@@ -7,7 +7,12 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 | [**CreateProject**](ProjectsApi.md#createproject) | **POST** /projects | Create a project (fast mode) |
 | [**CreateProjectDraft**](ProjectsApi.md#createprojectdraft) | **POST** /project_drafts | Start a project draft (wizard step 1) |
 | [**FinalizeProjectDraft**](ProjectsApi.md#finalizeprojectdraft) | **POST** /project_drafts/{id}/finalize | Finalize a draft into a real project |
+| [**GetProjectDetails**](ProjectsApi.md#getprojectdetails) | **GET** /dimensions/projects/{id} | Project details |
 | [**GetProjectDraft**](ProjectsApi.md#getprojectdraft) | **GET** /project_drafts/{id} | Read a project draft |
+| [**ListLocales**](ProjectsApi.md#listlocales) | **GET** /dimensions/locales | List locales with data |
+| [**ListModels**](ProjectsApi.md#listmodels) | **GET** /dimensions/models | List models with data |
+| [**ListProjects**](ProjectsApi.md#listprojects) | **GET** /dimensions/projects | List projects |
+| [**UpdateProject**](ProjectsApi.md#updateproject) | **PATCH** /projects/{id} | Update a project profile (Brand Book) |
 | [**UpdateProjectDraft**](ProjectsApi.md#updateprojectdraft) | **PATCH** /project_drafts/{id} | Submit a wizard step |
 
 <a id="createproject"></a>
@@ -122,8 +127,46 @@ void (empty response body)
 |-------------|-------------|------------------|
 | **201** | Project created |  -  |
 | **200** | Idempotent replay |  -  |
+| **403** | API key lacks write permission |  -  |
 | **404** | Resource not found |  -  |
 | **422** | Invalid parameters |  -  |
+
+[[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
+
+<a id="getprojectdetails"></a>
+# **GetProjectDetails**
+> ProjectDetails GetProjectDetails (int id)
+
+Project details
+
+Detailed info for one project: matching_names, industry, business model, primary products, target audience, brand voice, locale, app store IDs, stats (incl. prompts_by_brand_kind counts) and data_coverage (models, countries and languages with data).
+
+
+### Parameters
+
+| Name | Type | Description | Notes |
+|------|------|-------------|-------|
+| **id** | **int** |  |  |
+
+### Return type
+
+[**ProjectDetails**](ProjectDetails.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Project details |  -  |
+| **404** | Resource not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
 
@@ -163,6 +206,150 @@ void (empty response body)
 
 [[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
 
+<a id="listlocales"></a>
+# **ListLocales**
+> void ListLocales (int projectId)
+
+List locales with data
+
+
+### Parameters
+
+| Name | Type | Description | Notes |
+|------|------|-------------|-------|
+| **projectId** | **int** | Project ID |  |
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Locales |  -  |
+
+[[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
+
+<a id="listmodels"></a>
+# **ListModels**
+> void ListModels (int projectId)
+
+List models with data
+
+
+### Parameters
+
+| Name | Type | Description | Notes |
+|------|------|-------------|-------|
+| **projectId** | **int** | Project ID |  |
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: Not defined
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Models |  -  |
+
+[[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
+
+<a id="listprojects"></a>
+# **ListProjects**
+> ListProjects200Response ListProjects (string output = null)
+
+List projects
+
+All projects accessible with your API key.
+
+
+### Parameters
+
+| Name | Type | Description | Notes |
+|------|------|-------------|-------|
+| **output** | **string** | Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. | [optional]  |
+
+### Return type
+
+[**ListProjects200Response**](ListProjects200Response.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Projects |  -  |
+
+[[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
+
+<a id="updateproject"></a>
+# **UpdateProject**
+> void UpdateProject (int id, UpdateProjectRequest updateProjectRequest)
+
+Update a project profile (Brand Book)
+
+Updates the project profile, the same fields as Project Settings: brand_name, description, industry, business_model (plus business_model_other when it is OTHER), target_audience, brand_voice, goals, primary_products, matching_names. Send only the fields to change; unknown fields are rejected. All seven Brand Book fields feed every GEO Writer task and prompt suggestions; only industry, description, and target_audience help Recommendations. A matching_names change re-runs mention/citation matching over the project history in the background (rematching=true); further edits are rejected while that runs. Requires a `read_write` scope API key.
+
+
+### Parameters
+
+| Name | Type | Description | Notes |
+|------|------|-------------|-------|
+| **id** | **int** |  |  |
+| **updateProjectRequest** | [**UpdateProjectRequest**](UpdateProjectRequest.md) |  |  |
+
+### Return type
+
+void (empty response body)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Updated: { project, updated_fields, rematching, note, request_id } |  -  |
+| **403** | API key lacks write permission |  -  |
+| **404** | Resource not found |  -  |
+| **422** | Invalid parameters |  -  |
+
+[[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
+
 <a id="updateprojectdraft"></a>
 # **UpdateProjectDraft**
 > void UpdateProjectDraft (string id, UpdateProjectDraftRequest updateProjectDraftRequest)
@@ -197,6 +384,7 @@ void (empty response body)
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | Draft envelope with next-step suggestions |  -  |
+| **403** | API key lacks write permission |  -  |
 | **404** | Resource not found |  -  |
 | **422** | Invalid parameters |  -  |
 

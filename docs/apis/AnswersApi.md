@@ -48,7 +48,7 @@ Full answer with mentions, citations, sentiments, sources, shopping_products, br
 
 <a id="listanswers"></a>
 # **ListAnswers**
-> void ListAnswers (int projectId, string model = null, int collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string mentionFilter = null, string citationFilter = null, string competitors = null, DateTime from = null, DateTime to = null, int page = null, int perPage = null, string query = null)
+> void ListAnswers (int projectId, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string mentionFilter = null, string citationFilter = null, string competitors = null, DateTime from = null, DateTime to = null, int page = null, int perPage = null, string query = null, bool noResult = null)
 
 List AI responses
 
@@ -61,18 +61,19 @@ Successful prompt-execution responses with truncated content (max 10,000 chars).
 |------|------|-------------|-------|
 | **projectId** | **int** | Project ID |  |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | **int** |  | [optional]  |
-| **countryCode** | **string** | ISO country code (e.g. US, GB, DE) | [optional]  |
-| **languageCode** | **string** | ISO language code (e.g. en, es, de) | [optional]  |
+| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
+| **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
 | **mentionFilter** | **string** | Filter by which brands are mentioned, as a two-axis matrix (your brand x competitors): mentions_you / not_mentions_you, mentions_competitor / not_mentions_competitor, and the four combined cells you_and_competitor, competitor_not_you (a rival wins and you are absent), you_not_competitor, no_brands (no tracked brand appears, i.e. open space). Combine with &#39;competitors&#39; to narrow the competitor side to specific rivals; on a negative cell that reads &#39;none of these&#39;. On /dimensions/sources it applies to the crawled content of each cited page instead of the answer text. The legacy value &#39;competitors_only&#39; is still accepted as an alias of competitor_not_you. | [optional]  |
 | **citationFilter** | **string** | Same two-axis matrix applied to the domains cited in the answer instead of the brands named in it. Independent of mention_filter; pass both to intersect them (e.g. mentions_you + not_cites_you finds answers that talk about you without linking to you). | [optional]  |
 | **competitors** | **string** | Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM) | [optional]  |
 | **from** | **DateTime** |  | [optional]  |
-| **to** | **DateTime** |  | [optional]  |
+| **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **page** | **int** |  | [optional] [default to 1] |
 | **perPage** | **int** |  | [optional] [default to 20] |
 | **query** | **string** | Case-insensitive full-text search inside AI response texts. Switches items to snippet + match_count mode. | [optional]  |
+| **noResult** | **bool** | Filter sentinel non-answers (provider returned nothing after retries; excluded from platform metrics). false &#x3D; only real answers, true &#x3D; only sentinels, omit &#x3D; both. Every item carries its own no_result flag. | [optional]  |
 
 ### Return type
 

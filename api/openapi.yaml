@@ -9,49 +9,95 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.22.0
+  version: 1.46.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
 security:
 - BearerAuth: []
 tags:
-- description: API health check
+- description: "Health check that validates an API key and, optionally, access to\
+    \ a project."
   name: Health
-- description: "Lists of projects, competitors, prompts, mentions, citations and other\
-    \ dimensional entities"
-  name: Dimensions
-- description: "Aggregated time-series, summary, Share of Voice, top sources and agent-traffic\
-    \ metrics"
+- description: "Plan, subscription window, quota consumption and API rate limits for\
+    \ the authenticated account. Read it before spending quota so an integration can\
+    \ see its remaining budget instead of discovering the ceiling by hitting it."
+  name: Account
+- description: "A project is one tracked brand. List and read projects, see which\
+    \ AI models and locales have data, create a project in one call, or drive the\
+    \ multi-step draft wizard."
+  name: Projects
+- description: "Aggregated visibility, share of voice, citation and position data\
+    \ for the project and its competitors: time series, period summary, per-prompt\
+    \ summary, Share of Voice and top cited sources."
   name: Metrics
+- description: The brands tracked alongside your own. Competitor ids are the actor_id
+    values the metrics endpoints report against.
+  name: Competitors
+- description: "The questions executed against the AI models every week, and the execution\
+    \ records each run produces."
+  name: Prompts
+- description: "Collections (labelled Tags in the app) group prompts by topic, funnel\
+    \ stage or campaign so metrics can be filtered by them."
+  name: Collections & Tags
+- description: "The AI responses behind every metric, with their full text, mentions,\
+    \ citations and sentiment analysis."
+  name: Answers
+- description: "The raw records behind the visibility metrics: one row per brand mention\
+    \ or per cited URL, for the project brand, for competitors, or for both in a single\
+    \ stream."
+  name: Mentions & Citations
+- description: "Sentiment records with their comments, topics and scores, plus the\
+    \ category catalog used to label them."
+  name: Sentiments
+- description: "Every URL extracted from AI responses, plus grouped URL, domain and\
+    \ host views, page-cache metadata, mention evidence inside cited pages, occurrences\
+    \ and sanitized cached content."
+  name: Sources & Citation Intelligence
+- description: "Aggregate AI Model Insights report endpoints (summary, position distribution,\
+    \ AI Overview results). All filter by executed_at and share a standard actor shape."
+  name: AI Model Insights
+- description: "What AI sends to your site: referral traffic from AI assistants measured\
+    \ by the connected web analytics provider, and AI crawler traffic hitting your\
+    \ origin server. Scale plan and above."
+  name: AI & Agent Traffic
+- description: "Commercial surfaces inside AI answers: the product cards models return\
+    \ and the paid placements that run alongside them, with the merchants and advertisers\
+    \ behind each. Scale plan and above."
+  name: Shopping & Ads
+- description: "Which of your own channels and which community conversations AI answers\
+    \ cite: YouTube, Instagram, Facebook, TikTok, LinkedIn, app-store listings and\
+    \ Reddit. Growth plan and above."
+  name: Owned Media & Communities
+- description: "Multi-model analyst reports: the monthly reputation scoring of your\
+    \ brand against its competitors, and the custom AI studies you define over any\
+    \ subjects and dimensions. Requires reputation monitoring."
+  name: Reputation & Studies
 - description: "Google Search Console performance data (impressions, clicks, CTR,\
     \ average position) for projects with a connected GSC property: headline totals,\
     \ time series, top queries and top pages. Growth plan and above."
   name: Search Console
-- description: "Grouped cited-URL intelligence with page-cache metadata, mention evidence,\
-    \ occurrences and sanitized cached content"
-  name: Citation Intelligence
-- description: "Aggregate AI Model Insights report endpoints (summary, position distribution,\
-    \ AI Overview results)"
-  name: AI Model Insights
-- description: "Raw AI responses with mentions, citations, sentiments, sources, shopping\
-    \ products, brand entities and local businesses"
-  name: Answers
-- description: Per-execution sentiment analysis records
-  name: Sentiments
-- description: Recommendation runs (the same data that powers the in-app Recommendations
-    experience)
+- description: "Recommendation runs that power the in-app Recommendations page, plus\
+    \ the endpoint that launches a new one."
   name: Recommendations
-- description: Bulk-create prompts
-  name: Prompts
-- description: Create and inspect GEO Writer (formerly Content Intelligence) tasks
+- description: "AI-powered GEO Writer tasks (formerly Content Intelligence). Tasks\
+    \ are processed asynchronously, so create one and poll it until it completes."
   name: GEO Writer
-- description: Model Context Protocol endpoint for AI clients
-  name: MCP
-- description: "Outbound webhook subscriptions: signed HTTP POST notifications for\
-    \ project events (new mentions, citations, executions, negative sentiment, completed\
-    \ reports). Scale plan and above."
+- description: "Run the technical GEO analysis bundle, then list, poll and retrieve\
+    \ each completed report."
+  name: Technical GEO Reports
+- description: "Mark a date on the project timeline (a campaign launch, a site migration)\
+    \ so charts show what happened when."
+  name: Annotations
+- description: "Outbound event notifications: subscribe an HTTPS URL to project events\
+    \ and receive HMAC-signed deliveries with no polling. Scale plan and above."
   name: Webhooks
+- description: "Model Context Protocol endpoint for AI clients (Claude, ChatGPT, Cursor\
+    \ and other MCP-compatible assistants)."
+  name: MCP
+- description: "OAuth 2.1 authorization for MCP clients: discovery metadata, dynamic\
+    \ client registration, authorization, token exchange and JWKS."
+  name: OAuth 2.1
 paths:
   /ping:
     get:
@@ -80,7 +126,7 @@ paths:
               example:
                 error:
                   code: ERR_MISSING_AUTH
-                  message: Missing Authorization header
+                  message: missing_authorization
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -88,6 +134,40 @@ paths:
       summary: Health check
       tags:
       - Health
+  /account:
+    get:
+      description: "Returns the account plan, tracking cadence, subscription window,\
+        \ how much of each quota is used (prompts, projects, competitors per project,\
+        \ monthly GEO Writer tasks, team members) and the published API rate limits.\
+        \ Limits resolve through the account owner, so a team member sees the capacity\
+        \ that applies to them. An unlimited quota returns limit and remaining as\
+        \ null with unlimited set to true, since Infinity is not representable in\
+        \ JSON. The subscription block is only present for callers who can access\
+        \ Billing and Plans in the app (the account owner, or a team member with billing\
+        \ access); everyone else gets the same response without that key. requests_per_minute\
+        \ is the ceiling of the key used for the call, not a fixed number."
+      operationId: getAccount
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/getAccount_200_response"
+          description: Account usage snapshot
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+      summary: "Account plan, quota usage and rate limits"
+      tags:
+      - Account
   /metrics/timeseries:
     get:
       description: "Returns time-series data for one or more metrics, broken down\
@@ -144,7 +224,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -179,16 +261,19 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
-      - description: "ISO country code (e.g. US, GB, DE)"
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
         in: query
         name: country_code
@@ -196,7 +281,7 @@ paths:
         schema:
           type: string
         style: form
-      - description: "ISO language code (e.g. en, es, de)"
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
         explode: true
         in: query
         name: language_code
@@ -212,17 +297,13 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Filter by prompt type (search intent)
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
         explode: true
         in: query
         name: prompt_type
         required: false
         schema:
-          enum:
-          - informational
-          - navigational
-          - commercial
-          - transactional
           type: string
         style: form
       - description: "Filter by brand kind: brand (own brand/products), brand_other\
@@ -276,7 +357,7 @@ paths:
               example:
                 error:
                   code: ERR_MISSING_AUTH
-                  message: Missing Authorization header
+                  message: missing_authorization
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -287,7 +368,7 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -298,7 +379,7 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -369,7 +450,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -404,14 +487,17 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
       - description: Filter by prompt ID
         explode: true
@@ -421,17 +507,13 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Filter by prompt type (search intent)
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
         explode: true
         in: query
         name: prompt_type
         required: false
         schema:
-          enum:
-          - informational
-          - navigational
-          - commercial
-          - transactional
           type: string
         style: form
       - description: "Filter by brand kind: brand (own brand/products), brand_other\
@@ -477,7 +559,7 @@ paths:
               example:
                 error:
                   code: ERR_MISSING_AUTH
-                  message: Missing Authorization header
+                  message: missing_authorization
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -488,7 +570,7 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -529,7 +611,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -566,16 +650,19 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
-      - description: "ISO country code (e.g. US, GB, DE)"
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
         in: query
         name: country_code
@@ -583,7 +670,7 @@ paths:
         schema:
           type: string
         style: form
-      - description: "ISO language code (e.g. en, es, de)"
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
         explode: true
         in: query
         name: language_code
@@ -599,17 +686,13 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Filter by prompt type (search intent)
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
         explode: true
         in: query
         name: prompt_type
         required: false
         schema:
-          enum:
-          - informational
-          - navigational
-          - commercial
-          - transactional
           type: string
         style: form
       - description: "Filter by brand kind: brand (own brand/products), brand_other\
@@ -702,7 +785,7 @@ paths:
               example:
                 error:
                   code: ERR_MISSING_AUTH
-                  message: Missing Authorization header
+                  message: missing_authorization
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -740,7 +823,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -786,14 +871,17 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
       - description: Filter by prompt ID
         explode: true
@@ -803,17 +891,13 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Filter by prompt type (search intent)
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
         explode: true
         in: query
         name: prompt_type
         required: false
         schema:
-          enum:
-          - informational
-          - navigational
-          - commercial
-          - transactional
           type: string
         style: form
       - description: "Filter by brand kind: brand (own brand/products), brand_other\
@@ -904,7 +988,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -931,16 +1017,19 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
-      - description: "ISO country code (e.g. US, GB, DE)"
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
         in: query
         name: country_code
@@ -948,7 +1037,7 @@ paths:
         schema:
           type: string
         style: form
-      - description: "ISO language code (e.g. en, es, de)"
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
         explode: true
         in: query
         name: language_code
@@ -964,17 +1053,13 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Filter by prompt type (search intent)
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
         explode: true
         in: query
         name: prompt_type
         required: false
         schema:
-          enum:
-          - informational
-          - navigational
-          - commercial
-          - transactional
           type: string
         style: form
       - description: "Filter by brand kind: brand (own brand/products), brand_other\
@@ -1088,7 +1173,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -1147,14 +1234,14 @@ paths:
               example:
                 error:
                   code: ERR_PLAN_REQUIRED
-                  message: This endpoint requires the Scale plan or above
+                  message: Scale plan or above required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Endpoint requires a higher plan tier
-      summary: "AI bot crawler traffic (Scale+, Beta)"
+      summary: "AI bot crawler traffic (Scale plan or above, Beta)"
       tags:
-      - Metrics
+      - AI & Agent Traffic
   /metrics/ai_traffic:
     get:
       description: "AI referral traffic for a project: human visits arriving from\
@@ -1189,7 +1276,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -1226,7 +1315,7 @@ paths:
               example:
                 error:
                   code: ERR_PLAN_REQUIRED
-                  message: This endpoint requires the Scale plan or above
+                  message: Scale plan or above required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -1237,22 +1326,414 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Resource not found
-      summary: AI referral traffic (Scale+)
+      summary: AI referral traffic (Scale plan or above)
       tags:
-      - Metrics
+      - AI & Agent Traffic
+  /reputation/reports:
+    get:
+      description: "The monthly multi-model analyst reports scoring the tracked brand\
+        \ and its competitors, newest first. Pending and failed reports are included\
+        \ on purpose: whether this month ran at all is often the question. Each row\
+        \ carries the report id, its status, and which analyst models produced data.\
+        \ Requires reputation monitoring to be enabled on the account."
+      operationId: listReputationReports
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          description: Paginated report summaries
+      summary: List reputation reports
+      tags:
+      - Reputation & Studies
+  /reputation/reports/{id}:
+    get:
+      description: "One reputation report's scores as flat rows: one row per analyst\
+        \ model, brand, dimension and attribute, with its 0-100 score and the reasoning\
+        \ the model gave. Scores come from several analyst models independently, so\
+        \ compare models rather than averaging them blindly."
+      operationId: getReputationReport
+      parameters:
+      - description: The report id from GET /reputation/reports
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: Restrict to one analyst model
+        explode: true
+        in: query
+        name: model
+        required: false
+        schema:
+          enum:
+          - chatgpt
+          - perplexity
+          - gemini
+          - deepseek
+          - grok
+          - claude
+          type: string
+        style: form
+      - description: "Restrict to one brand name, or a comma-separated list"
+        explode: true
+        in: query
+        name: brand
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Restrict to one reputation dimension key
+        explode: true
+        in: query
+        name: dimension
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          description: Paginated score rows plus the report summary
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Get reputation report scores
+      tags:
+      - Reputation & Studies
+  /studies:
+    get:
+      description: "The custom AI studies defined on the account: analyst reports\
+        \ over any set of subjects (brands, sectors, topics) and any set of dimensions.\
+        \ Studies belong to the ACCOUNT, not to a project, so project_id is an optional\
+        \ filter here and account-level studies are returned whichever project you\
+        \ filter by. A team member whose project access is restricted sees only the\
+        \ studies of the projects they can reach. Requires reputation monitoring to\
+        \ be enabled on the account."
+      operationId: listStudies
+      parameters:
+      - description: Restrict to studies attached to this project (plus account-level
+          ones)
+        explode: true
+        in: query
+        name: project_id
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          enum:
+          - active
+          - archived
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          description: Paginated study summaries
+      summary: List custom AI studies
+      tags:
+      - Reputation & Studies
+  /studies/{id}:
+    get:
+      description: "One study with its brief, the subjects it compares, the dimensions\
+        \ it scores them on, and its report history. Use the ids in `reports` with\
+        \ GET /studies/{id}/reports/{report_id}."
+      operationId: getStudy
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          description: The study
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+      summary: Get a custom AI study
+      tags:
+      - Reputation & Studies
+  /studies/{id}/reports/{report_id}:
+    get:
+      description: "One custom-study report's scores as flat rows: one row per analyst\
+        \ model, subject, dimension and attribute, with its 0-100 score and the reasoning\
+        \ the model gave."
+      operationId: getStudyReport
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      - description: "The report id from GET /studies/{id}"
+        explode: false
+        in: path
+        name: report_id
+        required: true
+        schema:
+          type: string
+        style: simple
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: Restrict to one analyst model
+        explode: true
+        in: query
+        name: model
+        required: false
+        schema:
+          enum:
+          - chatgpt
+          - perplexity
+          - gemini
+          - deepseek
+          - grok
+          - claude
+          type: string
+        style: form
+      - description: "Restrict to one subject name, or a comma-separated list"
+        explode: true
+        in: query
+        name: subject
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Restrict to one dimension key
+        explode: true
+        in: query
+        name: dimension
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          description: Paginated score rows plus the report summary
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Get custom study report scores
+      tags:
+      - Reputation & Studies
   /search_console/summary:
     get:
       description: "Google Search Console headline totals (impressions, clicks, ctr\
         \ as a 0..1 fraction, average position) for the project over a date range.\
-        \ Pass dimension=country or dimension=device to also receive the breakdown\
-        \ aggregated over the range. Requires the project to have a connected Search\
-        \ Console property and the Growth plan or above; otherwise returns ERR_SEARCH_CONSOLE_NOT_CONNECTED\
-        \ or ERR_PLAN_REQUIRED."
+        \ Pass dimension=country, device, page, query or searchAppearance to also\
+        \ receive the breakdown aggregated over the range, capped by limit. Requires\
+        \ the project to have a connected Search Console property and the Growth plan\
+        \ or above; otherwise returns ERR_SEARCH_CONSOLE_NOT_CONNECTED or ERR_PLAN_REQUIRED.\
+        \ X-Search-Console-Backend identifies stored or live reads. Stored reads use\
+        \ synced data without contacting Google. Live reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED\
+        \ (403) for revoked Google access; reconnect the property in Preferences >\
+        \ Project Settings > Data Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM\
+        \ (503) when Google Search Console is unavailable or over quota; wait for\
+        \ the number of seconds in Retry-After before retrying."
       operationId: getSearchConsoleSummary
       parameters:
       - description: Project ID
@@ -1279,7 +1760,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -1287,7 +1770,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: Optional breakdown aggregated over the range
+      - description: "Optional breakdown aggregated over the range. country and device\
+          \ are lowercased; page and query keep the casing Google returns, because\
+          \ a page URL is case sensitive."
         explode: true
         in: query
         name: dimension
@@ -1296,6 +1781,71 @@ paths:
           enum:
           - country
           - device
+          - page
+          - query
+          - searchAppearance
+          type: string
+        style: form
+      - description: "Maximum breakdown rows, sorted by impressions descending. Default\
+          \ and maximum 1000. Use /search_console/queries or /search_console/pages\
+          \ to page through a full list."
+        explode: true
+        in: query
+        name: limit
+        required: false
+        schema:
+          maximum: 1000
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Which search surface to measure. Defaults to web. discover and\
+          \ googleNews carry no query dimension, so Google rejects /search_console/queries\
+          \ for them."
+        explode: true
+        in: query
+        name: search_type
+        required: false
+        schema:
+          default: web
+          enum:
+          - web
+          - image
+          - video
+          - news
+          - discover
+          - googleNews
+          type: string
+        style: form
+      - description: "Narrow the query; every entry must match (AND). Send the whole\
+          \ list as one JSON value: filters=[{\"dimension\":\"page\",\"operator\"\
+          :\"contains\",\"expression\":\"/blog/\"}] (URL-encoded). An array of objects\
+          \ has no query-parameter form a generated client can produce, so the string\
+          \ is what the official SDKs send; see the SearchConsoleFilters schema for\
+          \ the shape it encodes. includingRegex and excludingRegex take RE2 syntax.\
+          \ At most 10 entries, expression at most 500 characters. The bracket form\
+          \ filters[][dimension]=page&filters[][operator]=contains&filters[][expression]=/blog/\
+          \ is also accepted."
+        example: "[{\"dimension\":\"page\",\"operator\":\"contains\",\"expression\"\
+          :\"/blog/\"}]"
+        explode: true
+        in: query
+        name: filters
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "final (default) counts only rows Google has finalized. all also\
+          \ counts the most recent days, which are still being filled in and will\
+          \ change."
+        explode: true
+        in: query
+        name: data_state
+        required: false
+        schema:
+          default: final
+          enum:
+          - final
+          - all
           type: string
         style: form
       responses:
@@ -1306,23 +1856,47 @@ paths:
             application/json:
               example:
                 error:
-                  code: ERR_PLAN_REQUIRED
-                  message: This endpoint requires the Scale plan or above
+                  code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+                  message: Google Search Console access was revoked. Reconnect the
+                    property in Preferences > Project Settings > Data Connections.
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
-          description: Endpoint requires a higher plan tier
+          description: "Plan below Growth (ERR_PLAN_REQUIRED), or Google revoked the\
+            \ project's Search Console access (ERR_SEARCH_CONSOLE_ACCESS_REVOKED):\
+            \ reconnect the property"
         "404":
           content:
             application/json:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Resource not found
+        "503":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_UPSTREAM
+                  message: Google Search Console is temporarily unavailable. Retry
+                    in a few minutes.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Upstream provider unavailable, retry after the number of seconds\
+            \ in the Retry-After header"
+          headers:
+            Retry-After:
+              description: "Seconds to wait before retrying: Google's own value when\
+                \ it sent one, otherwise 900 after a quota error and 60 after an outage"
+              explode: false
+              schema:
+                type: integer
+              style: simple
       summary: Search Console summary (Growth+)
       tags:
       - Search Console
@@ -1330,7 +1904,13 @@ paths:
     get:
       description: "Google Search Console property-wide series (impressions, clicks,\
         \ ctr, position) bucketed by day, week or month. Requires a connected Search\
-        \ Console property (Growth+)."
+        \ Console property (Growth+). X-Search-Console-Backend identifies stored or\
+        \ live reads. Stored reads use synced data without contacting Google. Live\
+        \ reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked Google\
+        \ access; reconnect the property in Preferences > Project Settings > Data\
+        \ Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search\
+        \ Console is unavailable or over quota; wait for the number of seconds in\
+        \ Retry-After before retrying."
       operationId: getSearchConsoleTimeseries
       parameters:
       - description: Project ID
@@ -1357,7 +1937,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -1390,6 +1972,56 @@ paths:
           - csv
           type: string
         style: form
+      - description: "Which search surface to measure. Defaults to web. discover and\
+          \ googleNews carry no query dimension, so Google rejects /search_console/queries\
+          \ for them."
+        explode: true
+        in: query
+        name: search_type
+        required: false
+        schema:
+          default: web
+          enum:
+          - web
+          - image
+          - video
+          - news
+          - discover
+          - googleNews
+          type: string
+        style: form
+      - description: "Narrow the query; every entry must match (AND). Send the whole\
+          \ list as one JSON value: filters=[{\"dimension\":\"page\",\"operator\"\
+          :\"contains\",\"expression\":\"/blog/\"}] (URL-encoded). An array of objects\
+          \ has no query-parameter form a generated client can produce, so the string\
+          \ is what the official SDKs send; see the SearchConsoleFilters schema for\
+          \ the shape it encodes. includingRegex and excludingRegex take RE2 syntax.\
+          \ At most 10 entries, expression at most 500 characters. The bracket form\
+          \ filters[][dimension]=page&filters[][operator]=contains&filters[][expression]=/blog/\
+          \ is also accepted."
+        example: "[{\"dimension\":\"page\",\"operator\":\"contains\",\"expression\"\
+          :\"/blog/\"}]"
+        explode: true
+        in: query
+        name: filters
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "final (default) counts only rows Google has finalized. all also\
+          \ counts the most recent days, which are still being filled in and will\
+          \ change."
+        explode: true
+        in: query
+        name: data_state
+        required: false
+        schema:
+          default: final
+          enum:
+          - final
+          - all
+          type: string
+        style: form
       responses:
         "200":
           description: Search Console time series
@@ -1398,32 +2030,66 @@ paths:
             application/json:
               example:
                 error:
-                  code: ERR_PLAN_REQUIRED
-                  message: This endpoint requires the Scale plan or above
+                  code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+                  message: Google Search Console access was revoked. Reconnect the
+                    property in Preferences > Project Settings > Data Connections.
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
-          description: Endpoint requires a higher plan tier
+          description: "Plan below Growth (ERR_PLAN_REQUIRED), or Google revoked the\
+            \ project's Search Console access (ERR_SEARCH_CONSOLE_ACCESS_REVOKED):\
+            \ reconnect the property"
         "404":
           content:
             application/json:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Resource not found
+        "503":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_UPSTREAM
+                  message: Google Search Console is temporarily unavailable. Retry
+                    in a few minutes.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Upstream provider unavailable, retry after the number of seconds\
+            \ in the Retry-After header"
+          headers:
+            Retry-After:
+              description: "Seconds to wait before retrying: Google's own value when\
+                \ it sent one, otherwise 900 after a quota error and 60 after an outage"
+              explode: false
+              schema:
+                type: integer
+              style: simple
       summary: Search Console time series (Growth+)
       tags:
       - Search Console
   /search_console/queries:
     get:
       description: "Top Google Search Console search queries over a date range, ranked\
-        \ by impressions, clicks, ctr or position, paginated. Knowingly undercounts\
-        \ anonymized queries; for exact totals use /search_console/summary. Requires\
-        \ a connected Search Console property (Growth+)."
+        \ by impressions, clicks, ctr or position, paginated. Excludes anonymized\
+        \ queries; for headline totals use /search_console/summary. Requires a connected\
+        \ Search Console property (Growth+). X-Search-Console-Backend identifies stored\
+        \ or live reads. Stored reads use synced data without contacting Google. Live\
+        \ reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked Google\
+        \ access; reconnect the property in Preferences > Project Settings > Data\
+        \ Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search\
+        \ Console is unavailable or over quota; wait for the number of seconds in\
+        \ Retry-After before retrying. total counts distinct keys available for the\
+        \ range: keys from synced daily rows for stored reads, or up to 25,000 rows\
+        \ from one Google request for live reads. Live responses include truncated:\
+        \ true when that limit is reached. Sorting and pagination apply to the available\
+        \ set."
       operationId: getSearchConsoleQueries
       parameters:
       - description: Project ID
@@ -1450,7 +2116,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -1504,6 +2172,56 @@ paths:
           - csv
           type: string
         style: form
+      - description: "Which search surface to measure. Defaults to web. discover and\
+          \ googleNews carry no query dimension, so Google rejects /search_console/queries\
+          \ for them."
+        explode: true
+        in: query
+        name: search_type
+        required: false
+        schema:
+          default: web
+          enum:
+          - web
+          - image
+          - video
+          - news
+          - discover
+          - googleNews
+          type: string
+        style: form
+      - description: "Narrow the query; every entry must match (AND). Send the whole\
+          \ list as one JSON value: filters=[{\"dimension\":\"page\",\"operator\"\
+          :\"contains\",\"expression\":\"/blog/\"}] (URL-encoded). An array of objects\
+          \ has no query-parameter form a generated client can produce, so the string\
+          \ is what the official SDKs send; see the SearchConsoleFilters schema for\
+          \ the shape it encodes. includingRegex and excludingRegex take RE2 syntax.\
+          \ At most 10 entries, expression at most 500 characters. The bracket form\
+          \ filters[][dimension]=page&filters[][operator]=contains&filters[][expression]=/blog/\
+          \ is also accepted."
+        example: "[{\"dimension\":\"page\",\"operator\":\"contains\",\"expression\"\
+          :\"/blog/\"}]"
+        explode: true
+        in: query
+        name: filters
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "final (default) counts only rows Google has finalized. all also\
+          \ counts the most recent days, which are still being filled in and will\
+          \ change."
+        explode: true
+        in: query
+        name: data_state
+        required: false
+        schema:
+          default: final
+          enum:
+          - final
+          - all
+          type: string
+        style: form
       responses:
         "200":
           description: Top queries
@@ -1512,23 +2230,47 @@ paths:
             application/json:
               example:
                 error:
-                  code: ERR_PLAN_REQUIRED
-                  message: This endpoint requires the Scale plan or above
+                  code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+                  message: Google Search Console access was revoked. Reconnect the
+                    property in Preferences > Project Settings > Data Connections.
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
-          description: Endpoint requires a higher plan tier
+          description: "Plan below Growth (ERR_PLAN_REQUIRED), or Google revoked the\
+            \ project's Search Console access (ERR_SEARCH_CONSOLE_ACCESS_REVOKED):\
+            \ reconnect the property"
         "404":
           content:
             application/json:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Resource not found
+        "503":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_UPSTREAM
+                  message: Google Search Console is temporarily unavailable. Retry
+                    in a few minutes.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Upstream provider unavailable, retry after the number of seconds\
+            \ in the Retry-After header"
+          headers:
+            Retry-After:
+              description: "Seconds to wait before retrying: Google's own value when\
+                \ it sent one, otherwise 900 after a quota error and 60 after an outage"
+              explode: false
+              schema:
+                type: integer
+              style: simple
       summary: Top Search Console queries (Growth+)
       tags:
       - Search Console
@@ -1536,7 +2278,17 @@ paths:
     get:
       description: "Top Google Search Console landing pages over a date range, ranked\
         \ by impressions, clicks, ctr or position, paginated. Requires a connected\
-        \ Search Console property (Growth+)."
+        \ Search Console property (Growth+). X-Search-Console-Backend identifies stored\
+        \ or live reads. Stored reads use synced data without contacting Google. Live\
+        \ reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked Google\
+        \ access; reconnect the property in Preferences > Project Settings > Data\
+        \ Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search\
+        \ Console is unavailable or over quota; wait for the number of seconds in\
+        \ Retry-After before retrying. total counts distinct keys available for the\
+        \ range: keys from synced daily rows for stored reads, or up to 25,000 rows\
+        \ from one Google request for live reads. Live responses include truncated:\
+        \ true when that limit is reached. Sorting and pagination apply to the available\
+        \ set."
       operationId: getSearchConsolePages
       parameters:
       - description: Project ID
@@ -1563,7 +2315,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -1617,6 +2371,56 @@ paths:
           - csv
           type: string
         style: form
+      - description: "Which search surface to measure. Defaults to web. discover and\
+          \ googleNews carry no query dimension, so Google rejects /search_console/queries\
+          \ for them."
+        explode: true
+        in: query
+        name: search_type
+        required: false
+        schema:
+          default: web
+          enum:
+          - web
+          - image
+          - video
+          - news
+          - discover
+          - googleNews
+          type: string
+        style: form
+      - description: "Narrow the query; every entry must match (AND). Send the whole\
+          \ list as one JSON value: filters=[{\"dimension\":\"page\",\"operator\"\
+          :\"contains\",\"expression\":\"/blog/\"}] (URL-encoded). An array of objects\
+          \ has no query-parameter form a generated client can produce, so the string\
+          \ is what the official SDKs send; see the SearchConsoleFilters schema for\
+          \ the shape it encodes. includingRegex and excludingRegex take RE2 syntax.\
+          \ At most 10 entries, expression at most 500 characters. The bracket form\
+          \ filters[][dimension]=page&filters[][operator]=contains&filters[][expression]=/blog/\
+          \ is also accepted."
+        example: "[{\"dimension\":\"page\",\"operator\":\"contains\",\"expression\"\
+          :\"/blog/\"}]"
+        explode: true
+        in: query
+        name: filters
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "final (default) counts only rows Google has finalized. all also\
+          \ counts the most recent days, which are still being filled in and will\
+          \ change."
+        explode: true
+        in: query
+        name: data_state
+        required: false
+        schema:
+          default: final
+          enum:
+          - final
+          - all
+          type: string
+        style: form
       responses:
         "200":
           description: Top pages
@@ -1625,23 +2429,47 @@ paths:
             application/json:
               example:
                 error:
-                  code: ERR_PLAN_REQUIRED
-                  message: This endpoint requires the Scale plan or above
+                  code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+                  message: Google Search Console access was revoked. Reconnect the
+                    property in Preferences > Project Settings > Data Connections.
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
-          description: Endpoint requires a higher plan tier
+          description: "Plan below Growth (ERR_PLAN_REQUIRED), or Google revoked the\
+            \ project's Search Console access (ERR_SEARCH_CONSOLE_ACCESS_REVOKED):\
+            \ reconnect the property"
         "404":
           content:
             application/json:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Resource not found
+        "503":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_UPSTREAM
+                  message: Google Search Console is temporarily unavailable. Retry
+                    in a few minutes.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Upstream provider unavailable, retry after the number of seconds\
+            \ in the Retry-After header"
+          headers:
+            Retry-After:
+              description: "Seconds to wait before retrying: Google's own value when\
+                \ it sent one, otherwise 900 after a quota error and 60 after an outage"
+              explode: false
+              schema:
+                type: integer
+              style: simple
       summary: Top Search Console pages (Growth+)
       tags:
       - Search Console
@@ -1673,7 +2501,7 @@ paths:
           description: Projects
       summary: List projects
       tags:
-      - Dimensions
+      - Projects
   /dimensions/projects/{id}:
     get:
       description: "Detailed info for one project: matching_names, industry, business\
@@ -1702,14 +2530,14 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Resource not found
       summary: Project details
       tags:
-      - Dimensions
+      - Projects
   /dimensions/competitors:
     get:
       operationId: listCompetitors
@@ -1755,7 +2583,7 @@ paths:
           description: Competitors
       summary: List competitors
       tags:
-      - Dimensions
+      - Competitors
   /dimensions/competitors/{id}:
     get:
       operationId: getCompetitorDetails
@@ -1784,7 +2612,7 @@ paths:
           description: Competitor details
       summary: Competitor details
       tags:
-      - Dimensions
+      - Competitors
   /dimensions/collections:
     get:
       operationId: listCollections
@@ -1816,7 +2644,7 @@ paths:
           description: Collections
       summary: List tags/collections
       tags:
-      - Dimensions
+      - Collections & Tags
   /dimensions/tags:
     get:
       operationId: listTags
@@ -1848,7 +2676,7 @@ paths:
           description: Tags
       summary: List tags (alias for /collections)
       tags:
-      - Dimensions
+      - Collections & Tags
   /dimensions/models:
     get:
       operationId: listModels
@@ -1866,7 +2694,7 @@ paths:
           description: Models
       summary: List models with data
       tags:
-      - Dimensions
+      - Projects
   /dimensions/locales:
     get:
       operationId: listLocales
@@ -1884,7 +2712,7 @@ paths:
           description: Locales
       summary: List locales with data
       tags:
-      - Dimensions
+      - Projects
   /dimensions/sentiments:
     get:
       description: "Sentiment metric keys + labels + colors. For records, use /sentiments."
@@ -1917,7 +2745,7 @@ paths:
           description: Sentiment buckets
       summary: List sentiment categories
       tags:
-      - Dimensions
+      - Sentiments
   /dimensions/prompts:
     get:
       operationId: listPrompts
@@ -1968,16 +2796,19 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
-      - description: "ISO country code (e.g. US, GB, DE)"
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
         in: query
         name: country_code
@@ -1985,7 +2816,7 @@ paths:
         schema:
           type: string
         style: form
-      - description: "ISO language code (e.g. en, es, de)"
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
         explode: true
         in: query
         name: language_code
@@ -1993,17 +2824,13 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt type (search intent)
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
         explode: true
         in: query
         name: prompt_type
         required: false
         schema:
-          enum:
-          - informational
-          - navigational
-          - commercial
-          - transactional
           type: string
         style: form
       - description: "Filter by brand kind: brand (own brand/products), brand_other\
@@ -2030,7 +2857,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -2057,7 +2886,7 @@ paths:
           description: Paginated prompts
       summary: List prompts
       tags:
-      - Dimensions
+      - Prompts
   /dimensions/prompt_executions:
     get:
       operationId: listPromptExecutions
@@ -2108,16 +2937,19 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
-      - description: "ISO country code (e.g. US, GB, DE)"
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
         in: query
         name: country_code
@@ -2125,7 +2957,7 @@ paths:
         schema:
           type: string
         style: form
-      - description: "ISO language code (e.g. en, es, de)"
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
         explode: true
         in: query
         name: language_code
@@ -2149,7 +2981,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -2229,7 +3063,1150 @@ paths:
           description: Paginated executions
       summary: List prompt executions
       tags:
-      - Dimensions
+      - Prompts
+  /dimensions/query_fan_outs:
+    get:
+      description: "The sub-queries a model actually issued when answering your tracked\
+        \ prompts. view=query (default) returns one row per distinct sub-query with\
+        \ count and share of all occurrences; view=prompt returns one row per prompt\
+        \ with how many distinct sub-queries it produced. Fan-out is reported mainly\
+        \ by ChatGPT, so an empty result usually means the models in scope do not\
+        \ expose it. The API returns the aggregation only: for a period-over-period\
+        \ delta, call it twice with explicit from/to."
+      operationId: listQueryFanOuts
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Row shape: one per distinct sub-query, or one per prompt"
+        explode: true
+        in: query
+        name: view
+        required: false
+        schema:
+          default: query
+          enum:
+          - query
+          - prompt
+          type: string
+        style: form
+      - description: Sort field; the allowed set depends on view
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - count
+          - share
+          - query_text
+          - total_count
+          - variations_count
+          - prompt_text
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: direction
+        required: false
+        schema:
+          default: desc
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Case-insensitive substring filter on the sub-query text
+        explode: true
+        in: query
+        name: query
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter by AI model. Models the API key's user has not enabled
+          are silently dropped.
+        explode: true
+        in: query
+        name: model
+        required: false
+        schema:
+          enum:
+          - chatgpt
+          - perplexity
+          - gemini
+          - ai_overview
+          - ai_mode
+          - copilot
+          - claude
+          - grok
+          - deepseek
+          - meta_ai
+          - amazon_rufus
+          - naver_ai
+          - baidu_ai
+          type: string
+        style: form
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
+        in: query
+        name: collection_id
+        required: false
+        schema:
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+        style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter by prompt ID
+        explode: true
+        in: query
+        name: prompt
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
+        explode: true
+        in: query
+        name: prompt_type
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - description: Number of days to look back (alternative to from/to)
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          description: Paginated fan-out rows
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: List query fan-out
+      tags:
+      - Prompts
+  /dimensions/shopping:
+    get:
+      description: "Product cards returned inside AI answers. view=products (default)\
+        \ returns one row per distinct product, merged across executions, with its\
+        \ appearance count, price range, rating and whether it is yours, plus a currency_count\
+        \ saying how many currencies it was priced in (above 1 means the row reports\
+        \ its highest-priced listing and min_price may be another currency); view=merchants\
+        \ returns one row per selling merchant, with a currency field naming the money\
+        \ its price range and average are expressed in (providers price each market\
+        \ in its own currency, so a merchant that sells in more than one reports the\
+        \ currency most of its prices use). Every response also carries a totals block\
+        \ matching the KPI cards in the app, whose avg_price is computed inside the\
+        \ single currency named by avg_price_currency. Requires the Scale plan or\
+        \ above."
+      operationId: listShopping
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Row shape: one per distinct product, or one per merchant"
+        explode: true
+        in: query
+        name: view
+        required: false
+        schema:
+          default: products
+          enum:
+          - products
+          - merchants
+          type: string
+        style: form
+      - description: Return only products identified as the tracked brand's own. On
+          view=merchants this narrows to the merchants selling those products; the
+          totals block stays account-wide.
+        explode: true
+        in: query
+        name: owned
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Sort field; the allowed set depends on view
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - appearances
+          - price
+          - rating
+          - title
+          - products
+          - avg_price
+          - avg_rating
+          - merchant
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: direction
+        required: false
+        schema:
+          default: desc
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Case-insensitive substring filter on the product title
+        explode: true
+        in: query
+        name: query
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter by AI model. Models the API key's user has not enabled
+          are silently dropped.
+        explode: true
+        in: query
+        name: model
+        required: false
+        schema:
+          enum:
+          - chatgpt
+          - perplexity
+          - gemini
+          - ai_overview
+          - ai_mode
+          - copilot
+          - claude
+          - grok
+          - deepseek
+          - meta_ai
+          - amazon_rufus
+          - naver_ai
+          - baidu_ai
+          type: string
+        style: form
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
+        in: query
+        name: collection_id
+        required: false
+        schema:
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+        style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter by prompt ID
+        explode: true
+        in: query
+        name: prompt
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
+        explode: true
+        in: query
+        name: prompt_type
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - description: Number of days to look back (alternative to from/to)
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          description: Paginated shopping rows plus totals
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: List shopping results
+      tags:
+      - Shopping & Ads
+  /dimensions/ads:
+    get:
+      description: "Paid placements returned inside AI answers. view=advertisers (default)\
+        \ returns one row per advertising domain with its placement count, prompt\
+        \ reach and average and best position; view=ads returns the individual placements\
+        \ with title, snippet, position and the prompt that triggered them. Position\
+        \ 1 is the best slot, so a LOWER average position is better. Requires the\
+        \ Scale plan or above."
+      operationId: listAds
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Row shape: one per advertising domain, or one per placement"
+        explode: true
+        in: query
+        name: view
+        required: false
+        schema:
+          default: advertisers
+          enum:
+          - advertisers
+          - ads
+          type: string
+        style: form
+      - description: Return only placements identified as the tracked brand's own
+          (view=ads)
+        explode: true
+        in: query
+        name: owned
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Sort field; the allowed set depends on view
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - ads
+          - prompts
+          - avg_position
+          - domain
+          - recent
+          - oldest
+          - position
+          type: string
+        style: form
+      - description: "Sort direction for view=advertisers. Defaults to desc, except\
+          \ avg_position and domain which default to asc."
+        explode: true
+        in: query
+        name: direction
+        required: false
+        schema:
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: "Case-insensitive substring filter on the ad title, domain or\
+          \ snippet"
+        explode: true
+        in: query
+        name: query
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter by AI model. Models the API key's user has not enabled
+          are silently dropped.
+        explode: true
+        in: query
+        name: model
+        required: false
+        schema:
+          enum:
+          - chatgpt
+          - perplexity
+          - gemini
+          - ai_overview
+          - ai_mode
+          - copilot
+          - claude
+          - grok
+          - deepseek
+          - meta_ai
+          - amazon_rufus
+          - naver_ai
+          - baidu_ai
+          type: string
+        style: form
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
+        in: query
+        name: collection_id
+        required: false
+        schema:
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+        style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter by prompt ID
+        explode: true
+        in: query
+        name: prompt
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
+        explode: true
+        in: query
+        name: prompt_type
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - description: Number of days to look back (alternative to from/to)
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          description: Paginated ad rows plus totals
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: List AI ad placements
+      tags:
+      - Shopping & Ads
+  /dimensions/owned_media:
+    get:
+      description: "Which owned-media content AI answers cite, by platform. `provider`\
+        \ is required. Each row carries a `yours` flag so you can compare your own\
+        \ presence against everyone else cited on the same platform. view=own_citations\
+        \ returns the raw citations of the connected profile only and stays empty\
+        \ until a profile is connected. For Reddit use /dimensions/reddit. Requires\
+        \ the Growth plan or above."
+      operationId: listOwnedMedia
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: The platform to report on
+        explode: true
+        in: query
+        name: provider
+        required: true
+        schema:
+          enum:
+          - youtube
+          - instagram
+          - facebook
+          - tiktok
+          - linkedin
+          - mobile_apps
+          type: string
+        style: form
+      - description: Row shape; the allowed set depends on provider
+        explode: true
+        in: query
+        name: view
+        required: false
+        schema:
+          enum:
+          - videos
+          - channels
+          - posts
+          - profiles
+          - own_citations
+          - apps
+          type: string
+        style: form
+      - description: provider=mobile_apps only
+        explode: true
+        in: query
+        name: store
+        required: false
+        schema:
+          default: google_play
+          enum:
+          - google_play
+          - app_store
+          type: string
+        style: form
+      - description: Return only rows belonging to the account's own connected profile
+        explode: true
+        in: query
+        name: owned
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Filter by AI model. Models the API key's user has not enabled
+          are silently dropped.
+        explode: true
+        in: query
+        name: model
+        required: false
+        schema:
+          enum:
+          - chatgpt
+          - perplexity
+          - gemini
+          - ai_overview
+          - ai_mode
+          - copilot
+          - claude
+          - grok
+          - deepseek
+          - meta_ai
+          - amazon_rufus
+          - naver_ai
+          - baidu_ai
+          type: string
+        style: form
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
+        in: query
+        name: collection_id
+        required: false
+        schema:
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+        style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - description: Number of days to look back (alternative to from/to)
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          description: Paginated owned-media rows
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: List owned-media citations
+      tags:
+      - Owned Media & Communities
+  /dimensions/reddit:
+    get:
+      description: "Which Reddit content AI answers cite for your tracked prompts.\
+        \ view=subreddits (default) returns one row per subreddit with its citation\
+        \ count, unique authors and positive/negative sentiment split; view=authors\
+        \ returns one row per author; view=threads returns the individual cited threads\
+        \ with upvotes, comments, average position and dominant sentiment. Requires\
+        \ the Growth plan or above."
+      operationId: listRedditCitations
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: view
+        required: false
+        schema:
+          default: subreddits
+          enum:
+          - subreddits
+          - authors
+          - threads
+          type: string
+        style: form
+      - description: Filter to one subreddit (name without the r/ prefix)
+        explode: true
+        in: query
+        name: subreddit
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter to one Reddit author
+        explode: true
+        in: query
+        name: author
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: view=threads only
+        explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          enum:
+          - open
+          - archived
+          type: string
+        style: form
+      - description: Return only subreddits/authors the account has claimed as its
+          own
+        explode: true
+        in: query
+        name: owned
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: "Filter to citations whose scraped Reddit content mentions a\
+          \ brand: 'brand' for the tracked brand, or a competitor id. Reads the page\
+          \ content, not the AI answer."
+        explode: true
+        in: query
+        name: brand
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Sort field; the allowed set depends on view
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          enum:
+          - citations
+          - subreddit
+          - unique_authors
+          - positive_pct
+          - negative_pct
+          - author
+          - avg_position
+          - upvotes
+          - comments
+          - sentiment
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: direction
+        required: false
+        schema:
+          default: desc
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Filter by AI model. Models the API key's user has not enabled
+          are silently dropped.
+        explode: true
+        in: query
+        name: model
+        required: false
+        schema:
+          enum:
+          - chatgpt
+          - perplexity
+          - gemini
+          - ai_overview
+          - ai_mode
+          - copilot
+          - claude
+          - grok
+          - deepseek
+          - meta_ai
+          - amazon_rufus
+          - naver_ai
+          - baidu_ai
+          type: string
+        style: form
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
+        in: query
+        name: collection_id
+        required: false
+        schema:
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+        style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - description: Number of days to look back (alternative to from/to)
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          description: Paginated Reddit rows
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: List cited Reddit content
+      tags:
+      - Owned Media & Communities
   /dimensions/sources:
     get:
       operationId: listSources
@@ -2280,16 +4257,19 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
-      - description: "ISO country code (e.g. US, GB, DE)"
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
         in: query
         name: country_code
@@ -2297,7 +4277,7 @@ paths:
         schema:
           type: string
         style: form
-      - description: "ISO language code (e.g. en, es, de)"
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
         explode: true
         in: query
         name: language_code
@@ -2321,7 +4301,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -2394,7 +4376,7 @@ paths:
           description: Paginated sources
       summary: List source URLs
       tags:
-      - Dimensions
+      - Sources & Citation Intelligence
   /dimensions/mentions:
     get:
       operationId: listMentions
@@ -2445,16 +4427,19 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
-      - description: "ISO country code (e.g. US, GB, DE)"
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
         in: query
         name: country_code
@@ -2462,7 +4447,7 @@ paths:
         schema:
           type: string
         style: form
-      - description: "ISO language code (e.g. en, es, de)"
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
         explode: true
         in: query
         name: language_code
@@ -2486,7 +4471,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -2513,7 +4500,7 @@ paths:
           description: Paginated brand mentions
       summary: List brand mentions
       tags:
-      - Dimensions
+      - Mentions & Citations
   /dimensions/citations:
     get:
       description: "Includes visible citations and background source references. Background\
@@ -2566,16 +4553,19 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
-      - description: "ISO country code (e.g. US, GB, DE)"
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
         in: query
         name: country_code
@@ -2583,7 +4573,7 @@ paths:
         schema:
           type: string
         style: form
-      - description: "ISO language code (e.g. en, es, de)"
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
         explode: true
         in: query
         name: language_code
@@ -2607,7 +4597,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -2634,7 +4626,7 @@ paths:
           description: Paginated brand citations
       summary: List brand citations
       tags:
-      - Dimensions
+      - Mentions & Citations
   /dimensions/competitor_mentions:
     get:
       operationId: listCompetitorMentions
@@ -2693,14 +4685,17 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
       - description: Filter by prompt ID
         explode: true
@@ -2718,7 +4713,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -2745,7 +4742,7 @@ paths:
           description: Paginated competitor mentions
       summary: List competitor mentions
       tags:
-      - Dimensions
+      - Mentions & Citations
   /dimensions/competitor_citations:
     get:
       description: "Includes visible citations and background source references. Background\
@@ -2806,14 +4803,17 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
       - description: Filter by prompt ID
         explode: true
@@ -2831,7 +4831,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -2858,7 +4860,7 @@ paths:
           description: Paginated competitor citations
       summary: List competitor citations
       tags:
-      - Dimensions
+      - Mentions & Citations
   /dimensions/all_mentions:
     get:
       description: Unified mentions stream. Each record has an `actor_type` field
@@ -2919,14 +4921,17 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
       - description: Filter by prompt ID
         explode: true
@@ -2944,7 +4949,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -2971,7 +4978,7 @@ paths:
           description: Paginated mentions with actor_type discriminator
       summary: List all mentions (brand + competitor)
       tags:
-      - Dimensions
+      - Mentions & Citations
   /dimensions/all_citations:
     get:
       description: "Unified citations stream with an `actor_type` field on each record.\
@@ -3033,14 +5040,17 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
       - description: Filter by prompt ID
         explode: true
@@ -3058,7 +5068,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -3085,14 +5097,14 @@ paths:
           description: Paginated citations with actor_type discriminator
       summary: List all citations (brand + competitor)
       tags:
-      - Dimensions
+      - Mentions & Citations
   /dimensions/agent_bots:
     get:
       description: "Static catalog of AI bots that Agent Analytics can identify. Useful\
         \ for rendering filter UIs that mirror our internal classification (slug,\
         \ display name, company, category, Cloudflare verified-bot mapping, description).\
         \ Requires the Scale plan; lower tiers receive ERR_PLAN_REQUIRED. The equivalent\
-        \ MCP tool list_agent_bots is available on all plans."
+        \ MCP tool list_agent_bots is available on the Scale plan or above."
       operationId: listAgentBots
       parameters:
       - description: Project ID
@@ -3130,14 +5142,14 @@ paths:
               example:
                 error:
                   code: ERR_PLAN_REQUIRED
-                  message: This endpoint requires the Scale plan or above
+                  message: Scale plan or above required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Endpoint requires a higher plan tier
-      summary: AI bot catalog (Scale+)
+      summary: AI bot catalog (Scale plan or above)
       tags:
-      - Dimensions
+      - AI & Agent Traffic
   /citation_intelligence/groups:
     get:
       description: "Grouped citation intelligence by url / domain / host with per-model\
@@ -3145,7 +5157,14 @@ paths:
         \ rate include visible citations and background source references. Average\
         \ position ignores rows with position=0. Owned and competitor source matching\
         \ honor the project's exact-subdomain setting. Filter vocabulary aligns with\
-        \ `source_type` returned by the API."
+        \ `source_type` returned by the API. Unavailable page content keeps the cited\
+        \ URL and citation metrics. Page metadata/content and unknown brand_mentioned/competitor_mentioned\
+        \ return null; content_gap_status is content_unavailable (or missing_page_cache).\
+        \ Mention arrays stay empty until usable content has completed analysis. status_code\
+        \ shows a saved successful response or observed 404/410; other crawl failures\
+        \ and error_message are hidden. last_crawled_at dates the saved copy. Domain/host\
+        \ crawled_urls_count counts usable copies; mention counts are null when no\
+        \ URL has completed analysis."
       operationId: listCitationGroups
       parameters:
       - description: Project ID
@@ -3231,16 +5250,19 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
-      - description: "ISO country code (e.g. US, GB, DE)"
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
         in: query
         name: country_code
@@ -3248,7 +5270,7 @@ paths:
         schema:
           type: string
         style: form
-      - description: "ISO language code (e.g. en, es, de)"
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
         explode: true
         in: query
         name: language_code
@@ -3272,7 +5294,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -3330,14 +5354,14 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Invalid parameters
       summary: Grouped citation intelligence
       tags:
-      - Citation Intelligence
+      - Sources & Citation Intelligence
   /citation_intelligence/mentions_by_domain:
     get:
       description: "For the responses where each given source domain is cited, returns\
@@ -3383,16 +5407,19 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
-      - description: "ISO country code (e.g. US, GB, DE)"
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
         in: query
         name: country_code
@@ -3400,7 +5427,7 @@ paths:
         schema:
           type: string
         style: form
-      - description: "ISO language code (e.g. en, es, de)"
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
         explode: true
         in: query
         name: language_code
@@ -3416,6 +5443,22 @@ paths:
         schema:
           type: integer
         style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
       - explode: true
         in: query
         name: from
@@ -3424,7 +5467,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -3441,16 +5486,24 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Invalid parameters
       summary: Mention share by citing domain
       tags:
-      - Citation Intelligence
+      - Sources & Citation Intelligence
   /citation_intelligence/urls/{url_sha256}:
     get:
+      description: Unavailable page content keeps the cited URL and citation metrics.
+        Page metadata/content and unknown brand_mentioned/competitor_mentioned return
+        null; content_gap_status is content_unavailable (or missing_page_cache). Mention
+        arrays stay empty until usable content has completed analysis. status_code
+        shows a saved successful response or observed 404/410; other crawl failures
+        and error_message are hidden. last_crawled_at dates the saved copy. Domain/host
+        crawled_urls_count counts usable copies; mention counts are null when no URL
+        has completed analysis.
       operationId: getCitedUrlDetail
       parameters:
       - description: Project ID
@@ -3479,14 +5532,14 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Resource not found
       summary: Cited URL detail
       tags:
-      - Citation Intelligence
+      - Sources & Citation Intelligence
   /citation_intelligence/urls/{url_sha256}/occurrences:
     get:
       operationId: listCitedUrlOccurrences
@@ -3536,16 +5589,24 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Resource not found
       summary: Cited URL occurrences
       tags:
-      - Citation Intelligence
+      - Sources & Citation Intelligence
   /citation_intelligence/urls/{url_sha256}/content:
     get:
+      description: Unavailable page content keeps the cited URL and citation metrics.
+        Page metadata/content and unknown brand_mentioned/competitor_mentioned return
+        null; content_gap_status is content_unavailable (or missing_page_cache). Mention
+        arrays stay empty until usable content has completed analysis. status_code
+        shows a saved successful response or observed 404/410; other crawl failures
+        and error_message are hidden. last_crawled_at dates the saved copy. Domain/host
+        crawled_urls_count counts usable copies; mention counts are null when no URL
+        has completed analysis.
       operationId: getCitedUrlContent
       parameters:
       - description: Project ID
@@ -3574,14 +5635,14 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Resource not found
       summary: Cited URL cached content
       tags:
-      - Citation Intelligence
+      - Sources & Citation Intelligence
   /reports/ai_model_insights/summary:
     get:
       description: "Per-model mentions, citations, brand net sentiment with raw counts,\
@@ -3614,7 +5675,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -3633,14 +5696,15 @@ paths:
           - month
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
-      - description: "ISO country code (e.g. US, GB, DE)"
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
         in: query
         name: country_code
@@ -3648,7 +5712,7 @@ paths:
         schema:
           type: string
         style: form
-      - description: "ISO language code (e.g. en, es, de)"
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
         explode: true
         in: query
         name: language_code
@@ -3656,17 +5720,13 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt type (search intent)
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
         explode: true
         in: query
         name: prompt_type
         required: false
         schema:
-          enum:
-          - informational
-          - navigational
-          - commercial
-          - transactional
           type: string
         style: form
       - description: "Filter by brand kind: brand (own brand/products), brand_other\
@@ -3727,7 +5787,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -3746,14 +5808,15 @@ paths:
           - month
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
-      - description: "ISO country code (e.g. US, GB, DE)"
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
         in: query
         name: country_code
@@ -3761,7 +5824,7 @@ paths:
         schema:
           type: string
         style: form
-      - description: "ISO language code (e.g. en, es, de)"
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
         explode: true
         in: query
         name: language_code
@@ -3769,17 +5832,13 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt type (search intent)
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
         explode: true
         in: query
         name: prompt_type
         required: false
         schema:
-          enum:
-          - informational
-          - navigational
-          - commercial
-          - transactional
           type: string
         style: form
       - description: "Filter by brand kind: brand (own brand/products), brand_other\
@@ -3817,6 +5876,8 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
       - description: Competitor ID for the first comparison brand (omit to compare
@@ -3869,7 +5930,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -3888,14 +5951,15 @@ paths:
           - month
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
-      - description: "ISO country code (e.g. US, GB, DE)"
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
         in: query
         name: country_code
@@ -3903,7 +5967,7 @@ paths:
         schema:
           type: string
         style: form
-      - description: "ISO language code (e.g. en, es, de)"
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
         explode: true
         in: query
         name: language_code
@@ -3911,17 +5975,13 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt type (search intent)
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
         explode: true
         in: query
         name: prompt_type
         required: false
         schema:
-          enum:
-          - informational
-          - navigational
-          - commercial
-          - transactional
           type: string
         style: form
       - description: "Filter by brand kind: brand (own brand/products), brand_other\
@@ -4000,16 +6060,19 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
-      - description: "ISO country code (e.g. US, GB, DE)"
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
         in: query
         name: country_code
@@ -4017,7 +6080,7 @@ paths:
         schema:
           type: string
         style: form
-      - description: "ISO language code (e.g. en, es, de)"
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
         explode: true
         in: query
         name: language_code
@@ -4094,7 +6157,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -4130,6 +6195,16 @@ paths:
         schema:
           type: string
         style: form
+      - description: "Filter sentinel non-answers (provider returned nothing after\
+          \ retries; excluded from platform metrics). false = only real answers, true\
+          \ = only sentinels, omit = both. Every item carries its own no_result flag."
+        explode: true
+        in: query
+        name: no_result
+        required: false
+        schema:
+          type: boolean
+        style: form
       responses:
         "200":
           description: Paginated answers
@@ -4139,7 +6214,7 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4190,7 +6265,7 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4224,17 +6299,13 @@ paths:
         schema:
           type: boolean
         style: form
-      - explode: true
+      - description: "One sentiment level or a comma-separated list: very_positive,\
+          \ positive, neutral, negative, very_negative"
+        explode: true
         in: query
         name: analysis
         required: false
         schema:
-          enum:
-          - very_positive
-          - positive
-          - neutral
-          - negative
-          - very_negative
           type: string
         style: form
       - description: Filter by AI model. Models the API key's user has not enabled
@@ -4256,16 +6327,19 @@ paths:
           - deepseek
           - meta_ai
           - amazon_rufus
+          - naver_ai
+          - baidu_ai
           type: string
         style: form
-      - explode: true
+      - description: One collection/tag ID or a comma-separated list of IDs
+        explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          type: integer
+          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
         style: form
-      - description: "ISO country code (e.g. US, GB, DE)"
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
         in: query
         name: country_code
@@ -4273,7 +6347,7 @@ paths:
         schema:
           type: string
         style: form
-      - description: "ISO language code (e.g. en, es, de)"
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
         explode: true
         in: query
         name: language_code
@@ -4289,7 +6363,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - explode: true
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
         in: query
         name: to
         required: false
@@ -4325,7 +6401,7 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4417,7 +6493,7 @@ paths:
               example:
                 error:
                   code: ERR_INSUFFICIENT_SCOPE
-                  message: "Insufficient scope: write required"
+                  message: insufficient_scope_write_required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4428,7 +6504,7 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4483,7 +6559,7 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4515,7 +6591,7 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4526,7 +6602,7 @@ paths:
               example:
                 error:
                   code: ERR_INSUFFICIENT_SCOPE
-                  message: "Insufficient scope: write required"
+                  message: insufficient_scope_write_required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4565,7 +6641,7 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4596,13 +6672,24 @@ paths:
       responses:
         "200":
           description: Draft envelope with next-step suggestions
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
         "404":
           content:
             application/json:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4613,7 +6700,7 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4651,13 +6738,24 @@ paths:
           description: Project created
         "200":
           description: Idempotent replay
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
         "404":
           content:
             application/json:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4668,7 +6766,7 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4709,7 +6807,7 @@ paths:
               example:
                 error:
                   code: ERR_INSUFFICIENT_SCOPE
-                  message: "Insufficient scope: write required"
+                  message: insufficient_scope_write_required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4720,12 +6818,78 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Invalid parameters
       summary: Create a project (fast mode)
+      tags:
+      - Projects
+  /projects/{id}:
+    patch:
+      description: "Updates the project profile, the same fields as Project Settings:\
+        \ brand_name, description, industry, business_model (plus business_model_other\
+        \ when it is OTHER), target_audience, brand_voice, goals, primary_products,\
+        \ matching_names. Send only the fields to change; unknown fields are rejected.\
+        \ All seven Brand Book fields feed every GEO Writer task and prompt suggestions;\
+        \ only industry, description, and target_audience help Recommendations. A\
+        \ matching_names change re-runs mention/citation matching over the project\
+        \ history in the background (rematching=true); further edits are rejected\
+        \ while that runs. Requires a `read_write` scope API key."
+      operationId: updateProject
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updateProject_request"
+        required: true
+      responses:
+        "200":
+          description: "Updated: { project, updated_fields, rematching, note, request_id\
+            \ }"
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Update a project profile (Brand Book)
       tags:
       - Projects
   /prompts:
@@ -4753,7 +6917,7 @@ paths:
               example:
                 error:
                   code: ERR_INSUFFICIENT_SCOPE
-                  message: "Insufficient scope: write required"
+                  message: insufficient_scope_write_required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4764,7 +6928,7 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4804,7 +6968,7 @@ paths:
               example:
                 error:
                   code: ERR_INSUFFICIENT_SCOPE
-                  message: "Insufficient scope: write required"
+                  message: insufficient_scope_write_required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4815,7 +6979,7 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4845,7 +7009,7 @@ paths:
               example:
                 error:
                   code: ERR_INSUFFICIENT_SCOPE
-                  message: "Insufficient scope: write required"
+                  message: insufficient_scope_write_required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4856,18 +7020,18 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Invalid parameters
       summary: Bulk-attach tags to prompts
       tags:
-      - Prompts
+      - Collections & Tags
   /competitors:
     post:
-      description: Adds a competitor (brand name + domain) to a project. Honours the
-        per-plan max competitors cap. Requires a `read_write` scope API key.
+      description: Adds a competitor with its own citation URL matching rule. Honours
+        the per-plan max competitors cap. Requires a `read_write` scope API key.
       operationId: createCompetitor
       requestBody:
         content:
@@ -4884,7 +7048,7 @@ paths:
               example:
                 error:
                   code: ERR_INSUFFICIENT_SCOPE
-                  message: "Insufficient scope: write required"
+                  message: insufficient_scope_write_required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4895,7 +7059,7 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4934,7 +7098,7 @@ paths:
               example:
                 error:
                   code: ERR_INSUFFICIENT_SCOPE
-                  message: "Insufficient scope: write required"
+                  message: insufficient_scope_write_required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4945,7 +7109,7 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4954,12 +7118,14 @@ paths:
       tags:
       - Competitors
     patch:
-      description: "Updates brand_name, matching_names (full replacement list; the\
-        \ brand name is always included automatically) and/or color. The domain is\
-        \ immutable after creation. Name changes re-run mention/citation matching\
-        \ in the background: the competitor shows processing=true for a few minutes\
-        \ and further edits are rejected meanwhile. Requires a `read_write` scope\
-        \ API key."
+      description: "Updates brand_name, the competitor website domain or host, matching_names\
+        \ (full replacement list; the brand name is always included automatically),\
+        \ color and/or the citation URL matching rule. Website domain/host and citation-rule\
+        \ changes share one seven-day cooldown per competitor; other fields remain\
+        \ editable during the cooldown. Name, website or citation-rule changes re-run\
+        \ historical matching in the background: the competitor shows processing=true\
+        \ for a few minutes and further edits are rejected meanwhile. Requires a `read_write`\
+        \ scope API key."
       operationId: updateCompetitor
       parameters:
       - explode: false
@@ -4984,7 +7150,7 @@ paths:
               example:
                 error:
                   code: ERR_INSUFFICIENT_SCOPE
-                  message: "Insufficient scope: write required"
+                  message: insufficient_scope_write_required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -4995,7 +7161,7 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5006,7 +7172,7 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5035,7 +7201,7 @@ paths:
               example:
                 error:
                   code: ERR_INSUFFICIENT_SCOPE
-                  message: "Insufficient scope: write required"
+                  message: insufficient_scope_write_required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5046,14 +7212,14 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Invalid parameters
       summary: Create a tag
       tags:
-      - Collections
+      - Collections & Tags
   /collections/{id}:
     delete:
       description: Deletes a tag/collection. The prompts inside it are NOT deleted;
@@ -5084,7 +7250,7 @@ paths:
               example:
                 error:
                   code: ERR_INSUFFICIENT_SCOPE
-                  message: "Insufficient scope: write required"
+                  message: insufficient_scope_write_required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5095,14 +7261,14 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Resource not found
       summary: Delete a tag
       tags:
-      - Collections
+      - Collections & Tags
     patch:
       description: "Renames a tag/collection or changes its description. Prompt membership\
         \ is managed via POST /prompts/assign_tags, not here. Requires a `read_write`\
@@ -5131,7 +7297,7 @@ paths:
               example:
                 error:
                   code: ERR_INSUFFICIENT_SCOPE
-                  message: "Insufficient scope: write required"
+                  message: insufficient_scope_write_required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5142,7 +7308,7 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5153,20 +7319,20 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Invalid parameters
       summary: Update a tag
       tags:
-      - Collections
+      - Collections & Tags
   /annotations:
     get:
-      description: "Lists the project timeline annotations (user-created + system),\
-        \ newest first. The category field tells them apart; editable says whether\
-        \ the requesting user may modify the row. Requires the **Growth** plan or\
-        \ above."
+      description: "Lists project timeline annotations, newest first. Rows can come\
+        \ from manual notes, project automations, GEO tests, or platform events. The\
+        \ origin field distinguishes them; editable says whether the requesting user\
+        \ may modify the row. Available on every plan."
       operationId: listAnnotations
       parameters:
       - description: Project ID
@@ -5227,18 +7393,19 @@ paths:
             application/json:
               example:
                 error:
-                  code: ERR_PLAN_REQUIRED
-                  message: This endpoint requires the Scale plan or above
+                  code: ERR_INSUFFICIENT_PERMISSION
+                  message: insufficient_team_member_permission
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
-          description: Endpoint requires a higher plan tier
+          description: API key belongs to a team member whose permission matrix does
+            not grant this feature
       summary: List timeline annotations
       tags:
       - Annotations
     post:
       description: Marks a date in the project timeseries with a title + description.
-        Requires the **Growth** plan or above. Requires a `read_write` scope API key.
+        Available on every plan. Requires a `read_write` scope API key.
       operationId: createAnnotation
       requestBody:
         content:
@@ -5250,14 +7417,23 @@ paths:
         "201":
           description: Created
         "403":
-          description: Insufficient scope or plan required
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
         "422":
           content:
             application/json:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5267,8 +7443,8 @@ paths:
       - Annotations
   /annotations/{id}:
     delete:
-      description: Deletes an annotation. Same ownership rule as PATCH. Requires the
-        **Growth** plan or above and a `read_write` scope API key.
+      description: Deletes an annotation. Same ownership rule as PATCH. Available
+        on every plan and requires a `read_write` scope API key.
       operationId: deleteAnnotation
       parameters:
       - description: Project ID
@@ -5295,7 +7471,7 @@ paths:
               example:
                 error:
                   code: ERR_INSUFFICIENT_PERMISSION
-                  message: Your team-member permissions do not allow this
+                  message: insufficient_team_member_permission
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5307,7 +7483,7 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5318,8 +7494,8 @@ paths:
     patch:
       description: "Updates title, description, annotation_date, color and/or annotation_category_id.\
         \ Only user-created annotations belonging to the requesting user can be updated\
-        \ (system annotations never). Requires the **Growth** plan or above and a\
-        \ `read_write` scope API key."
+        \ (system annotations never). Available on every plan and requires a `read_write`\
+        \ scope API key."
       operationId: updateAnnotation
       parameters:
       - explode: false
@@ -5344,7 +7520,7 @@ paths:
               example:
                 error:
                   code: ERR_INSUFFICIENT_PERMISSION
-                  message: Your team-member permissions do not allow this
+                  message: insufficient_team_member_permission
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5356,7 +7532,7 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5367,7 +7543,7 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5376,11 +7552,93 @@ paths:
       tags:
       - Annotations
   /technical_geo_reports:
+    get:
+      description: "Lists reports of one technical GEO type for a project, newest\
+        \ first. Use agent_readiness for the AI/Agent Readiness report."
+      operationId: listTechnicalGeoReports
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: report_type
+        required: true
+        schema:
+          enum:
+          - crawlability
+          - schema
+          - content_readiness
+          - discoverability
+          - site_structure
+          - robots_txt
+          - agent_readiness
+          - llms_txt
+          - ai_visibility
+          type: string
+        style: form
+      - description: Optional status filter; valid values depend on report_type
+        explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Optional batch id returned when the report bundle was created
+        explode: true
+        in: query
+        name: batch_id
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          description: Paginated technical GEO report summaries
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: List technical GEO reports
+      tags:
+      - Technical GEO Reports
     post:
       description: "Launches the full technical GEO analysis bundle (crawlability,\
         \ schema, content readiness, discoverability, site structure, robots.txt,\
-        \ llms.txt, AI visibility) for a URL + country. Each report runs in a background\
-        \ job. Requires a `read_write` scope API key."
+        \ agent readiness, llms.txt, AI visibility) for a URL + country. Each report\
+        \ runs in a background job. Requires a `read_write` scope API key."
       operationId: createTechnicalGeoReports
       requestBody:
         content:
@@ -5397,7 +7655,7 @@ paths:
               example:
                 error:
                   code: ERR_INSUFFICIENT_SCOPE
-                  message: "Insufficient scope: write required"
+                  message: insufficient_scope_write_required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5408,14 +7666,82 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Invalid parameters
       summary: Run technical GEO analysis
       tags:
-      - Reports
+      - Technical GEO Reports
+  /technical_geo_reports/{id}:
+    get:
+      description: "Returns the current status and the full result_data once the report\
+        \ is completed. While it is running, result_data is null and poll_after_seconds\
+        \ tells clients when to check again."
+      operationId: getTechnicalGeoReport
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: report_type
+        required: true
+        schema:
+          enum:
+          - crawlability
+          - schema
+          - content_readiness
+          - discoverability
+          - site_structure
+          - robots_txt
+          - agent_readiness
+          - llms_txt
+          - ai_visibility
+          type: string
+        style: form
+      - description: Report id returned by POST /technical_geo_reports or GET /technical_geo_reports
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          description: Report status and completed result data
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Get a technical GEO report
+      tags:
+      - Technical GEO Reports
   /intelligence_tasks:
     get:
       operationId: listIntelligenceTasks
@@ -5488,13 +7814,24 @@ paths:
               schema:
                 $ref: "#/components/schemas/IntelligenceTask"
           description: Created
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
         "422":
           content:
             application/json:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5530,6 +7867,143 @@ paths:
                 $ref: "#/components/schemas/IntelligenceTask"
           description: Task with result_data when completed
       summary: Get a GEO Writer task
+      tags:
+      - GEO Writer
+    patch:
+      description: "Edits the text of a completed task in place. `edits` maps dotted\
+        \ paths into result_data (for example `title` or `sections.0.content`) to\
+        \ replacement text. Only string fields that already exist can change: a path\
+        \ that does not resolve to text, a blank `title`, a value over 20,000 characters\
+        \ or an empty `edits` object is rejected with ERR_INVALID_PARAM and nothing\
+        \ is written. Values identical to the stored text are ignored, and the response\
+        \ lists the paths that actually changed. The first edit keeps a copy of the\
+        \ generated output so POST /intelligence_tasks/{id}/revert can restore it;\
+        \ regenerating the task replaces the edited content. Requires a `read_write`\
+        \ scope API key and, for team members, update permission on GEO Writer."
+      operationId: updateIntelligenceTaskContent
+      parameters:
+      - description: Numeric task ID or public_id string token
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/IntelligenceTaskUpdateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IntelligenceTaskUpdateResponse"
+          description: Updated task with the paths that changed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Edit GEO Writer task content
+      tags:
+      - GEO Writer
+  /intelligence_tasks/{id}/revert:
+    post:
+      description: "Discards every manual edit on the task and restores the output\
+        \ exactly as it was generated. Returns ERR_INVALID_PARAM when the task has\
+        \ no manual edits. Requires a `read_write` scope API key and, for team members,\
+        \ update permission on GEO Writer."
+      operationId: revertIntelligenceTaskContent
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: Numeric task ID or public_id string token
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IntelligenceTask"
+          description: Task restored to its generated output
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Revert GEO Writer task content
       tags:
       - GEO Writer
   /webhooks:
@@ -5574,7 +8048,7 @@ paths:
               example:
                 error:
                   code: ERR_MISSING_AUTH
-                  message: Missing Authorization header
+                  message: missing_authorization
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5585,7 +8059,7 @@ paths:
               example:
                 error:
                   code: ERR_PLAN_REQUIRED
-                  message: This endpoint requires the Scale plan or above
+                  message: Scale plan or above required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5622,7 +8096,7 @@ paths:
               example:
                 error:
                   code: ERR_MISSING_AUTH
-                  message: Missing Authorization header
+                  message: missing_authorization
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5633,7 +8107,7 @@ paths:
               example:
                 error:
                   code: ERR_INSUFFICIENT_SCOPE
-                  message: "Insufficient scope: write required"
+                  message: insufficient_scope_write_required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5644,7 +8118,7 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5655,7 +8129,7 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5690,7 +8164,7 @@ paths:
               example:
                 error:
                   code: ERR_MISSING_AUTH
-                  message: Missing Authorization header
+                  message: missing_authorization
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5701,7 +8175,7 @@ paths:
               example:
                 error:
                   code: ERR_INSUFFICIENT_SCOPE
-                  message: "Insufficient scope: write required"
+                  message: insufficient_scope_write_required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5712,7 +8186,7 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5741,6 +8215,7 @@ paths:
           - sentiment.negative_detected
           - recommendation.completed
           - intelligence_task.completed
+          - intelligence_task.updated
           type: string
         style: simple
       - explode: true
@@ -5763,7 +8238,7 @@ paths:
               example:
                 error:
                   code: ERR_MISSING_AUTH
-                  message: Missing Authorization header
+                  message: missing_authorization
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5774,7 +8249,7 @@ paths:
               example:
                 error:
                   code: ERR_PLAN_REQUIRED
-                  message: This endpoint requires the Scale plan or above
+                  message: Scale plan or above required
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5785,7 +8260,7 @@ paths:
               example:
                 error:
                   code: ERR_PROJECT_NOT_FOUND
-                  message: Project not found or not accessible
+                  message: project_not_found
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5796,7 +8271,7 @@ paths:
               example:
                 error:
                   code: ERR_INVALID_PARAM
-                  message: "Unknown metric: invalid_metric"
+                  message: invalid metrics
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -5903,6 +8378,58 @@ components:
         - month
         type: string
       style: form
+    GscSearchType:
+      description: "Which search surface to measure. Defaults to web. discover and\
+        \ googleNews carry no query dimension, so Google rejects /search_console/queries\
+        \ for them."
+      explode: true
+      in: query
+      name: search_type
+      required: false
+      schema:
+        default: web
+        enum:
+        - web
+        - image
+        - video
+        - news
+        - discover
+        - googleNews
+        type: string
+      style: form
+    GscFilters:
+      description: "Narrow the query; every entry must match (AND). Send the whole\
+        \ list as one JSON value: filters=[{\"dimension\":\"page\",\"operator\":\"\
+        contains\",\"expression\":\"/blog/\"}] (URL-encoded). An array of objects\
+        \ has no query-parameter form a generated client can produce, so the string\
+        \ is what the official SDKs send; see the SearchConsoleFilters schema for\
+        \ the shape it encodes. includingRegex and excludingRegex take RE2 syntax.\
+        \ At most 10 entries, expression at most 500 characters. The bracket form\
+        \ filters[][dimension]=page&filters[][operator]=contains&filters[][expression]=/blog/\
+        \ is also accepted."
+      example: "[{\"dimension\":\"page\",\"operator\":\"contains\",\"expression\"\
+        :\"/blog/\"}]"
+      explode: true
+      in: query
+      name: filters
+      required: false
+      schema:
+        type: string
+      style: form
+    GscDataState:
+      description: "final (default) counts only rows Google has finalized. all also\
+        \ counts the most recent days, which are still being filled in and will change."
+      explode: true
+      in: query
+      name: data_state
+      required: false
+      schema:
+        default: final
+        enum:
+        - final
+        - all
+        type: string
+      style: form
     Range:
       description: Number of days to look back (alternative to from/to)
       explode: true
@@ -5922,6 +8449,8 @@ components:
         type: string
       style: form
     To:
+      description: End of the window. A date-only value such as 2026-09-01 covers
+        that whole day. Pass a full timestamp to end the window earlier.
       explode: true
       in: query
       name: to
@@ -5950,18 +8479,21 @@ components:
         - deepseek
         - meta_ai
         - amazon_rufus
+        - naver_ai
+        - baidu_ai
         type: string
       style: form
     CollectionId:
+      description: One collection/tag ID or a comma-separated list of IDs
       explode: true
       in: query
       name: collection_id
       required: false
       schema:
-        type: integer
+        $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
       style: form
     CountryCode:
-      description: "ISO country code (e.g. US, GB, DE)"
+      description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
       explode: true
       in: query
       name: country_code
@@ -5970,7 +8502,7 @@ components:
         type: string
       style: form
     LanguageCode:
-      description: "ISO language code (e.g. en, es, de)"
+      description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
       explode: true
       in: query
       name: language_code
@@ -5988,17 +8520,13 @@ components:
         type: integer
       style: form
     PromptType:
-      description: Filter by prompt type (search intent)
+      description: "One prompt type or a comma-separated list: informational, navigational,\
+        \ commercial, transactional"
       explode: true
       in: query
       name: prompt_type
       required: false
       schema:
-        enum:
-        - informational
-        - navigational
-        - commercial
-        - transactional
         type: string
       style: form
     BrandKind:
@@ -6091,7 +8619,7 @@ components:
           example:
             error:
               code: ERR_MISSING_AUTH
-              message: Missing Authorization header
+              message: missing_authorization
             request_id: abc-123
           schema:
             $ref: "#/components/schemas/ApiError"
@@ -6102,7 +8630,7 @@ components:
           example:
             error:
               code: ERR_PROJECT_NOT_FOUND
-              message: Project not found or not accessible
+              message: project_not_found
             request_id: abc-123
           schema:
             $ref: "#/components/schemas/ApiError"
@@ -6113,7 +8641,7 @@ components:
           example:
             error:
               code: ERR_REVOKED_API_KEY
-              message: API key has been revoked
+              message: revoked_api_key
             request_id: abc-123
           schema:
             $ref: "#/components/schemas/ApiError"
@@ -6124,18 +8652,32 @@ components:
           example:
             error:
               code: ERR_PLAN_REQUIRED
-              message: This endpoint requires the Scale plan or above
+              message: Scale plan or above required
             request_id: abc-123
           schema:
             $ref: "#/components/schemas/ApiError"
       description: Endpoint requires a higher plan tier
+    SearchConsoleForbidden:
+      content:
+        application/json:
+          example:
+            error:
+              code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+              message: Google Search Console access was revoked. Reconnect the property
+                in Preferences > Project Settings > Data Connections.
+            request_id: abc-123
+          schema:
+            $ref: "#/components/schemas/ApiError"
+      description: "Plan below Growth (ERR_PLAN_REQUIRED), or Google revoked the project's\
+        \ Search Console access (ERR_SEARCH_CONSOLE_ACCESS_REVOKED): reconnect the\
+        \ property"
     InsufficientScope:
       content:
         application/json:
           example:
             error:
               code: ERR_INSUFFICIENT_SCOPE
-              message: "Insufficient scope: write required"
+              message: insufficient_scope_write_required
             request_id: abc-123
           schema:
             $ref: "#/components/schemas/ApiError"
@@ -6146,7 +8688,7 @@ components:
           example:
             error:
               code: ERR_INSUFFICIENT_PERMISSION
-              message: Your team-member permissions do not allow this
+              message: insufficient_team_member_permission
             request_id: abc-123
           schema:
             $ref: "#/components/schemas/ApiError"
@@ -6158,12 +8700,77 @@ components:
           example:
             error:
               code: ERR_INVALID_PARAM
-              message: "Unknown metric: invalid_metric"
+              message: invalid metrics
             request_id: abc-123
           schema:
             $ref: "#/components/schemas/ApiError"
       description: Invalid parameters
+    ServiceUnavailable:
+      content:
+        application/json:
+          example:
+            error:
+              code: ERR_SEARCH_CONSOLE_UPSTREAM
+              message: Google Search Console is temporarily unavailable. Retry in
+                a few minutes.
+            request_id: abc-123
+          schema:
+            $ref: "#/components/schemas/ApiError"
+      description: "Upstream provider unavailable, retry after the number of seconds\
+        \ in the Retry-After header"
+      headers:
+        Retry-After:
+          description: "Seconds to wait before retrying: Google's own value when it\
+            \ sent one, otherwise 900 after a quota error and 60 after an outage"
+          explode: false
+          schema:
+            type: integer
+          style: simple
   schemas:
+    SearchConsoleFilters:
+      description: "The value of the filters query parameter, JSON-encoded into a\
+        \ single string."
+      items:
+        $ref: "#/components/schemas/SearchConsoleFilters_inner"
+      maxItems: 10
+      type: array
+    AccountQuota:
+      description: A consumable quota. limit and remaining are null when unlimited
+        is true.
+      example:
+        limit: 0
+        used: 6
+        remaining: 1
+        unlimited: true
+        period: period
+      properties:
+        limit:
+          nullable: true
+          type: integer
+        used:
+          type: integer
+        remaining:
+          nullable: true
+          type: integer
+        unlimited:
+          type: boolean
+        period:
+          description: Reset window for quotas that reset (e.g. month)
+          type: string
+      type: object
+    AccountCapacity:
+      description: A ceiling with no usage counter attached. limit is null when unlimited
+        is true.
+      example:
+        limit: 5
+        unlimited: true
+      properties:
+        limit:
+          nullable: true
+          type: integer
+        unlimited:
+          type: boolean
+      type: object
     Project:
       example:
         id: 6
@@ -6197,11 +8804,19 @@ components:
             type: string
           business_model:
             type: string
-          primary_products:
+          business_model_other:
+            description: Set only when business_model is OTHER
+            nullable: true
             type: string
+          primary_products:
+            items:
+              type: string
+            type: array
           target_audience:
             type: string
           brand_voice:
+            type: string
+          goals:
             type: string
           country_code:
             type: string
@@ -6230,9 +8845,13 @@ components:
         - matching_names
         industry: industry
         business_model: business_model
-        primary_products: primary_products
+        business_model_other: business_model_other
+        primary_products:
+        - primary_products
+        - primary_products
         target_audience: target_audience
         brand_voice: brand_voice
+        goals: goals
         country_code: country_code
         language_code: language_code
         paused: true
@@ -6957,6 +9576,14 @@ components:
         description: description
         industry:
         - SAAS
+        business_model: B2B_SAAS
+        business_model_other: business_model_other
+        target_audience: target_audience
+        brand_voice: brand_voice
+        goals: goals
+        primary_products:
+        - primary_products
+        - primary_products
         matching_names:
         - matching_names
         - matching_names
@@ -7012,6 +9639,31 @@ components:
         industry:
           example:
           - SAAS
+          items:
+            type: string
+          type: array
+        business_model:
+          description: "Business model key (e.g. B2B_SAAS, MARKETPLACE); unknown keys\
+            \ are rejected"
+          example: B2B_SAAS
+          type: string
+        business_model_other:
+          description: "Free-text business model, only accepted when business_model\
+            \ is OTHER; rejected against any other key"
+          type: string
+        target_audience:
+          description: Who the brand sells to. Context for Recommendations and GEO
+            Writer (Brand Book)
+          type: string
+        brand_voice:
+          description: Tone of voice guidance for generated content (Brand Book)
+          type: string
+        goals:
+          description: What the brand wants to achieve. Context for GEO Writer and
+            prompt suggestions
+          type: string
+        primary_products:
+          description: Main products or services
           items:
             type: string
           type: array
@@ -7187,6 +9839,31 @@ components:
       - project_id
       - task_type
       type: object
+    IntelligenceTaskUpdateRequest:
+      example:
+        project_id: 0
+        edits:
+          title: How to measure AI visibility in 2026
+          sections.0.content: AI visibility is the share of AI answers that mention
+            your brand.
+      properties:
+        project_id:
+          type: integer
+        edits:
+          additionalProperties:
+            type: string
+          description: "Dotted result_data paths (title, sections.0.content, key_points.2)\
+            \ mapped to their replacement text. Only string fields that already exist\
+            \ are editable; sections cannot be added or removed."
+          example:
+            title: How to measure AI visibility in 2026
+            sections.0.content: AI visibility is the share of AI answers that mention
+              your brand.
+          type: object
+      required:
+      - edits
+      - project_id
+      type: object
     IntelligenceTask:
       example:
         id: 0
@@ -7207,6 +9884,8 @@ components:
         estimated_time: estimated_time
         created_at: 2000-01-23T04:56:07.000+00:00
         processed_at: 2000-01-23T04:56:07.000+00:00
+        manually_edited_at: 2000-01-23T04:56:07.000+00:00
+        edited_by_user_id: 5
         request_id: request_id
       properties:
         id:
@@ -7257,9 +9936,56 @@ components:
           format: date-time
           nullable: true
           type: string
+        manually_edited_at:
+          description: When the content was last edited by hand; null while the output
+            is as generated
+          format: date-time
+          nullable: true
+          type: string
+        edited_by_user_id:
+          description: User behind the last manual edit; null for an unedited task
+            or an edit made from an embedded portal
+          nullable: true
+          type: integer
         request_id:
           type: string
       type: object
+    IntelligenceTaskUpdateResponse:
+      allOf:
+      - $ref: "#/components/schemas/IntelligenceTask"
+      - properties:
+          changed_paths:
+            description: Paths whose text actually changed; empty when every value
+              matched the stored text
+            items:
+              type: string
+            type: array
+        type: object
+      example:
+        id: 0
+        public_id: public_id
+        project_id: 6
+        task_type: task_type
+        title: title
+        status: status
+        prompt_id: 1
+        prompt_text: prompt_text
+        agentic_mode: true
+        custom_topic: custom_topic
+        user_instructions: user_instructions
+        output_language_code: output_language_code
+        word_count: 5
+        result_data: "{}"
+        error_message: error_message
+        estimated_time: estimated_time
+        created_at: 2000-01-23T04:56:07.000+00:00
+        processed_at: 2000-01-23T04:56:07.000+00:00
+        manually_edited_at: 2000-01-23T04:56:07.000+00:00
+        edited_by_user_id: 5
+        request_id: request_id
+        changed_paths:
+        - changed_paths
+        - changed_paths
     ApiError:
       example:
         error:
@@ -7292,6 +10018,139 @@ components:
         request_id:
           type: string
       type: object
+    getAccount_200_response_subscription:
+      description: Billing state. Present only for callers who can access Billing
+        and Plans in the app; absent otherwise.
+      example:
+        status: status
+        trialing: true
+        current_period_ends_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        status:
+          type: string
+        trialing:
+          type: boolean
+        current_period_ends_at:
+          format: date-time
+          nullable: true
+          type: string
+      type: object
+    getAccount_200_response_limits:
+      example:
+        prompts:
+          limit: 0
+          used: 6
+          remaining: 1
+          unlimited: true
+          period: period
+        projects:
+          limit: 0
+          used: 6
+          remaining: 1
+          unlimited: true
+          period: period
+        competitors_per_project:
+          limit: 5
+          unlimited: true
+        intelligence_tasks:
+          limit: 0
+          used: 6
+          remaining: 1
+          unlimited: true
+          period: period
+        team_members:
+          limit: 5
+          unlimited: true
+      properties:
+        prompts:
+          $ref: "#/components/schemas/AccountQuota"
+        projects:
+          $ref: "#/components/schemas/AccountQuota"
+        competitors_per_project:
+          $ref: "#/components/schemas/AccountCapacity"
+        intelligence_tasks:
+          $ref: "#/components/schemas/AccountQuota"
+        team_members:
+          $ref: "#/components/schemas/AccountCapacity"
+      type: object
+    getAccount_200_response_rate_limits:
+      example:
+        requests_per_minute: 5
+        write_requests_per_minute: 2
+      properties:
+        requests_per_minute:
+          description: "The ceiling enforced for the API key used on this call, which\
+            \ may be above the 300/min default."
+          type: integer
+        write_requests_per_minute:
+          description: "Flat ceiling on write requests, the same for every key."
+          type: integer
+      type: object
+    getAccount_200_response:
+      example:
+        plan: plan
+        tracking_frequency: tracking_frequency
+        role: owner
+        subscription:
+          status: status
+          trialing: true
+          current_period_ends_at: 2000-01-23T04:56:07.000+00:00
+        limits:
+          prompts:
+            limit: 0
+            used: 6
+            remaining: 1
+            unlimited: true
+            period: period
+          projects:
+            limit: 0
+            used: 6
+            remaining: 1
+            unlimited: true
+            period: period
+          competitors_per_project:
+            limit: 5
+            unlimited: true
+          intelligence_tasks:
+            limit: 0
+            used: 6
+            remaining: 1
+            unlimited: true
+            period: period
+          team_members:
+            limit: 5
+            unlimited: true
+        rate_limits:
+          requests_per_minute: 5
+          write_requests_per_minute: 2
+        request_id: request_id
+      properties:
+        plan:
+          description: "Plan key (starter, growth, scale, ...)"
+          type: string
+        tracking_frequency:
+          description: "How often prompts run (weekly, daily, monthly, ...)"
+          type: string
+        role:
+          description: Whether the key belongs to the account owner or a team member
+          enum:
+          - owner
+          - member
+          type: string
+        subscription:
+          $ref: "#/components/schemas/getAccount_200_response_subscription"
+        limits:
+          $ref: "#/components/schemas/getAccount_200_response_limits"
+        rate_limits:
+          $ref: "#/components/schemas/getAccount_200_response_rate_limits"
+        request_id:
+          type: string
+      type: object
+    getTimeseries_collection_id_parameter:
+      oneOf:
+      - type: integer
+      - pattern: "^\\d+(,\\d+)*$"
+        type: string
     listProjects_200_response:
       example:
         projects:
@@ -7432,6 +10291,48 @@ components:
         execute_prompts_immediately:
           type: boolean
       type: object
+    updateProject_request:
+      properties:
+        brand_name:
+          description: Brand name used to detect mentions. Applies to future runs;
+            it does not rewrite history
+          type: string
+        description:
+          description: What the brand does. Context for Recommendations and GEO Writer
+            (Brand Book)
+          type: string
+        industry:
+          description: Single industry key (e.g. SAAS); unknown keys are rejected
+          type: string
+        business_model:
+          description: Business model key (e.g. B2B_SAAS); unknown keys are rejected
+          type: string
+        business_model_other:
+          description: "Free-text business model, only accepted when business_model\
+            \ is OTHER; rejected against any other key"
+          type: string
+        target_audience:
+          description: Who the brand sells to (Brand Book)
+          type: string
+        brand_voice:
+          description: Tone of voice guidance for generated content (Brand Book)
+          type: string
+        goals:
+          description: What the brand wants to achieve. Context for GEO Writer and
+            prompt suggestions
+          type: string
+        primary_products:
+          description: Full replacement list of the main products or services
+          items:
+            type: string
+          type: array
+        matching_names:
+          description: FULL replacement list of the brand-name variants used to detect
+            mentions; send every variant to keep
+          items:
+            type: string
+          type: array
+      type: object
     assignPromptTags_request:
       properties:
         project_id:
@@ -7468,6 +10369,19 @@ components:
           items:
             type: string
           type: array
+        citation_match_mode:
+          default: domain
+          description: domain includes the registrable domain and all subdomains;
+            host requires the exact hostname; path_prefix also requires citation_match_path
+          enum:
+          - domain
+          - host
+          - path_prefix
+          type: string
+        citation_match_path:
+          description: "Required when citation_match_mode=path_prefix, e.g. /es. Case-sensitive;\
+            \ trailing slash is optional; query and fragment are ignored"
+          type: string
       required:
       - brand_name
       - domain
@@ -7479,12 +10393,25 @@ components:
           type: integer
         brand_name:
           type: string
+        domain:
+          description: Website domain or host used for citation matching. A full URL
+            is accepted and normalised to its host.
+          type: string
         matching_names:
           items:
             type: string
           type: array
         color:
           description: "Hex color, e.g. #1a2b3c"
+          type: string
+        citation_match_mode:
+          enum:
+          - domain
+          - host
+          - path_prefix
+          type: string
+        citation_match_path:
+          description: Required when changing citation_match_mode to path_prefix
           type: string
       required:
       - project_id
@@ -7592,6 +10519,7 @@ components:
           - sentiment.negative_detected
           - recommendation.completed
           - intelligence_task.completed
+          - intelligence_task.updated
           type: string
         target_url:
           type: string
@@ -7656,6 +10584,7 @@ components:
           - sentiment.negative_detected
           - recommendation.completed
           - intelligence_task.completed
+          - intelligence_task.updated
           type: string
         target_url:
           description: Public HTTPS URL that will receive signed event payloads
@@ -7690,6 +10619,7 @@ components:
           - sentiment.negative_detected
           - recommendation.completed
           - intelligence_task.completed
+          - intelligence_task.updated
           type: string
         target_url:
           type: string
@@ -7764,6 +10694,33 @@ components:
           type: array
         request_id:
           type: string
+      type: object
+    SearchConsoleFilters_inner:
+      properties:
+        dimension:
+          enum:
+          - country
+          - device
+          - page
+          - query
+          - searchAppearance
+          type: string
+        operator:
+          default: contains
+          enum:
+          - contains
+          - equals
+          - notContains
+          - notEquals
+          - includingRegex
+          - excludingRegex
+          type: string
+        expression:
+          maxLength: 500
+          type: string
+      required:
+      - dimension
+      - expression
       type: object
     ProjectDetails_allOf_stats:
       example:
@@ -8062,6 +11019,8 @@ components:
           - ERR_PROJECT_NOT_FOUND
           - ERR_NOT_FOUND
           - ERR_SEARCH_CONSOLE_NOT_CONNECTED
+          - ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          - ERR_SEARCH_CONSOLE_UPSTREAM
           - ERR_AI_TRAFFIC_NOT_CONNECTED
           - ERR_AGENT_TRAFFIC_NOT_CONNECTED
           - ERR_INVALID_PARAM

@@ -10,7 +10,7 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 
 <a id="getaimodelinsightssummary"></a>
 # **GetAiModelInsightsSummary**
-> void GetAiModelInsightsSummary (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, int collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, string competitors = null)
+> void GetAiModelInsightsSummary (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, string competitors = null)
 
 AI Model Insights summary
 
@@ -24,12 +24,12 @@ Per-model mentions, citations, brand net sentiment with raw counts, weighted vis
 | **projectId** | **int** | Project ID |  |
 | **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
 | **from** | **DateTime** |  | [optional]  |
-| **to** | **DateTime** |  | [optional]  |
+| **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **granularity** | **string** |  | [optional]  |
-| **collectionId** | **int** |  | [optional]  |
-| **countryCode** | **string** | ISO country code (e.g. US, GB, DE) | [optional]  |
-| **languageCode** | **string** | ISO language code (e.g. en, es, de) | [optional]  |
-| **promptType** | **string** | Filter by prompt type (search intent) | [optional]  |
+| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
+| **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
+| **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
 | **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
 | **competitors** | **string** | Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM) | [optional]  |
 
@@ -56,7 +56,7 @@ void (empty response body)
 
 <a id="getaimodelpositiondistribution"></a>
 # **GetAiModelPositionDistribution**
-> void GetAiModelPositionDistribution (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, int collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, string model = null, int brand1 = null, int brand2 = null)
+> void GetAiModelPositionDistribution (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, string model = null, int brand1 = null, int brand2 = null)
 
 Position distribution comparison
 
@@ -68,12 +68,12 @@ Position distribution comparison
 | **projectId** | **int** | Project ID |  |
 | **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
 | **from** | **DateTime** |  | [optional]  |
-| **to** | **DateTime** |  | [optional]  |
+| **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **granularity** | **string** |  | [optional]  |
-| **collectionId** | **int** |  | [optional]  |
-| **countryCode** | **string** | ISO country code (e.g. US, GB, DE) | [optional]  |
-| **languageCode** | **string** | ISO language code (e.g. en, es, de) | [optional]  |
-| **promptType** | **string** | Filter by prompt type (search intent) | [optional]  |
+| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
+| **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
+| **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
 | **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
 | **brand1** | **int** | Competitor ID for the first comparison brand (omit to compare project brand) | [optional]  |
@@ -102,7 +102,7 @@ void (empty response body)
 
 <a id="getaioverviewresults"></a>
 # **GetAiOverviewResults**
-> void GetAiOverviewResults (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, int collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, int page = null, int perPage = null)
+> void GetAiOverviewResults (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, int page = null, int perPage = null)
 
 Google AI Overview result availability
 
@@ -114,12 +114,12 @@ Google AI Overview result availability
 | **projectId** | **int** | Project ID |  |
 | **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
 | **from** | **DateTime** |  | [optional]  |
-| **to** | **DateTime** |  | [optional]  |
+| **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **granularity** | **string** |  | [optional]  |
-| **collectionId** | **int** |  | [optional]  |
-| **countryCode** | **string** | ISO country code (e.g. US, GB, DE) | [optional]  |
-| **languageCode** | **string** | ISO language code (e.g. en, es, de) | [optional]  |
-| **promptType** | **string** | Filter by prompt type (search intent) | [optional]  |
+| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
+| **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
+| **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
 | **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
 | **page** | **int** |  | [optional] [default to 1] |
 | **perPage** | **int** |  | [optional] [default to 20] |

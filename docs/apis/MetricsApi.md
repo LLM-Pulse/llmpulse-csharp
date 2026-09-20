@@ -4,104 +4,15 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 
 | Method | HTTP request | Description |
 |--------|--------------|-------------|
-| [**GetAgentTraffic**](MetricsApi.md#getagenttraffic) | **GET** /metrics/agent_traffic | AI bot crawler traffic (Scale+, Beta) |
-| [**GetAiTraffic**](MetricsApi.md#getaitraffic) | **GET** /metrics/ai_traffic | AI referral traffic (Scale+) |
 | [**GetPromptSummary**](MetricsApi.md#getpromptsummary) | **GET** /metrics/prompt_summary | Per-prompt metrics summary |
 | [**GetShareOfVoice**](MetricsApi.md#getshareofvoice) | **GET** /metrics/sov | Share of Voice |
 | [**GetSummary**](MetricsApi.md#getsummary) | **GET** /metrics/summary | Aggregated metrics summary |
 | [**GetTimeseries**](MetricsApi.md#gettimeseries) | **GET** /metrics/timeseries | Time-series metrics |
 | [**GetTopSources**](MetricsApi.md#gettopsources) | **GET** /metrics/top_sources | Top cited sources |
 
-<a id="getagenttraffic"></a>
-# **GetAgentTraffic**
-> AgentTrafficResponse GetAgentTraffic (int projectId, int range = null, DateTime from = null, DateTime to = null, string bot = null, string company = null, string groupBy = null, string granularity = null)
-
-AI bot crawler traffic (Scale+, Beta)
-
-Aggregated AI bot traffic hitting the project's origin server (GPTBot, PerplexityBot, ClaudeBot, OAI-SearchBot, Google-Extended, etc.). Sourced from Cloudflare or CSV uploads. Requires the Scale plan; lower tiers receive ERR_PLAN_REQUIRED.
-
-
-### Parameters
-
-| Name | Type | Description | Notes |
-|------|------|-------------|-------|
-| **projectId** | **int** | Project ID |  |
-| **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
-| **from** | **DateTime** |  | [optional]  |
-| **to** | **DateTime** |  | [optional]  |
-| **bot** | **string** | Filter by bot slug (e.g. gptbot, claudebot, perplexitybot) | [optional]  |
-| **company** | **string** | Filter by company (e.g. openai, anthropic, google) | [optional]  |
-| **groupBy** | **string** |  | [optional] [default to bot] |
-| **granularity** | **string** |  | [optional]  |
-
-### Return type
-
-[**AgentTrafficResponse**](AgentTrafficResponse.md)
-
-### Authorization
-
-[BearerAuth](../README.md#BearerAuth)
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-
-### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-| **200** | Agent traffic data |  -  |
-| **403** | Endpoint requires a higher plan tier |  -  |
-
-[[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
-
-<a id="getaitraffic"></a>
-# **GetAiTraffic**
-> void GetAiTraffic (int projectId, int range = null, DateTime from = null, DateTime to = null, string source = null, string granularity = null)
-
-AI referral traffic (Scale+)
-
-AI referral traffic for a project: human visits arriving from AI assistants (ChatGPT, Perplexity, Gemini, Claude, etc.), measured from the connected web analytics provider (Google Analytics 4, Adobe Analytics, PostHog, Plausible or Piano). Returns per-source users, sessions and conversions with totals and a conversion rate. Requires a connected provider and the Scale plan; otherwise returns ERR_AI_TRAFFIC_NOT_CONNECTED or ERR_PLAN_REQUIRED.
-
-
-### Parameters
-
-| Name | Type | Description | Notes |
-|------|------|-------------|-------|
-| **projectId** | **int** | Project ID |  |
-| **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
-| **from** | **DateTime** |  | [optional]  |
-| **to** | **DateTime** |  | [optional]  |
-| **source** | **string** | Filter by a single AI source slug (e.g. chatgpt, perplexity, gemini, claude) | [optional]  |
-| **granularity** | **string** |  | [optional]  |
-
-### Return type
-
-void (empty response body)
-
-### Authorization
-
-[BearerAuth](../README.md#BearerAuth)
-
-### HTTP request headers
-
- - **Content-Type**: Not defined
- - **Accept**: application/json
-
-
-### HTTP response details
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-| **200** | AI referral traffic data |  -  |
-| **403** | Endpoint requires a higher plan tier |  -  |
-| **404** | Resource not found |  -  |
-
-[[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
-
 <a id="getpromptsummary"></a>
 # **GetPromptSummary**
-> PromptSummaryResponse GetPromptSummary (int projectId, int range = null, DateTime from = null, DateTime to = null, string breakdown = null, string model = null, int collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, string sort = null, string sortDir = null, int page = null, int perPage = null, string output = null)
+> PromptSummaryResponse GetPromptSummary (int projectId, int range = null, DateTime from = null, DateTime to = null, string breakdown = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, string sort = null, string sortDir = null, int page = null, int perPage = null, string output = null)
 
 Per-prompt metrics summary
 
@@ -115,14 +26,14 @@ Paginated per-prompt aggregated metrics. Returns responses, mentions, citations,
 | **projectId** | **int** | Project ID |  |
 | **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
 | **from** | **DateTime** |  | [optional]  |
-| **to** | **DateTime** |  | [optional]  |
+| **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **breakdown** | **string** | Add per-(prompt, model) rows to the output | [optional]  |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | **int** |  | [optional]  |
-| **countryCode** | **string** | ISO country code (e.g. US, GB, DE) | [optional]  |
-| **languageCode** | **string** | ISO language code (e.g. en, es, de) | [optional]  |
+| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
+| **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
-| **promptType** | **string** | Filter by prompt type (search intent) | [optional]  |
+| **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
 | **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
 | **sort** | **string** |  | [optional] [default to responses] |
 | **sortDir** | **string** |  | [optional] [default to desc] |
@@ -154,7 +65,7 @@ Paginated per-prompt aggregated metrics. Returns responses, mentions, citations,
 
 <a id="getshareofvoice"></a>
 # **GetShareOfVoice**
-> SovResponse GetShareOfVoice (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, string competitors = null, string model = null, int collectionId = null, int prompt = null, string promptType = null, string brandKind = null, string output = null, string view = null)
+> SovResponse GetShareOfVoice (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, string competitors = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, int prompt = null, string promptType = null, string brandKind = null, string output = null, string view = null)
 
 Share of Voice
 
@@ -168,13 +79,13 @@ Share of Voice breakdown comparing your project to competitors. Returns over_tim
 | **projectId** | **int** | Project ID |  |
 | **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
 | **from** | **DateTime** |  | [optional]  |
-| **to** | **DateTime** |  | [optional]  |
+| **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **granularity** | **string** |  | [optional]  |
 | **competitors** | **string** | Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM) | [optional]  |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | **int** |  | [optional]  |
+| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
-| **promptType** | **string** | Filter by prompt type (search intent) | [optional]  |
+| **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
 | **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
 | **output** | **string** | Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. | [optional]  |
 | **view** | **string** | Which Share of Voice projection to flatten. Only valid together with &#39;output&#39;. &#39;over_time&#39; (default) is one row per date and actor, &#39;current&#39; the ranked snapshot, &#39;breakdown&#39; the Top 4 plus Others. | [optional] [default to over_time] |
@@ -202,7 +113,7 @@ Share of Voice breakdown comparing your project to competitors. Returns over_tim
 
 <a id="getsummary"></a>
 # **GetSummary**
-> SummaryResponse GetSummary (int projectId, string metrics = null, string granularity = null, int range = null, DateTime from = null, DateTime to = null, string competitors = null, string model = null, int collectionId = null, int prompt = null, string promptType = null, string brandKind = null, string output = null)
+> SummaryResponse GetSummary (int projectId, string metrics = null, string granularity = null, int range = null, DateTime from = null, DateTime to = null, string competitors = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, int prompt = null, string promptType = null, string brandKind = null, string output = null)
 
 Aggregated metrics summary
 
@@ -218,12 +129,12 @@ Same as /metrics/timeseries but adds a `summary` block with total/min/max/last p
 | **granularity** | **string** |  | [optional]  |
 | **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
 | **from** | **DateTime** |  | [optional]  |
-| **to** | **DateTime** |  | [optional]  |
+| **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **competitors** | **string** | Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM) | [optional]  |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | **int** |  | [optional]  |
+| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
-| **promptType** | **string** | Filter by prompt type (search intent) | [optional]  |
+| **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
 | **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
 | **output** | **string** | Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. | [optional]  |
 
@@ -252,7 +163,7 @@ Same as /metrics/timeseries but adds a `summary` block with total/min/max/last p
 
 <a id="gettimeseries"></a>
 # **GetTimeseries**
-> TimeseriesResponse GetTimeseries (int projectId, string metrics = null, string granularity = null, int range = null, DateTime from = null, DateTime to = null, string competitors = null, string model = null, int collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, bool includeProject = null, string output = null)
+> TimeseriesResponse GetTimeseries (int projectId, string metrics = null, string granularity = null, int range = null, DateTime from = null, DateTime to = null, string competitors = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, bool includeProject = null, string output = null)
 
 Time-series metrics
 
@@ -268,14 +179,14 @@ Returns time-series data for one or more metrics, broken down by actor (project 
 | **granularity** | **string** |  | [optional]  |
 | **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
 | **from** | **DateTime** |  | [optional]  |
-| **to** | **DateTime** |  | [optional]  |
+| **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **competitors** | **string** | Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM) | [optional]  |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | **int** |  | [optional]  |
-| **countryCode** | **string** | ISO country code (e.g. US, GB, DE) | [optional]  |
-| **languageCode** | **string** | ISO language code (e.g. en, es, de) | [optional]  |
+| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
+| **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
-| **promptType** | **string** | Filter by prompt type (search intent) | [optional]  |
+| **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
 | **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
 | **includeProject** | **bool** |  | [optional] [default to true] |
 | **output** | **string** | Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. | [optional]  |
@@ -306,7 +217,7 @@ Returns time-series data for one or more metrics, broken down by actor (project 
 
 <a id="gettopsources"></a>
 # **GetTopSources**
-> TopSourcesResponse GetTopSources (int projectId, int range = null, DateTime from = null, DateTime to = null, string model = null, int collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, string sort = null, string query = null, int page = null, int perPage = null, string output = null)
+> TopSourcesResponse GetTopSources (int projectId, int range = null, DateTime from = null, DateTime to = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, string sort = null, string query = null, int page = null, int perPage = null, string output = null)
 
 Top cited sources
 
@@ -320,13 +231,13 @@ Registrable domains most frequently cited in AI responses for the project, inclu
 | **projectId** | **int** | Project ID |  |
 | **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
 | **from** | **DateTime** |  | [optional]  |
-| **to** | **DateTime** |  | [optional]  |
+| **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | **int** |  | [optional]  |
-| **countryCode** | **string** | ISO country code (e.g. US, GB, DE) | [optional]  |
-| **languageCode** | **string** | ISO language code (e.g. en, es, de) | [optional]  |
+| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
+| **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
-| **promptType** | **string** | Filter by prompt type (search intent) | [optional]  |
+| **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
 | **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
 | **sort** | **string** |  | [optional] [default to total_responses] |
 | **query** | **string** | Filter domains by case-insensitive partial match | [optional]  |
