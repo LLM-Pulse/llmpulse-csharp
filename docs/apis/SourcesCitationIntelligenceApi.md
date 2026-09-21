@@ -89,7 +89,7 @@ void (empty response body)
 
 <a id="getmentionsbycitingdomain"></a>
 # **GetMentionsByCitingDomain**
-> void GetMentionsByCitingDomain (int projectId, List<string> domains, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string brandKind = null, DateTime from = null, DateTime to = null)
+> void GetMentionsByCitingDomain (int projectId, List<string> domains, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string brandKind = null, DateTime from = null, DateTime to = null)
 
 Mention share by citing domain
 
@@ -103,7 +103,7 @@ For the responses where each given source domain is cited, returns the share of 
 | **projectId** | **int** | Project ID |  |
 | **domains** | [**List&lt;string&gt;**](string.md) | Source domains to analyze, e.g. domains[]&#x3D;gmac.com&amp;domains[]&#x3D;educaweb.com |  |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
@@ -135,7 +135,7 @@ void (empty response body)
 
 <a id="listcitationgroups"></a>
 # **ListCitationGroups**
-> void ListCitationGroups (int projectId, string view = null, int page = null, int perPage = null, string order = null, string direction = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string query = null, string sourceType = null, string sentiment = null, string contentGap = null)
+> void ListCitationGroups (int projectId, string view = null, int page = null, int perPage = null, string order = null, string direction = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string query = null, string sourceType = null, string sentiment = null, string contentGap = null)
 
 Grouped citation intelligence
 
@@ -153,7 +153,7 @@ Grouped citation intelligence by url / domain / host with per-model breakdown, c
 | **order** | **string** |  | [optional]  |
 | **direction** | **string** |  | [optional]  |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
@@ -226,7 +226,7 @@ void (empty response body)
 
 <a id="listsources"></a>
 # **ListSources**
-> void ListSources (int projectId, int page = null, int perPage = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string sourceType = null, string mentionFilter = null, string competitors = null, string output = null)
+> void ListSources (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string sourceType = null, string mentionFilter = null, string competitors = null, string output = null)
 
 List source URLs
 
@@ -239,7 +239,7 @@ List source URLs
 | **page** | **int** |  | [optional] [default to 1] |
 | **perPage** | **int** |  | [optional] [default to 20] |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |

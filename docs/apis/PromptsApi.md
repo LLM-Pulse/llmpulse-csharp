@@ -89,7 +89,7 @@ void (empty response body)
 
 <a id="listpromptexecutions"></a>
 # **ListPromptExecutions**
-> void ListPromptExecutions (int projectId, int page = null, int perPage = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string mentionFilter = null, string citationFilter = null, string competitors = null, string output = null)
+> void ListPromptExecutions (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string mentionFilter = null, string citationFilter = null, string competitors = null, string output = null)
 
 List prompt executions
 
@@ -102,7 +102,7 @@ List prompt executions
 | **page** | **int** |  | [optional] [default to 1] |
 | **perPage** | **int** |  | [optional] [default to 20] |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
@@ -136,7 +136,7 @@ void (empty response body)
 
 <a id="listprompts"></a>
 # **ListPrompts**
-> void ListPrompts (int projectId, int page = null, int perPage = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, DateTime from = null, DateTime to = null, string output = null)
+> void ListPrompts (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, DateTime from = null, DateTime to = null, string output = null)
 
 List prompts
 
@@ -149,7 +149,7 @@ List prompts
 | **page** | **int** |  | [optional] [default to 1] |
 | **perPage** | **int** |  | [optional] [default to 20] |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
@@ -181,7 +181,7 @@ void (empty response body)
 
 <a id="listqueryfanouts"></a>
 # **ListQueryFanOuts**
-> void ListQueryFanOuts (int projectId, int page = null, int perPage = null, string view = null, string order = null, string direction = null, string query = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, int range = null, DateTime from = null, DateTime to = null, string output = null)
+> void ListQueryFanOuts (int projectId, int page = null, int perPage = null, string view = null, string order = null, string direction = null, string query = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, int range = null, DateTime from = null, DateTime to = null, string output = null)
 
 List query fan-out
 
@@ -200,7 +200,7 @@ The sub-queries a model actually issued when answering your tracked prompts. vie
 | **direction** | **string** |  | [optional] [default to desc] |
 | **query** | **string** | Case-insensitive substring filter on the sub-query text | [optional]  |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |

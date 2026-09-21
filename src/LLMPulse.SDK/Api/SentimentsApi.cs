@@ -76,7 +76,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandOnly"> (optional)</param>
         /// <param name="analysis">One sentiment level or a comma-separated list: very_positive, positive, neutral, negative, very_negative (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="from"> (optional)</param>
@@ -85,7 +85,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="perPage"> (optional, default to 20)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListSentimentRecordsApiResponse"/>&gt;</returns>
-        Task<IListSentimentRecordsApiResponse> ListSentimentRecordsAsync(int projectId, Option<int> competitorId = default, Option<bool> brandOnly = default, Option<string> analysis = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<int> page = default, Option<int> perPage = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListSentimentRecordsApiResponse> ListSentimentRecordsAsync(int projectId, Option<int> competitorId = default, Option<bool> brandOnly = default, Option<string> analysis = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<int> page = default, Option<int> perPage = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// List sentiment records
@@ -98,7 +98,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandOnly"> (optional)</param>
         /// <param name="analysis">One sentiment level or a comma-separated list: very_positive, positive, neutral, negative, very_negative (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="from"> (optional)</param>
@@ -107,7 +107,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="perPage"> (optional, default to 20)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListSentimentRecordsApiResponse"/>?&gt;</returns>
-        Task<IListSentimentRecordsApiResponse?> ListSentimentRecordsOrDefaultAsync(int projectId, Option<int> competitorId = default, Option<bool> brandOnly = default, Option<string> analysis = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<int> page = default, Option<int> perPage = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListSentimentRecordsApiResponse?> ListSentimentRecordsOrDefaultAsync(int projectId, Option<int> competitorId = default, Option<bool> brandOnly = default, Option<string> analysis = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<int> page = default, Option<int> perPage = default, System.Threading.CancellationToken cancellationToken = default);
     }
 
     /// <summary>
@@ -452,7 +452,7 @@ namespace LLMPulse.SDK.Api
             partial void OnDeserializationError(ref bool suppressDefaultLog, Exception exception, HttpStatusCode httpStatusCode);
         }
 
-        partial void FormatListSentimentRecords(ref int projectId, ref Option<int> competitorId, ref Option<bool> brandOnly, ref Option<string> analysis, ref Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<int> page, ref Option<int> perPage);
+        partial void FormatListSentimentRecords(ref int projectId, ref Option<int> competitorId, ref Option<bool> brandOnly, ref Option<string> analysis, ref Option<string> model, ref Option<string> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<int> page, ref Option<int> perPage);
 
         /// <summary>
         /// Validates the request parameters
@@ -463,7 +463,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="countryCode"></param>
         /// <param name="languageCode"></param>
         /// <returns></returns>
-        private void ValidateListSentimentRecords(Option<string> analysis, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode)
+        private void ValidateListSentimentRecords(Option<string> analysis, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode)
         {
             if (analysis.IsSet && analysis.Value == null)
                 throw new ArgumentNullException(nameof(analysis));
@@ -497,7 +497,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="to"></param>
         /// <param name="page"></param>
         /// <param name="perPage"></param>
-        private void AfterListSentimentRecordsDefaultImplementation(IListSentimentRecordsApiResponse apiResponseLocalVar, int projectId, Option<int> competitorId, Option<bool> brandOnly, Option<string> analysis, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<DateTime> from, Option<DateTime> to, Option<int> page, Option<int> perPage)
+        private void AfterListSentimentRecordsDefaultImplementation(IListSentimentRecordsApiResponse apiResponseLocalVar, int projectId, Option<int> competitorId, Option<bool> brandOnly, Option<string> analysis, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<DateTime> from, Option<DateTime> to, Option<int> page, Option<int> perPage)
         {
             bool suppressDefaultLog = false;
             AfterListSentimentRecords(ref suppressDefaultLog, apiResponseLocalVar, projectId, competitorId, brandOnly, analysis, model, collectionId, countryCode, languageCode, from, to, page, perPage);
@@ -522,7 +522,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="to"></param>
         /// <param name="page"></param>
         /// <param name="perPage"></param>
-        partial void AfterListSentimentRecords(ref bool suppressDefaultLog, IListSentimentRecordsApiResponse apiResponseLocalVar, int projectId, Option<int> competitorId, Option<bool> brandOnly, Option<string> analysis, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<DateTime> from, Option<DateTime> to, Option<int> page, Option<int> perPage);
+        partial void AfterListSentimentRecords(ref bool suppressDefaultLog, IListSentimentRecordsApiResponse apiResponseLocalVar, int projectId, Option<int> competitorId, Option<bool> brandOnly, Option<string> analysis, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<DateTime> from, Option<DateTime> to, Option<int> page, Option<int> perPage);
 
         /// <summary>
         /// Logs exceptions that occur while retrieving the server response
@@ -542,7 +542,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="to"></param>
         /// <param name="page"></param>
         /// <param name="perPage"></param>
-        private void OnErrorListSentimentRecordsDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> competitorId, Option<bool> brandOnly, Option<string> analysis, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<DateTime> from, Option<DateTime> to, Option<int> page, Option<int> perPage)
+        private void OnErrorListSentimentRecordsDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> competitorId, Option<bool> brandOnly, Option<string> analysis, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<DateTime> from, Option<DateTime> to, Option<int> page, Option<int> perPage)
         {
             bool suppressDefaultLogLocalVar = false;
             OnErrorListSentimentRecords(ref suppressDefaultLogLocalVar, exceptionLocalVar, pathFormatLocalVar, pathLocalVar, projectId, competitorId, brandOnly, analysis, model, collectionId, countryCode, languageCode, from, to, page, perPage);
@@ -569,7 +569,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="to"></param>
         /// <param name="page"></param>
         /// <param name="perPage"></param>
-        partial void OnErrorListSentimentRecords(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> competitorId, Option<bool> brandOnly, Option<string> analysis, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<DateTime> from, Option<DateTime> to, Option<int> page, Option<int> perPage);
+        partial void OnErrorListSentimentRecords(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> competitorId, Option<bool> brandOnly, Option<string> analysis, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<DateTime> from, Option<DateTime> to, Option<int> page, Option<int> perPage);
 
         /// <summary>
         /// List sentiment records 
@@ -579,7 +579,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandOnly"> (optional)</param>
         /// <param name="analysis">One sentiment level or a comma-separated list: very_positive, positive, neutral, negative, very_negative (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="from"> (optional)</param>
@@ -588,7 +588,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="perPage"> (optional, default to 20)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListSentimentRecordsApiResponse"/>&gt;</returns>
-        public async Task<IListSentimentRecordsApiResponse?> ListSentimentRecordsOrDefaultAsync(int projectId, Option<int> competitorId = default, Option<bool> brandOnly = default, Option<string> analysis = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<int> page = default, Option<int> perPage = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListSentimentRecordsApiResponse?> ListSentimentRecordsOrDefaultAsync(int projectId, Option<int> competitorId = default, Option<bool> brandOnly = default, Option<string> analysis = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<int> page = default, Option<int> perPage = default, System.Threading.CancellationToken cancellationToken = default)
         {
             try
             {
@@ -609,7 +609,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandOnly"> (optional)</param>
         /// <param name="analysis">One sentiment level or a comma-separated list: very_positive, positive, neutral, negative, very_negative (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="from"> (optional)</param>
@@ -618,7 +618,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="perPage"> (optional, default to 20)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListSentimentRecordsApiResponse"/>&gt;</returns>
-        public async Task<IListSentimentRecordsApiResponse> ListSentimentRecordsAsync(int projectId, Option<int> competitorId = default, Option<bool> brandOnly = default, Option<string> analysis = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<int> page = default, Option<int> perPage = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListSentimentRecordsApiResponse> ListSentimentRecordsAsync(int projectId, Option<int> competitorId = default, Option<bool> brandOnly = default, Option<string> analysis = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<int> page = default, Option<int> perPage = default, System.Threading.CancellationToken cancellationToken = default)
         {
             UriBuilder uriBuilderLocalVar = new UriBuilder();
 
@@ -626,7 +626,7 @@ namespace LLMPulse.SDK.Api
             {
                 ValidateListSentimentRecords(analysis, model, collectionId, countryCode, languageCode);
 
-                FormatListSentimentRecords(ref projectId, ref competitorId, ref brandOnly, ref analysis, ref model, collectionId, ref countryCode, ref languageCode, ref from, ref to, ref page, ref perPage);
+                FormatListSentimentRecords(ref projectId, ref competitorId, ref brandOnly, ref analysis, ref model, ref collectionId, ref countryCode, ref languageCode, ref from, ref to, ref page, ref perPage);
 
                 using (HttpRequestMessage httpRequestMessageLocalVar = new HttpRequestMessage())
                 {

@@ -265,13 +265,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -491,13 +496,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: Filter by prompt ID
         explode: true
@@ -654,13 +664,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -875,13 +890,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: Filter by prompt ID
         explode: true
@@ -1021,13 +1041,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -2800,13 +2825,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -2941,13 +2971,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -3171,13 +3206,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -3409,13 +3449,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -3641,13 +3686,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -3865,13 +3915,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -4110,13 +4165,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -4261,13 +4321,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -4431,13 +4496,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -4557,13 +4627,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -4689,13 +4764,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: Filter by prompt ID
         explode: true
@@ -4807,13 +4887,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: Filter by prompt ID
         explode: true
@@ -4925,13 +5010,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: Filter by prompt ID
         explode: true
@@ -5044,13 +5134,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: Filter by prompt ID
         explode: true
@@ -5254,13 +5349,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -5411,13 +5511,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -5696,13 +5801,18 @@ paths:
           - month
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -5808,13 +5918,18 @@ paths:
           - month
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -5951,13 +6066,18 @@ paths:
           - month
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -6064,13 +6184,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -6331,13 +6456,18 @@ paths:
           - baidu_ai
           type: string
         style: form
-      - description: One collection/tag ID or a comma-separated list of IDs
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
         explode: true
         in: query
         name: collection_id
         required: false
         schema:
-          $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
         style: form
       - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
         explode: true
@@ -8484,13 +8614,18 @@ components:
         type: string
       style: form
     CollectionId:
-      description: One collection/tag ID or a comma-separated list of IDs
+      description: "One collection/tag ID or a comma-separated list of IDs. A query\
+        \ value is always a string on the wire, so it is typed as one: the previous\
+        \ integer-or-string union made generators emit a wrapper type they could not\
+        \ serialize."
+      example: "12,34"
       explode: true
       in: query
       name: collection_id
       required: false
       schema:
-        $ref: "#/components/schemas/getTimeseries_collection_id_parameter"
+        pattern: "^\\d+(,\\d+)*$"
+        type: string
       style: form
     CountryCode:
       description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
@@ -10146,11 +10281,6 @@ components:
         request_id:
           type: string
       type: object
-    getTimeseries_collection_id_parameter:
-      oneOf:
-      - type: integer
-      - pattern: "^\\d+(,\\d+)*$"
-        type: string
     listProjects_200_response:
       example:
         projects:

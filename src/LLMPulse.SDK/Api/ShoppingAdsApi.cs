@@ -55,7 +55,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="direction">Sort direction for view&#x3D;advertisers. Defaults to desc, except avg_position and domain which default to asc. (optional)</param>
         /// <param name="query">Case-insensitive substring filter on the ad title, domain or snippet (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -67,7 +67,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListAdsApiResponse"/>&gt;</returns>
-        Task<IListAdsApiResponse> ListAdsAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<bool> owned = default, Option<string> order = default, Option<string> direction = default, Option<string> query = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListAdsApiResponse> ListAdsAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<bool> owned = default, Option<string> order = default, Option<string> direction = default, Option<string> query = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// List AI ad placements
@@ -84,7 +84,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="direction">Sort direction for view&#x3D;advertisers. Defaults to desc, except avg_position and domain which default to asc. (optional)</param>
         /// <param name="query">Case-insensitive substring filter on the ad title, domain or snippet (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -96,7 +96,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListAdsApiResponse"/>?&gt;</returns>
-        Task<IListAdsApiResponse?> ListAdsOrDefaultAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<bool> owned = default, Option<string> order = default, Option<string> direction = default, Option<string> query = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListAdsApiResponse?> ListAdsOrDefaultAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<bool> owned = default, Option<string> order = default, Option<string> direction = default, Option<string> query = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// List shopping results
@@ -114,7 +114,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="direction"> (optional, default to desc)</param>
         /// <param name="query">Case-insensitive substring filter on the product title (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -126,7 +126,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListShoppingApiResponse"/>&gt;</returns>
-        Task<IListShoppingApiResponse> ListShoppingAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<bool> owned = default, Option<string> order = default, Option<string> direction = default, Option<string> query = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListShoppingApiResponse> ListShoppingAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<bool> owned = default, Option<string> order = default, Option<string> direction = default, Option<string> query = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// List shopping results
@@ -143,7 +143,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="direction"> (optional, default to desc)</param>
         /// <param name="query">Case-insensitive substring filter on the product title (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -155,7 +155,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListShoppingApiResponse"/>?&gt;</returns>
-        Task<IListShoppingApiResponse?> ListShoppingOrDefaultAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<bool> owned = default, Option<string> order = default, Option<string> direction = default, Option<string> query = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListShoppingApiResponse?> ListShoppingOrDefaultAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<bool> owned = default, Option<string> order = default, Option<string> direction = default, Option<string> query = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
     }
 
     /// <summary>
@@ -281,7 +281,7 @@ namespace LLMPulse.SDK.Api
             BearerTokenProvider = bearerTokenProvider;
         }
 
-        partial void FormatListAds(ref int projectId, ref Option<int> page, ref Option<int> perPage, ref Option<string> view, ref Option<bool> owned, ref Option<string> order, ref Option<string> direction, ref Option<string> query, ref Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<int> prompt, ref Option<string> promptType, ref Option<string> brandKind, ref Option<int> range, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> output);
+        partial void FormatListAds(ref int projectId, ref Option<int> page, ref Option<int> perPage, ref Option<string> view, ref Option<bool> owned, ref Option<string> order, ref Option<string> direction, ref Option<string> query, ref Option<string> model, ref Option<string> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<int> prompt, ref Option<string> promptType, ref Option<string> brandKind, ref Option<int> range, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> output);
 
         /// <summary>
         /// Validates the request parameters
@@ -298,7 +298,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandKind"></param>
         /// <param name="output"></param>
         /// <returns></returns>
-        private void ValidateListAds(Option<string> view, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> output)
+        private void ValidateListAds(Option<string> view, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> output)
         {
             if (view.IsSet && view.Value == null)
                 throw new ArgumentNullException(nameof(view));
@@ -357,7 +357,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <param name="output"></param>
-        private void AfterListAdsDefaultImplementation(IListAdsApiResponse apiResponseLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<bool> owned, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> promptType, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output)
+        private void AfterListAdsDefaultImplementation(IListAdsApiResponse apiResponseLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<bool> owned, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> promptType, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output)
         {
             bool suppressDefaultLog = false;
             AfterListAds(ref suppressDefaultLog, apiResponseLocalVar, projectId, page, perPage, view, owned, order, direction, query, model, collectionId, countryCode, languageCode, prompt, promptType, brandKind, range, from, to, output);
@@ -389,7 +389,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <param name="output"></param>
-        partial void AfterListAds(ref bool suppressDefaultLog, IListAdsApiResponse apiResponseLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<bool> owned, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> promptType, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output);
+        partial void AfterListAds(ref bool suppressDefaultLog, IListAdsApiResponse apiResponseLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<bool> owned, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> promptType, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output);
 
         /// <summary>
         /// Logs exceptions that occur while retrieving the server response
@@ -416,7 +416,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <param name="output"></param>
-        private void OnErrorListAdsDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<bool> owned, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> promptType, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output)
+        private void OnErrorListAdsDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<bool> owned, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> promptType, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output)
         {
             bool suppressDefaultLogLocalVar = false;
             OnErrorListAds(ref suppressDefaultLogLocalVar, exceptionLocalVar, pathFormatLocalVar, pathLocalVar, projectId, page, perPage, view, owned, order, direction, query, model, collectionId, countryCode, languageCode, prompt, promptType, brandKind, range, from, to, output);
@@ -450,7 +450,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <param name="output"></param>
-        partial void OnErrorListAds(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<bool> owned, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> promptType, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output);
+        partial void OnErrorListAds(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<bool> owned, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> promptType, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output);
 
         /// <summary>
         /// List AI ad placements Paid placements returned inside AI answers. view&#x3D;advertisers (default) returns one row per advertising domain with its placement count, prompt reach and average and best position; view&#x3D;ads returns the individual placements with title, snippet, position and the prompt that triggered them. Position 1 is the best slot, so a LOWER average position is better. Requires the Scale plan or above.
@@ -464,7 +464,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="direction">Sort direction for view&#x3D;advertisers. Defaults to desc, except avg_position and domain which default to asc. (optional)</param>
         /// <param name="query">Case-insensitive substring filter on the ad title, domain or snippet (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -476,7 +476,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListAdsApiResponse"/>&gt;</returns>
-        public async Task<IListAdsApiResponse?> ListAdsOrDefaultAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<bool> owned = default, Option<string> order = default, Option<string> direction = default, Option<string> query = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListAdsApiResponse?> ListAdsOrDefaultAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<bool> owned = default, Option<string> order = default, Option<string> direction = default, Option<string> query = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
         {
             try
             {
@@ -501,7 +501,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="direction">Sort direction for view&#x3D;advertisers. Defaults to desc, except avg_position and domain which default to asc. (optional)</param>
         /// <param name="query">Case-insensitive substring filter on the ad title, domain or snippet (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -513,7 +513,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListAdsApiResponse"/>&gt;</returns>
-        public async Task<IListAdsApiResponse> ListAdsAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<bool> owned = default, Option<string> order = default, Option<string> direction = default, Option<string> query = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListAdsApiResponse> ListAdsAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<bool> owned = default, Option<string> order = default, Option<string> direction = default, Option<string> query = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
         {
             UriBuilder uriBuilderLocalVar = new UriBuilder();
 
@@ -521,7 +521,7 @@ namespace LLMPulse.SDK.Api
             {
                 ValidateListAds(view, order, direction, query, model, collectionId, countryCode, languageCode, promptType, brandKind, output);
 
-                FormatListAds(ref projectId, ref page, ref perPage, ref view, ref owned, ref order, ref direction, ref query, ref model, collectionId, ref countryCode, ref languageCode, ref prompt, ref promptType, ref brandKind, ref range, ref from, ref to, ref output);
+                FormatListAds(ref projectId, ref page, ref perPage, ref view, ref owned, ref order, ref direction, ref query, ref model, ref collectionId, ref countryCode, ref languageCode, ref prompt, ref promptType, ref brandKind, ref range, ref from, ref to, ref output);
 
                 using (HttpRequestMessage httpRequestMessageLocalVar = new HttpRequestMessage())
                 {
@@ -746,7 +746,7 @@ namespace LLMPulse.SDK.Api
             partial void OnDeserializationError(ref bool suppressDefaultLog, Exception exception, HttpStatusCode httpStatusCode);
         }
 
-        partial void FormatListShopping(ref int projectId, ref Option<int> page, ref Option<int> perPage, ref Option<string> view, ref Option<bool> owned, ref Option<string> order, ref Option<string> direction, ref Option<string> query, ref Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<int> prompt, ref Option<string> promptType, ref Option<string> brandKind, ref Option<int> range, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> output);
+        partial void FormatListShopping(ref int projectId, ref Option<int> page, ref Option<int> perPage, ref Option<string> view, ref Option<bool> owned, ref Option<string> order, ref Option<string> direction, ref Option<string> query, ref Option<string> model, ref Option<string> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<int> prompt, ref Option<string> promptType, ref Option<string> brandKind, ref Option<int> range, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> output);
 
         /// <summary>
         /// Validates the request parameters
@@ -763,7 +763,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandKind"></param>
         /// <param name="output"></param>
         /// <returns></returns>
-        private void ValidateListShopping(Option<string> view, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> output)
+        private void ValidateListShopping(Option<string> view, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> output)
         {
             if (view.IsSet && view.Value == null)
                 throw new ArgumentNullException(nameof(view));
@@ -822,7 +822,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <param name="output"></param>
-        private void AfterListShoppingDefaultImplementation(IListShoppingApiResponse apiResponseLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<bool> owned, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> promptType, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output)
+        private void AfterListShoppingDefaultImplementation(IListShoppingApiResponse apiResponseLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<bool> owned, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> promptType, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output)
         {
             bool suppressDefaultLog = false;
             AfterListShopping(ref suppressDefaultLog, apiResponseLocalVar, projectId, page, perPage, view, owned, order, direction, query, model, collectionId, countryCode, languageCode, prompt, promptType, brandKind, range, from, to, output);
@@ -854,7 +854,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <param name="output"></param>
-        partial void AfterListShopping(ref bool suppressDefaultLog, IListShoppingApiResponse apiResponseLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<bool> owned, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> promptType, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output);
+        partial void AfterListShopping(ref bool suppressDefaultLog, IListShoppingApiResponse apiResponseLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<bool> owned, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> promptType, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output);
 
         /// <summary>
         /// Logs exceptions that occur while retrieving the server response
@@ -881,7 +881,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <param name="output"></param>
-        private void OnErrorListShoppingDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<bool> owned, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> promptType, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output)
+        private void OnErrorListShoppingDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<bool> owned, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> promptType, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output)
         {
             bool suppressDefaultLogLocalVar = false;
             OnErrorListShopping(ref suppressDefaultLogLocalVar, exceptionLocalVar, pathFormatLocalVar, pathLocalVar, projectId, page, perPage, view, owned, order, direction, query, model, collectionId, countryCode, languageCode, prompt, promptType, brandKind, range, from, to, output);
@@ -915,7 +915,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <param name="output"></param>
-        partial void OnErrorListShopping(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<bool> owned, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> promptType, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output);
+        partial void OnErrorListShopping(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<bool> owned, Option<string> order, Option<string> direction, Option<string> query, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> promptType, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output);
 
         /// <summary>
         /// List shopping results Product cards returned inside AI answers. view&#x3D;products (default) returns one row per distinct product, merged across executions, with its appearance count, price range, rating and whether it is yours, plus a currency_count saying how many currencies it was priced in (above 1 means the row reports its highest-priced listing and min_price may be another currency); view&#x3D;merchants returns one row per selling merchant, with a currency field naming the money its price range and average are expressed in (providers price each market in its own currency, so a merchant that sells in more than one reports the currency most of its prices use). Every response also carries a totals block matching the KPI cards in the app, whose avg_price is computed inside the single currency named by avg_price_currency. Requires the Scale plan or above.
@@ -929,7 +929,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="direction"> (optional, default to desc)</param>
         /// <param name="query">Case-insensitive substring filter on the product title (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -941,7 +941,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListShoppingApiResponse"/>&gt;</returns>
-        public async Task<IListShoppingApiResponse?> ListShoppingOrDefaultAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<bool> owned = default, Option<string> order = default, Option<string> direction = default, Option<string> query = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListShoppingApiResponse?> ListShoppingOrDefaultAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<bool> owned = default, Option<string> order = default, Option<string> direction = default, Option<string> query = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
         {
             try
             {
@@ -966,7 +966,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="direction"> (optional, default to desc)</param>
         /// <param name="query">Case-insensitive substring filter on the product title (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -978,7 +978,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListShoppingApiResponse"/>&gt;</returns>
-        public async Task<IListShoppingApiResponse> ListShoppingAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<bool> owned = default, Option<string> order = default, Option<string> direction = default, Option<string> query = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListShoppingApiResponse> ListShoppingAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<bool> owned = default, Option<string> order = default, Option<string> direction = default, Option<string> query = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
         {
             UriBuilder uriBuilderLocalVar = new UriBuilder();
 
@@ -986,7 +986,7 @@ namespace LLMPulse.SDK.Api
             {
                 ValidateListShopping(view, order, direction, query, model, collectionId, countryCode, languageCode, promptType, brandKind, output);
 
-                FormatListShopping(ref projectId, ref page, ref perPage, ref view, ref owned, ref order, ref direction, ref query, ref model, collectionId, ref countryCode, ref languageCode, ref prompt, ref promptType, ref brandKind, ref range, ref from, ref to, ref output);
+                FormatListShopping(ref projectId, ref page, ref perPage, ref view, ref owned, ref order, ref direction, ref query, ref model, ref collectionId, ref countryCode, ref languageCode, ref prompt, ref promptType, ref brandKind, ref range, ref from, ref to, ref output);
 
                 using (HttpRequestMessage httpRequestMessageLocalVar = new HttpRequestMessage())
                 {

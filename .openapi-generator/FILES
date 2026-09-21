@@ -52,7 +52,6 @@ docs/models/GetAccount200Response.md
 docs/models/GetAccount200ResponseLimits.md
 docs/models/GetAccount200ResponseRateLimits.md
 docs/models/GetAccount200ResponseSubscription.md
-docs/models/GetTimeseriesCollectionIdParameter.md
 docs/models/IntelligenceTask.md
 docs/models/IntelligenceTaskCreateRequest.md
 docs/models/IntelligenceTaskUpdateRequest.md
@@ -177,7 +176,6 @@ src/LLMPulse.SDK/Model/GetAccount200Response.cs
 src/LLMPulse.SDK/Model/GetAccount200ResponseLimits.cs
 src/LLMPulse.SDK/Model/GetAccount200ResponseRateLimits.cs
 src/LLMPulse.SDK/Model/GetAccount200ResponseSubscription.cs
-src/LLMPulse.SDK/Model/GetTimeseriesCollectionIdParameter.cs
 src/LLMPulse.SDK/Model/IntelligenceTask.cs
 src/LLMPulse.SDK/Model/IntelligenceTaskCreateRequest.cs
 src/LLMPulse.SDK/Model/IntelligenceTaskUpdateRequest.cs

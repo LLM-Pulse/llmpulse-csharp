@@ -46,7 +46,7 @@ void (empty response body)
 
 <a id="listsentimentrecords"></a>
 # **ListSentimentRecords**
-> void ListSentimentRecords (int projectId, int competitorId = null, bool brandOnly = null, string analysis = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, DateTime from = null, DateTime to = null, int page = null, int perPage = null)
+> void ListSentimentRecords (int projectId, int competitorId = null, bool brandOnly = null, string analysis = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, DateTime from = null, DateTime to = null, int page = null, int perPage = null)
 
 List sentiment records
 
@@ -60,7 +60,7 @@ List sentiment records
 | **brandOnly** | **bool** |  | [optional]  |
 | **analysis** | **string** | One sentiment level or a comma-separated list: very_positive, positive, neutral, negative, very_negative | [optional]  |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **from** | **DateTime** |  | [optional]  |

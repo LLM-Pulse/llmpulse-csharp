@@ -99,7 +99,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="projectId">Project ID</param>
         /// <param name="domains">Source domains to analyze, e.g. domains[]&#x3D;gmac.com&amp;domains[]&#x3D;educaweb.com</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -108,7 +108,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="to">End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IGetMentionsByCitingDomainApiResponse"/>&gt;</returns>
-        Task<IGetMentionsByCitingDomainApiResponse> GetMentionsByCitingDomainAsync(int projectId, List<string> domains, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> brandKind = default, Option<DateTime> from = default, Option<DateTime> to = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IGetMentionsByCitingDomainApiResponse> GetMentionsByCitingDomainAsync(int projectId, List<string> domains, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> brandKind = default, Option<DateTime> from = default, Option<DateTime> to = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Mention share by citing domain
@@ -119,7 +119,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="projectId">Project ID</param>
         /// <param name="domains">Source domains to analyze, e.g. domains[]&#x3D;gmac.com&amp;domains[]&#x3D;educaweb.com</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -128,7 +128,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="to">End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IGetMentionsByCitingDomainApiResponse"/>?&gt;</returns>
-        Task<IGetMentionsByCitingDomainApiResponse?> GetMentionsByCitingDomainOrDefaultAsync(int projectId, List<string> domains, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> brandKind = default, Option<DateTime> from = default, Option<DateTime> to = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IGetMentionsByCitingDomainApiResponse?> GetMentionsByCitingDomainOrDefaultAsync(int projectId, List<string> domains, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> brandKind = default, Option<DateTime> from = default, Option<DateTime> to = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Grouped citation intelligence
@@ -144,7 +144,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="order"> (optional)</param>
         /// <param name="direction"> (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -156,7 +156,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="contentGap"> (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListCitationGroupsApiResponse"/>&gt;</returns>
-        Task<IListCitationGroupsApiResponse> ListCitationGroupsAsync(int projectId, Option<string> view = default, Option<int> page = default, Option<int> perPage = default, Option<string> order = default, Option<string> direction = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> query = default, Option<string> sourceType = default, Option<string> sentiment = default, Option<string> contentGap = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListCitationGroupsApiResponse> ListCitationGroupsAsync(int projectId, Option<string> view = default, Option<int> page = default, Option<int> perPage = default, Option<string> order = default, Option<string> direction = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> query = default, Option<string> sourceType = default, Option<string> sentiment = default, Option<string> contentGap = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Grouped citation intelligence
@@ -171,7 +171,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="order"> (optional)</param>
         /// <param name="direction"> (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -183,7 +183,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="contentGap"> (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListCitationGroupsApiResponse"/>?&gt;</returns>
-        Task<IListCitationGroupsApiResponse?> ListCitationGroupsOrDefaultAsync(int projectId, Option<string> view = default, Option<int> page = default, Option<int> perPage = default, Option<string> order = default, Option<string> direction = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> query = default, Option<string> sourceType = default, Option<string> sentiment = default, Option<string> contentGap = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListCitationGroupsApiResponse?> ListCitationGroupsOrDefaultAsync(int projectId, Option<string> view = default, Option<int> page = default, Option<int> perPage = default, Option<string> order = default, Option<string> direction = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> query = default, Option<string> sourceType = default, Option<string> sentiment = default, Option<string> contentGap = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Cited URL occurrences
@@ -225,7 +225,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="page"> (optional, default to 1)</param>
         /// <param name="perPage"> (optional, default to 20)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -237,7 +237,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListSourcesApiResponse"/>&gt;</returns>
-        Task<IListSourcesApiResponse> ListSourcesAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> sourceType = default, Option<string> mentionFilter = default, Option<string> competitors = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListSourcesApiResponse> ListSourcesAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> sourceType = default, Option<string> mentionFilter = default, Option<string> competitors = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// List source URLs
@@ -249,7 +249,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="page"> (optional, default to 1)</param>
         /// <param name="perPage"> (optional, default to 20)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -261,7 +261,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListSourcesApiResponse"/>?&gt;</returns>
-        Task<IListSourcesApiResponse?> ListSourcesOrDefaultAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> sourceType = default, Option<string> mentionFilter = default, Option<string> competitors = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListSourcesApiResponse?> ListSourcesOrDefaultAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> sourceType = default, Option<string> mentionFilter = default, Option<string> competitors = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
     }
 
     /// <summary>
@@ -1073,7 +1073,7 @@ namespace LLMPulse.SDK.Api
             partial void OnDeserializationError(ref bool suppressDefaultLog, Exception exception, HttpStatusCode httpStatusCode);
         }
 
-        partial void FormatGetMentionsByCitingDomain(ref int projectId, List<string> domains, ref Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<int> prompt, ref Option<string> brandKind, ref Option<DateTime> from, ref Option<DateTime> to);
+        partial void FormatGetMentionsByCitingDomain(ref int projectId, List<string> domains, ref Option<string> model, ref Option<string> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<int> prompt, ref Option<string> brandKind, ref Option<DateTime> from, ref Option<DateTime> to);
 
         /// <summary>
         /// Validates the request parameters
@@ -1085,7 +1085,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="languageCode"></param>
         /// <param name="brandKind"></param>
         /// <returns></returns>
-        private void ValidateGetMentionsByCitingDomain(List<string> domains, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind)
+        private void ValidateGetMentionsByCitingDomain(List<string> domains, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind)
         {
             if (domains == null)
                 throw new ArgumentNullException(nameof(domains));
@@ -1120,7 +1120,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandKind"></param>
         /// <param name="from"></param>
         /// <param name="to"></param>
-        private void AfterGetMentionsByCitingDomainDefaultImplementation(IGetMentionsByCitingDomainApiResponse apiResponseLocalVar, int projectId, List<string> domains, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> brandKind, Option<DateTime> from, Option<DateTime> to)
+        private void AfterGetMentionsByCitingDomainDefaultImplementation(IGetMentionsByCitingDomainApiResponse apiResponseLocalVar, int projectId, List<string> domains, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> brandKind, Option<DateTime> from, Option<DateTime> to)
         {
             bool suppressDefaultLog = false;
             AfterGetMentionsByCitingDomain(ref suppressDefaultLog, apiResponseLocalVar, projectId, domains, model, collectionId, countryCode, languageCode, prompt, brandKind, from, to);
@@ -1143,7 +1143,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandKind"></param>
         /// <param name="from"></param>
         /// <param name="to"></param>
-        partial void AfterGetMentionsByCitingDomain(ref bool suppressDefaultLog, IGetMentionsByCitingDomainApiResponse apiResponseLocalVar, int projectId, List<string> domains, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> brandKind, Option<DateTime> from, Option<DateTime> to);
+        partial void AfterGetMentionsByCitingDomain(ref bool suppressDefaultLog, IGetMentionsByCitingDomainApiResponse apiResponseLocalVar, int projectId, List<string> domains, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> brandKind, Option<DateTime> from, Option<DateTime> to);
 
         /// <summary>
         /// Logs exceptions that occur while retrieving the server response
@@ -1161,7 +1161,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandKind"></param>
         /// <param name="from"></param>
         /// <param name="to"></param>
-        private void OnErrorGetMentionsByCitingDomainDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, List<string> domains, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> brandKind, Option<DateTime> from, Option<DateTime> to)
+        private void OnErrorGetMentionsByCitingDomainDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, List<string> domains, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> brandKind, Option<DateTime> from, Option<DateTime> to)
         {
             bool suppressDefaultLogLocalVar = false;
             OnErrorGetMentionsByCitingDomain(ref suppressDefaultLogLocalVar, exceptionLocalVar, pathFormatLocalVar, pathLocalVar, projectId, domains, model, collectionId, countryCode, languageCode, prompt, brandKind, from, to);
@@ -1186,7 +1186,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandKind"></param>
         /// <param name="from"></param>
         /// <param name="to"></param>
-        partial void OnErrorGetMentionsByCitingDomain(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, List<string> domains, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> brandKind, Option<DateTime> from, Option<DateTime> to);
+        partial void OnErrorGetMentionsByCitingDomain(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, List<string> domains, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> brandKind, Option<DateTime> from, Option<DateTime> to);
 
         /// <summary>
         /// Mention share by citing domain For the responses where each given source domain is cited, returns the share of those responses that mention the brand vs each competitor (brand + competitors sum to 100% per domain). Pass multiple domains to get the whole matrix in one call.
@@ -1194,7 +1194,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="projectId">Project ID</param>
         /// <param name="domains">Source domains to analyze, e.g. domains[]&#x3D;gmac.com&amp;domains[]&#x3D;educaweb.com</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -1203,7 +1203,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="to">End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IGetMentionsByCitingDomainApiResponse"/>&gt;</returns>
-        public async Task<IGetMentionsByCitingDomainApiResponse?> GetMentionsByCitingDomainOrDefaultAsync(int projectId, List<string> domains, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> brandKind = default, Option<DateTime> from = default, Option<DateTime> to = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IGetMentionsByCitingDomainApiResponse?> GetMentionsByCitingDomainOrDefaultAsync(int projectId, List<string> domains, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> brandKind = default, Option<DateTime> from = default, Option<DateTime> to = default, System.Threading.CancellationToken cancellationToken = default)
         {
             try
             {
@@ -1222,7 +1222,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="projectId">Project ID</param>
         /// <param name="domains">Source domains to analyze, e.g. domains[]&#x3D;gmac.com&amp;domains[]&#x3D;educaweb.com</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -1231,7 +1231,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="to">End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IGetMentionsByCitingDomainApiResponse"/>&gt;</returns>
-        public async Task<IGetMentionsByCitingDomainApiResponse> GetMentionsByCitingDomainAsync(int projectId, List<string> domains, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> brandKind = default, Option<DateTime> from = default, Option<DateTime> to = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IGetMentionsByCitingDomainApiResponse> GetMentionsByCitingDomainAsync(int projectId, List<string> domains, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> brandKind = default, Option<DateTime> from = default, Option<DateTime> to = default, System.Threading.CancellationToken cancellationToken = default)
         {
             UriBuilder uriBuilderLocalVar = new UriBuilder();
 
@@ -1239,7 +1239,7 @@ namespace LLMPulse.SDK.Api
             {
                 ValidateGetMentionsByCitingDomain(domains, model, collectionId, countryCode, languageCode, brandKind);
 
-                FormatGetMentionsByCitingDomain(ref projectId, domains, ref model, collectionId, ref countryCode, ref languageCode, ref prompt, ref brandKind, ref from, ref to);
+                FormatGetMentionsByCitingDomain(ref projectId, domains, ref model, ref collectionId, ref countryCode, ref languageCode, ref prompt, ref brandKind, ref from, ref to);
 
                 using (HttpRequestMessage httpRequestMessageLocalVar = new HttpRequestMessage())
                 {
@@ -1435,7 +1435,7 @@ namespace LLMPulse.SDK.Api
             partial void OnDeserializationError(ref bool suppressDefaultLog, Exception exception, HttpStatusCode httpStatusCode);
         }
 
-        partial void FormatListCitationGroups(ref int projectId, ref Option<string> view, ref Option<int> page, ref Option<int> perPage, ref Option<string> order, ref Option<string> direction, ref Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<int> prompt, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> query, ref Option<string> sourceType, ref Option<string> sentiment, ref Option<string> contentGap);
+        partial void FormatListCitationGroups(ref int projectId, ref Option<string> view, ref Option<int> page, ref Option<int> perPage, ref Option<string> order, ref Option<string> direction, ref Option<string> model, ref Option<string> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<int> prompt, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> query, ref Option<string> sourceType, ref Option<string> sentiment, ref Option<string> contentGap);
 
         /// <summary>
         /// Validates the request parameters
@@ -1452,7 +1452,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="sentiment"></param>
         /// <param name="contentGap"></param>
         /// <returns></returns>
-        private void ValidateListCitationGroups(Option<string> view, Option<string> order, Option<string> direction, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> query, Option<string> sourceType, Option<string> sentiment, Option<string> contentGap)
+        private void ValidateListCitationGroups(Option<string> view, Option<string> order, Option<string> direction, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> query, Option<string> sourceType, Option<string> sentiment, Option<string> contentGap)
         {
             if (view.IsSet && view.Value == null)
                 throw new ArgumentNullException(nameof(view));
@@ -1509,7 +1509,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="sourceType"></param>
         /// <param name="sentiment"></param>
         /// <param name="contentGap"></param>
-        private void AfterListCitationGroupsDefaultImplementation(IListCitationGroupsApiResponse apiResponseLocalVar, int projectId, Option<string> view, Option<int> page, Option<int> perPage, Option<string> order, Option<string> direction, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<DateTime> from, Option<DateTime> to, Option<string> query, Option<string> sourceType, Option<string> sentiment, Option<string> contentGap)
+        private void AfterListCitationGroupsDefaultImplementation(IListCitationGroupsApiResponse apiResponseLocalVar, int projectId, Option<string> view, Option<int> page, Option<int> perPage, Option<string> order, Option<string> direction, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<DateTime> from, Option<DateTime> to, Option<string> query, Option<string> sourceType, Option<string> sentiment, Option<string> contentGap)
         {
             bool suppressDefaultLog = false;
             AfterListCitationGroups(ref suppressDefaultLog, apiResponseLocalVar, projectId, view, page, perPage, order, direction, model, collectionId, countryCode, languageCode, prompt, from, to, query, sourceType, sentiment, contentGap);
@@ -1539,7 +1539,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="sourceType"></param>
         /// <param name="sentiment"></param>
         /// <param name="contentGap"></param>
-        partial void AfterListCitationGroups(ref bool suppressDefaultLog, IListCitationGroupsApiResponse apiResponseLocalVar, int projectId, Option<string> view, Option<int> page, Option<int> perPage, Option<string> order, Option<string> direction, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<DateTime> from, Option<DateTime> to, Option<string> query, Option<string> sourceType, Option<string> sentiment, Option<string> contentGap);
+        partial void AfterListCitationGroups(ref bool suppressDefaultLog, IListCitationGroupsApiResponse apiResponseLocalVar, int projectId, Option<string> view, Option<int> page, Option<int> perPage, Option<string> order, Option<string> direction, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<DateTime> from, Option<DateTime> to, Option<string> query, Option<string> sourceType, Option<string> sentiment, Option<string> contentGap);
 
         /// <summary>
         /// Logs exceptions that occur while retrieving the server response
@@ -1564,7 +1564,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="sourceType"></param>
         /// <param name="sentiment"></param>
         /// <param name="contentGap"></param>
-        private void OnErrorListCitationGroupsDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<string> view, Option<int> page, Option<int> perPage, Option<string> order, Option<string> direction, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<DateTime> from, Option<DateTime> to, Option<string> query, Option<string> sourceType, Option<string> sentiment, Option<string> contentGap)
+        private void OnErrorListCitationGroupsDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<string> view, Option<int> page, Option<int> perPage, Option<string> order, Option<string> direction, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<DateTime> from, Option<DateTime> to, Option<string> query, Option<string> sourceType, Option<string> sentiment, Option<string> contentGap)
         {
             bool suppressDefaultLogLocalVar = false;
             OnErrorListCitationGroups(ref suppressDefaultLogLocalVar, exceptionLocalVar, pathFormatLocalVar, pathLocalVar, projectId, view, page, perPage, order, direction, model, collectionId, countryCode, languageCode, prompt, from, to, query, sourceType, sentiment, contentGap);
@@ -1596,7 +1596,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="sourceType"></param>
         /// <param name="sentiment"></param>
         /// <param name="contentGap"></param>
-        partial void OnErrorListCitationGroups(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<string> view, Option<int> page, Option<int> perPage, Option<string> order, Option<string> direction, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<DateTime> from, Option<DateTime> to, Option<string> query, Option<string> sourceType, Option<string> sentiment, Option<string> contentGap);
+        partial void OnErrorListCitationGroups(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<string> view, Option<int> page, Option<int> perPage, Option<string> order, Option<string> direction, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<DateTime> from, Option<DateTime> to, Option<string> query, Option<string> sourceType, Option<string> sentiment, Option<string> contentGap);
 
         /// <summary>
         /// Grouped citation intelligence Grouped citation intelligence by url / domain / host with per-model breakdown, citation rate, and avg citation position. Counts and citation rate include visible citations and background source references. Average position ignores rows with position&#x3D;0. Owned and competitor source matching honor the project&#39;s exact-subdomain setting. Filter vocabulary aligns with &#x60;source_type&#x60; returned by the API. Unavailable page content keeps the cited URL and citation metrics. Page metadata/content and unknown brand_mentioned/competitor_mentioned return null; content_gap_status is content_unavailable (or missing_page_cache). Mention arrays stay empty until usable content has completed analysis. status_code shows a saved successful response or observed 404/410; other crawl failures and error_message are hidden. last_crawled_at dates the saved copy. Domain/host crawled_urls_count counts usable copies; mention counts are null when no URL has completed analysis.
@@ -1608,7 +1608,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="order"> (optional)</param>
         /// <param name="direction"> (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -1620,7 +1620,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="contentGap"> (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListCitationGroupsApiResponse"/>&gt;</returns>
-        public async Task<IListCitationGroupsApiResponse?> ListCitationGroupsOrDefaultAsync(int projectId, Option<string> view = default, Option<int> page = default, Option<int> perPage = default, Option<string> order = default, Option<string> direction = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> query = default, Option<string> sourceType = default, Option<string> sentiment = default, Option<string> contentGap = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListCitationGroupsApiResponse?> ListCitationGroupsOrDefaultAsync(int projectId, Option<string> view = default, Option<int> page = default, Option<int> perPage = default, Option<string> order = default, Option<string> direction = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> query = default, Option<string> sourceType = default, Option<string> sentiment = default, Option<string> contentGap = default, System.Threading.CancellationToken cancellationToken = default)
         {
             try
             {
@@ -1643,7 +1643,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="order"> (optional)</param>
         /// <param name="direction"> (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -1655,7 +1655,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="contentGap"> (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListCitationGroupsApiResponse"/>&gt;</returns>
-        public async Task<IListCitationGroupsApiResponse> ListCitationGroupsAsync(int projectId, Option<string> view = default, Option<int> page = default, Option<int> perPage = default, Option<string> order = default, Option<string> direction = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> query = default, Option<string> sourceType = default, Option<string> sentiment = default, Option<string> contentGap = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListCitationGroupsApiResponse> ListCitationGroupsAsync(int projectId, Option<string> view = default, Option<int> page = default, Option<int> perPage = default, Option<string> order = default, Option<string> direction = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> query = default, Option<string> sourceType = default, Option<string> sentiment = default, Option<string> contentGap = default, System.Threading.CancellationToken cancellationToken = default)
         {
             UriBuilder uriBuilderLocalVar = new UriBuilder();
 
@@ -1663,7 +1663,7 @@ namespace LLMPulse.SDK.Api
             {
                 ValidateListCitationGroups(view, order, direction, model, collectionId, countryCode, languageCode, query, sourceType, sentiment, contentGap);
 
-                FormatListCitationGroups(ref projectId, ref view, ref page, ref perPage, ref order, ref direction, ref model, collectionId, ref countryCode, ref languageCode, ref prompt, ref from, ref to, ref query, ref sourceType, ref sentiment, ref contentGap);
+                FormatListCitationGroups(ref projectId, ref view, ref page, ref perPage, ref order, ref direction, ref model, ref collectionId, ref countryCode, ref languageCode, ref prompt, ref from, ref to, ref query, ref sourceType, ref sentiment, ref contentGap);
 
                 using (HttpRequestMessage httpRequestMessageLocalVar = new HttpRequestMessage())
                 {
@@ -2170,7 +2170,7 @@ namespace LLMPulse.SDK.Api
             partial void OnDeserializationError(ref bool suppressDefaultLog, Exception exception, HttpStatusCode httpStatusCode);
         }
 
-        partial void FormatListSources(ref int projectId, ref Option<int> page, ref Option<int> perPage, ref Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<int> prompt, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> sourceType, ref Option<string> mentionFilter, ref Option<string> competitors, ref Option<string> output);
+        partial void FormatListSources(ref int projectId, ref Option<int> page, ref Option<int> perPage, ref Option<string> model, ref Option<string> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<int> prompt, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> sourceType, ref Option<string> mentionFilter, ref Option<string> competitors, ref Option<string> output);
 
         /// <summary>
         /// Validates the request parameters
@@ -2184,7 +2184,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="competitors"></param>
         /// <param name="output"></param>
         /// <returns></returns>
-        private void ValidateListSources(Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> sourceType, Option<string> mentionFilter, Option<string> competitors, Option<string> output)
+        private void ValidateListSources(Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> sourceType, Option<string> mentionFilter, Option<string> competitors, Option<string> output)
         {
             if (model.IsSet && model.Value == null)
                 throw new ArgumentNullException(nameof(model));
@@ -2229,7 +2229,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="mentionFilter"></param>
         /// <param name="competitors"></param>
         /// <param name="output"></param>
-        private void AfterListSourcesDefaultImplementation(IListSourcesApiResponse apiResponseLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<DateTime> from, Option<DateTime> to, Option<string> sourceType, Option<string> mentionFilter, Option<string> competitors, Option<string> output)
+        private void AfterListSourcesDefaultImplementation(IListSourcesApiResponse apiResponseLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<DateTime> from, Option<DateTime> to, Option<string> sourceType, Option<string> mentionFilter, Option<string> competitors, Option<string> output)
         {
             bool suppressDefaultLog = false;
             AfterListSources(ref suppressDefaultLog, apiResponseLocalVar, projectId, page, perPage, model, collectionId, countryCode, languageCode, prompt, from, to, sourceType, mentionFilter, competitors, output);
@@ -2256,7 +2256,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="mentionFilter"></param>
         /// <param name="competitors"></param>
         /// <param name="output"></param>
-        partial void AfterListSources(ref bool suppressDefaultLog, IListSourcesApiResponse apiResponseLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<DateTime> from, Option<DateTime> to, Option<string> sourceType, Option<string> mentionFilter, Option<string> competitors, Option<string> output);
+        partial void AfterListSources(ref bool suppressDefaultLog, IListSourcesApiResponse apiResponseLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<DateTime> from, Option<DateTime> to, Option<string> sourceType, Option<string> mentionFilter, Option<string> competitors, Option<string> output);
 
         /// <summary>
         /// Logs exceptions that occur while retrieving the server response
@@ -2278,7 +2278,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="mentionFilter"></param>
         /// <param name="competitors"></param>
         /// <param name="output"></param>
-        private void OnErrorListSourcesDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<DateTime> from, Option<DateTime> to, Option<string> sourceType, Option<string> mentionFilter, Option<string> competitors, Option<string> output)
+        private void OnErrorListSourcesDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<DateTime> from, Option<DateTime> to, Option<string> sourceType, Option<string> mentionFilter, Option<string> competitors, Option<string> output)
         {
             bool suppressDefaultLogLocalVar = false;
             OnErrorListSources(ref suppressDefaultLogLocalVar, exceptionLocalVar, pathFormatLocalVar, pathLocalVar, projectId, page, perPage, model, collectionId, countryCode, languageCode, prompt, from, to, sourceType, mentionFilter, competitors, output);
@@ -2307,7 +2307,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="mentionFilter"></param>
         /// <param name="competitors"></param>
         /// <param name="output"></param>
-        partial void OnErrorListSources(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<DateTime> from, Option<DateTime> to, Option<string> sourceType, Option<string> mentionFilter, Option<string> competitors, Option<string> output);
+        partial void OnErrorListSources(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<DateTime> from, Option<DateTime> to, Option<string> sourceType, Option<string> mentionFilter, Option<string> competitors, Option<string> output);
 
         /// <summary>
         /// List source URLs 
@@ -2316,7 +2316,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="page"> (optional, default to 1)</param>
         /// <param name="perPage"> (optional, default to 20)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -2328,7 +2328,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListSourcesApiResponse"/>&gt;</returns>
-        public async Task<IListSourcesApiResponse?> ListSourcesOrDefaultAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> sourceType = default, Option<string> mentionFilter = default, Option<string> competitors = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListSourcesApiResponse?> ListSourcesOrDefaultAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> sourceType = default, Option<string> mentionFilter = default, Option<string> competitors = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
         {
             try
             {
@@ -2348,7 +2348,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="page"> (optional, default to 1)</param>
         /// <param name="perPage"> (optional, default to 20)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -2360,7 +2360,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListSourcesApiResponse"/>&gt;</returns>
-        public async Task<IListSourcesApiResponse> ListSourcesAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> sourceType = default, Option<string> mentionFilter = default, Option<string> competitors = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListSourcesApiResponse> ListSourcesAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> sourceType = default, Option<string> mentionFilter = default, Option<string> competitors = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
         {
             UriBuilder uriBuilderLocalVar = new UriBuilder();
 
@@ -2368,7 +2368,7 @@ namespace LLMPulse.SDK.Api
             {
                 ValidateListSources(model, collectionId, countryCode, languageCode, sourceType, mentionFilter, competitors, output);
 
-                FormatListSources(ref projectId, ref page, ref perPage, ref model, collectionId, ref countryCode, ref languageCode, ref prompt, ref from, ref to, ref sourceType, ref mentionFilter, ref competitors, ref output);
+                FormatListSources(ref projectId, ref page, ref perPage, ref model, ref collectionId, ref countryCode, ref languageCode, ref prompt, ref from, ref to, ref sourceType, ref mentionFilter, ref competitors, ref output);
 
                 using (HttpRequestMessage httpRequestMessageLocalVar = new HttpRequestMessage())
                 {

@@ -10,7 +10,7 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 
 <a id="getaimodelinsightssummary"></a>
 # **GetAiModelInsightsSummary**
-> void GetAiModelInsightsSummary (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, string competitors = null)
+> void GetAiModelInsightsSummary (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, string collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, string competitors = null)
 
 AI Model Insights summary
 
@@ -26,7 +26,7 @@ Per-model mentions, citations, brand net sentiment with raw counts, weighted vis
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **granularity** | **string** |  | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
@@ -56,7 +56,7 @@ void (empty response body)
 
 <a id="getaimodelpositiondistribution"></a>
 # **GetAiModelPositionDistribution**
-> void GetAiModelPositionDistribution (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, string model = null, int brand1 = null, int brand2 = null)
+> void GetAiModelPositionDistribution (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, string collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, string model = null, int brand1 = null, int brand2 = null)
 
 Position distribution comparison
 
@@ -70,7 +70,7 @@ Position distribution comparison
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **granularity** | **string** |  | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
@@ -102,7 +102,7 @@ void (empty response body)
 
 <a id="getaioverviewresults"></a>
 # **GetAiOverviewResults**
-> void GetAiOverviewResults (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, int page = null, int perPage = null)
+> void GetAiOverviewResults (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, string collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, int page = null, int perPage = null)
 
 Google AI Overview result availability
 
@@ -116,7 +116,7 @@ Google AI Overview result availability
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **granularity** | **string** |  | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |

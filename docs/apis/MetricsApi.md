@@ -12,7 +12,7 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 
 <a id="getpromptsummary"></a>
 # **GetPromptSummary**
-> PromptSummaryResponse GetPromptSummary (int projectId, int range = null, DateTime from = null, DateTime to = null, string breakdown = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, string sort = null, string sortDir = null, int page = null, int perPage = null, string output = null)
+> PromptSummaryResponse GetPromptSummary (int projectId, int range = null, DateTime from = null, DateTime to = null, string breakdown = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, string sort = null, string sortDir = null, int page = null, int perPage = null, string output = null)
 
 Per-prompt metrics summary
 
@@ -29,7 +29,7 @@ Paginated per-prompt aggregated metrics. Returns responses, mentions, citations,
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **breakdown** | **string** | Add per-(prompt, model) rows to the output | [optional]  |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
@@ -65,7 +65,7 @@ Paginated per-prompt aggregated metrics. Returns responses, mentions, citations,
 
 <a id="getshareofvoice"></a>
 # **GetShareOfVoice**
-> SovResponse GetShareOfVoice (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, string competitors = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, int prompt = null, string promptType = null, string brandKind = null, string output = null, string view = null)
+> SovResponse GetShareOfVoice (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, string competitors = null, string model = null, string collectionId = null, int prompt = null, string promptType = null, string brandKind = null, string output = null, string view = null)
 
 Share of Voice
 
@@ -83,7 +83,7 @@ Share of Voice breakdown comparing your project to competitors. Returns over_tim
 | **granularity** | **string** |  | [optional]  |
 | **competitors** | **string** | Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM) | [optional]  |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
 | **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
 | **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
@@ -113,7 +113,7 @@ Share of Voice breakdown comparing your project to competitors. Returns over_tim
 
 <a id="getsummary"></a>
 # **GetSummary**
-> SummaryResponse GetSummary (int projectId, string metrics = null, string granularity = null, int range = null, DateTime from = null, DateTime to = null, string competitors = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, int prompt = null, string promptType = null, string brandKind = null, string output = null)
+> SummaryResponse GetSummary (int projectId, string metrics = null, string granularity = null, int range = null, DateTime from = null, DateTime to = null, string competitors = null, string model = null, string collectionId = null, int prompt = null, string promptType = null, string brandKind = null, string output = null)
 
 Aggregated metrics summary
 
@@ -132,7 +132,7 @@ Same as /metrics/timeseries but adds a `summary` block with total/min/max/last p
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **competitors** | **string** | Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM) | [optional]  |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
 | **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
 | **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
@@ -163,7 +163,7 @@ Same as /metrics/timeseries but adds a `summary` block with total/min/max/last p
 
 <a id="gettimeseries"></a>
 # **GetTimeseries**
-> TimeseriesResponse GetTimeseries (int projectId, string metrics = null, string granularity = null, int range = null, DateTime from = null, DateTime to = null, string competitors = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, bool includeProject = null, string output = null)
+> TimeseriesResponse GetTimeseries (int projectId, string metrics = null, string granularity = null, int range = null, DateTime from = null, DateTime to = null, string competitors = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, bool includeProject = null, string output = null)
 
 Time-series metrics
 
@@ -182,7 +182,7 @@ Returns time-series data for one or more metrics, broken down by actor (project 
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **competitors** | **string** | Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM) | [optional]  |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
@@ -217,7 +217,7 @@ Returns time-series data for one or more metrics, broken down by actor (project 
 
 <a id="gettopsources"></a>
 # **GetTopSources**
-> TopSourcesResponse GetTopSources (int projectId, int range = null, DateTime from = null, DateTime to = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, string sort = null, string query = null, int page = null, int perPage = null, string output = null)
+> TopSourcesResponse GetTopSources (int projectId, int range = null, DateTime from = null, DateTime to = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, string sort = null, string query = null, int page = null, int perPage = null, string output = null)
 
 Top cited sources
 
@@ -233,7 +233,7 @@ Registrable domains most frequently cited in AI responses for the project, inclu
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |

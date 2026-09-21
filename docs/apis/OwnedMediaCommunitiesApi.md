@@ -9,7 +9,7 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 
 <a id="listownedmedia"></a>
 # **ListOwnedMedia**
-> void ListOwnedMedia (int projectId, string provider, int page = null, int perPage = null, string view = null, string store = null, bool owned = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, string brandKind = null, int range = null, DateTime from = null, DateTime to = null, string output = null)
+> void ListOwnedMedia (int projectId, string provider, int page = null, int perPage = null, string view = null, string store = null, bool owned = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, string brandKind = null, int range = null, DateTime from = null, DateTime to = null, string output = null)
 
 List owned-media citations
 
@@ -28,7 +28,7 @@ Which owned-media content AI answers cite, by platform. `provider` is required. 
 | **store** | **string** | provider&#x3D;mobile_apps only | [optional] [default to google_play] |
 | **owned** | **bool** | Return only rows belonging to the account&#39;s own connected profile | [optional]  |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
@@ -61,7 +61,7 @@ void (empty response body)
 
 <a id="listredditcitations"></a>
 # **ListRedditCitations**
-> void ListRedditCitations (int projectId, int page = null, int perPage = null, string view = null, string subreddit = null, string author = null, string status = null, bool owned = null, string brand = null, string order = null, string direction = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, string brandKind = null, int range = null, DateTime from = null, DateTime to = null, string output = null)
+> void ListRedditCitations (int projectId, int page = null, int perPage = null, string view = null, string subreddit = null, string author = null, string status = null, bool owned = null, string brand = null, string order = null, string direction = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, string brandKind = null, int range = null, DateTime from = null, DateTime to = null, string output = null)
 
 List cited Reddit content
 
@@ -84,7 +84,7 @@ Which Reddit content AI answers cite for your tracked prompts. view=subreddits (
 | **order** | **string** | Sort field; the allowed set depends on view | [optional]  |
 | **direction** | **string** |  | [optional] [default to desc] |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |

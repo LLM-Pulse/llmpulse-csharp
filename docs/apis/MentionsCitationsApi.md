@@ -13,7 +13,7 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 
 <a id="listallcitations"></a>
 # **ListAllCitations**
-> void ListAllCitations (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
+> void ListAllCitations (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
 
 List all citations (brand + competitor)
 
@@ -29,7 +29,7 @@ Unified citations stream with an `actor_type` field on each record. Includes vis
 | **page** | **int** |  | [optional] [default to 1] |
 | **perPage** | **int** |  | [optional] [default to 20] |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
@@ -58,7 +58,7 @@ void (empty response body)
 
 <a id="listallmentions"></a>
 # **ListAllMentions**
-> void ListAllMentions (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
+> void ListAllMentions (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
 
 List all mentions (brand + competitor)
 
@@ -74,7 +74,7 @@ Unified mentions stream. Each record has an `actor_type` field (`project` or `co
 | **page** | **int** |  | [optional] [default to 1] |
 | **perPage** | **int** |  | [optional] [default to 20] |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
@@ -103,7 +103,7 @@ void (empty response body)
 
 <a id="listcitations"></a>
 # **ListCitations**
-> void ListCitations (int projectId, int page = null, int perPage = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
+> void ListCitations (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
 
 List brand citations
 
@@ -118,7 +118,7 @@ Includes visible citations and background source references. Background referenc
 | **page** | **int** |  | [optional] [default to 1] |
 | **perPage** | **int** |  | [optional] [default to 20] |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
@@ -149,7 +149,7 @@ void (empty response body)
 
 <a id="listcompetitorcitations"></a>
 # **ListCompetitorCitations**
-> void ListCompetitorCitations (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
+> void ListCompetitorCitations (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
 
 List competitor citations
 
@@ -165,7 +165,7 @@ Includes visible citations and background source references. Background referenc
 | **page** | **int** |  | [optional] [default to 1] |
 | **perPage** | **int** |  | [optional] [default to 20] |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
@@ -194,7 +194,7 @@ void (empty response body)
 
 <a id="listcompetitormentions"></a>
 # **ListCompetitorMentions**
-> void ListCompetitorMentions (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
+> void ListCompetitorMentions (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
 
 List competitor mentions
 
@@ -208,7 +208,7 @@ List competitor mentions
 | **page** | **int** |  | [optional] [default to 1] |
 | **perPage** | **int** |  | [optional] [default to 20] |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
@@ -237,7 +237,7 @@ void (empty response body)
 
 <a id="listmentions"></a>
 # **ListMentions**
-> void ListMentions (int projectId, int page = null, int perPage = null, string model = null, GetTimeseriesCollectionIdParameter collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
+> void ListMentions (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
 
 List brand mentions
 
@@ -250,7 +250,7 @@ List brand mentions
 | **page** | **int** |  | [optional] [default to 1] |
 | **perPage** | **int** |  | [optional] [default to 20] |
 | **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
-| **collectionId** | [**GetTimeseriesCollectionIdParameter**](GetTimeseriesCollectionIdParameter.md) | One collection/tag ID or a comma-separated list of IDs | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
 | **prompt** | **int** | Filter by prompt ID | [optional]  |

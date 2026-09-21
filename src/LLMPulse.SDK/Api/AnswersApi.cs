@@ -75,7 +75,7 @@ namespace LLMPulse.SDK.Api
         /// <exception cref="ApiException">Thrown when fails to make API call</exception>
         /// <param name="projectId">Project ID</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -90,7 +90,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="noResult">Filter sentinel non-answers (provider returned nothing after retries; excluded from platform metrics). false &#x3D; only real answers, true &#x3D; only sentinels, omit &#x3D; both. Every item carries its own no_result flag. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListAnswersApiResponse"/>&gt;</returns>
-        Task<IListAnswersApiResponse> ListAnswersAsync(int projectId, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> mentionFilter = default, Option<string> citationFilter = default, Option<string> competitors = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<int> page = default, Option<int> perPage = default, Option<string> query = default, Option<bool> noResult = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListAnswersApiResponse> ListAnswersAsync(int projectId, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> mentionFilter = default, Option<string> citationFilter = default, Option<string> competitors = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<int> page = default, Option<int> perPage = default, Option<string> query = default, Option<bool> noResult = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// List AI responses
@@ -100,7 +100,7 @@ namespace LLMPulse.SDK.Api
         /// </remarks>
         /// <param name="projectId">Project ID</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -115,7 +115,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="noResult">Filter sentinel non-answers (provider returned nothing after retries; excluded from platform metrics). false &#x3D; only real answers, true &#x3D; only sentinels, omit &#x3D; both. Every item carries its own no_result flag. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListAnswersApiResponse"/>?&gt;</returns>
-        Task<IListAnswersApiResponse?> ListAnswersOrDefaultAsync(int projectId, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> mentionFilter = default, Option<string> citationFilter = default, Option<string> competitors = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<int> page = default, Option<int> perPage = default, Option<string> query = default, Option<bool> noResult = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListAnswersApiResponse?> ListAnswersOrDefaultAsync(int projectId, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> mentionFilter = default, Option<string> citationFilter = default, Option<string> competitors = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<int> page = default, Option<int> perPage = default, Option<string> query = default, Option<bool> noResult = default, System.Threading.CancellationToken cancellationToken = default);
     }
 
     /// <summary>
@@ -539,7 +539,7 @@ namespace LLMPulse.SDK.Api
             partial void OnDeserializationError(ref bool suppressDefaultLog, Exception exception, HttpStatusCode httpStatusCode);
         }
 
-        partial void FormatListAnswers(ref int projectId, ref Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<int> prompt, ref Option<string> mentionFilter, ref Option<string> citationFilter, ref Option<string> competitors, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<int> page, ref Option<int> perPage, ref Option<string> query, ref Option<bool> noResult);
+        partial void FormatListAnswers(ref int projectId, ref Option<string> model, ref Option<string> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<int> prompt, ref Option<string> mentionFilter, ref Option<string> citationFilter, ref Option<string> competitors, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<int> page, ref Option<int> perPage, ref Option<string> query, ref Option<bool> noResult);
 
         /// <summary>
         /// Validates the request parameters
@@ -553,7 +553,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="competitors"></param>
         /// <param name="query"></param>
         /// <returns></returns>
-        private void ValidateListAnswers(Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> mentionFilter, Option<string> citationFilter, Option<string> competitors, Option<string> query)
+        private void ValidateListAnswers(Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> mentionFilter, Option<string> citationFilter, Option<string> competitors, Option<string> query)
         {
             if (model.IsSet && model.Value == null)
                 throw new ArgumentNullException(nameof(model));
@@ -599,7 +599,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="perPage"></param>
         /// <param name="query"></param>
         /// <param name="noResult"></param>
-        private void AfterListAnswersDefaultImplementation(IListAnswersApiResponse apiResponseLocalVar, int projectId, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> mentionFilter, Option<string> citationFilter, Option<string> competitors, Option<DateTime> from, Option<DateTime> to, Option<int> page, Option<int> perPage, Option<string> query, Option<bool> noResult)
+        private void AfterListAnswersDefaultImplementation(IListAnswersApiResponse apiResponseLocalVar, int projectId, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> mentionFilter, Option<string> citationFilter, Option<string> competitors, Option<DateTime> from, Option<DateTime> to, Option<int> page, Option<int> perPage, Option<string> query, Option<bool> noResult)
         {
             bool suppressDefaultLog = false;
             AfterListAnswers(ref suppressDefaultLog, apiResponseLocalVar, projectId, model, collectionId, countryCode, languageCode, prompt, mentionFilter, citationFilter, competitors, from, to, page, perPage, query, noResult);
@@ -627,7 +627,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="perPage"></param>
         /// <param name="query"></param>
         /// <param name="noResult"></param>
-        partial void AfterListAnswers(ref bool suppressDefaultLog, IListAnswersApiResponse apiResponseLocalVar, int projectId, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> mentionFilter, Option<string> citationFilter, Option<string> competitors, Option<DateTime> from, Option<DateTime> to, Option<int> page, Option<int> perPage, Option<string> query, Option<bool> noResult);
+        partial void AfterListAnswers(ref bool suppressDefaultLog, IListAnswersApiResponse apiResponseLocalVar, int projectId, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> mentionFilter, Option<string> citationFilter, Option<string> competitors, Option<DateTime> from, Option<DateTime> to, Option<int> page, Option<int> perPage, Option<string> query, Option<bool> noResult);
 
         /// <summary>
         /// Logs exceptions that occur while retrieving the server response
@@ -650,7 +650,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="perPage"></param>
         /// <param name="query"></param>
         /// <param name="noResult"></param>
-        private void OnErrorListAnswersDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> mentionFilter, Option<string> citationFilter, Option<string> competitors, Option<DateTime> from, Option<DateTime> to, Option<int> page, Option<int> perPage, Option<string> query, Option<bool> noResult)
+        private void OnErrorListAnswersDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> mentionFilter, Option<string> citationFilter, Option<string> competitors, Option<DateTime> from, Option<DateTime> to, Option<int> page, Option<int> perPage, Option<string> query, Option<bool> noResult)
         {
             bool suppressDefaultLogLocalVar = false;
             OnErrorListAnswers(ref suppressDefaultLogLocalVar, exceptionLocalVar, pathFormatLocalVar, pathLocalVar, projectId, model, collectionId, countryCode, languageCode, prompt, mentionFilter, citationFilter, competitors, from, to, page, perPage, query, noResult);
@@ -680,14 +680,14 @@ namespace LLMPulse.SDK.Api
         /// <param name="perPage"></param>
         /// <param name="query"></param>
         /// <param name="noResult"></param>
-        partial void OnErrorListAnswers(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> mentionFilter, Option<string> citationFilter, Option<string> competitors, Option<DateTime> from, Option<DateTime> to, Option<int> page, Option<int> perPage, Option<string> query, Option<bool> noResult);
+        partial void OnErrorListAnswers(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<int> prompt, Option<string> mentionFilter, Option<string> citationFilter, Option<string> competitors, Option<DateTime> from, Option<DateTime> to, Option<int> page, Option<int> perPage, Option<string> query, Option<bool> noResult);
 
         /// <summary>
         /// List AI responses Successful prompt-execution responses with truncated content (max 10,000 chars). Pass &#x60;query&#x60; for case-insensitive full-text search inside response texts: &#x60;total&#x60; becomes the exact count of matching responses and each item returns &#x60;snippet&#x60; + &#x60;match_count&#x60; instead of &#x60;response&#x60;/&#x60;response_truncated&#x60;.
         /// </summary>
         /// <param name="projectId">Project ID</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -702,7 +702,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="noResult">Filter sentinel non-answers (provider returned nothing after retries; excluded from platform metrics). false &#x3D; only real answers, true &#x3D; only sentinels, omit &#x3D; both. Every item carries its own no_result flag. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListAnswersApiResponse"/>&gt;</returns>
-        public async Task<IListAnswersApiResponse?> ListAnswersOrDefaultAsync(int projectId, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> mentionFilter = default, Option<string> citationFilter = default, Option<string> competitors = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<int> page = default, Option<int> perPage = default, Option<string> query = default, Option<bool> noResult = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListAnswersApiResponse?> ListAnswersOrDefaultAsync(int projectId, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> mentionFilter = default, Option<string> citationFilter = default, Option<string> competitors = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<int> page = default, Option<int> perPage = default, Option<string> query = default, Option<bool> noResult = default, System.Threading.CancellationToken cancellationToken = default)
         {
             try
             {
@@ -720,7 +720,7 @@ namespace LLMPulse.SDK.Api
         /// <exception cref="ApiException">Thrown when fails to make API call</exception>
         /// <param name="projectId">Project ID</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="prompt">Filter by prompt ID (optional)</param>
@@ -735,7 +735,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="noResult">Filter sentinel non-answers (provider returned nothing after retries; excluded from platform metrics). false &#x3D; only real answers, true &#x3D; only sentinels, omit &#x3D; both. Every item carries its own no_result flag. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListAnswersApiResponse"/>&gt;</returns>
-        public async Task<IListAnswersApiResponse> ListAnswersAsync(int projectId, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> mentionFilter = default, Option<string> citationFilter = default, Option<string> competitors = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<int> page = default, Option<int> perPage = default, Option<string> query = default, Option<bool> noResult = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListAnswersApiResponse> ListAnswersAsync(int projectId, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<int> prompt = default, Option<string> mentionFilter = default, Option<string> citationFilter = default, Option<string> competitors = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<int> page = default, Option<int> perPage = default, Option<string> query = default, Option<bool> noResult = default, System.Threading.CancellationToken cancellationToken = default)
         {
             UriBuilder uriBuilderLocalVar = new UriBuilder();
 
@@ -743,7 +743,7 @@ namespace LLMPulse.SDK.Api
             {
                 ValidateListAnswers(model, collectionId, countryCode, languageCode, mentionFilter, citationFilter, competitors, query);
 
-                FormatListAnswers(ref projectId, ref model, collectionId, ref countryCode, ref languageCode, ref prompt, ref mentionFilter, ref citationFilter, ref competitors, ref from, ref to, ref page, ref perPage, ref query, ref noResult);
+                FormatListAnswers(ref projectId, ref model, ref collectionId, ref countryCode, ref languageCode, ref prompt, ref mentionFilter, ref citationFilter, ref competitors, ref from, ref to, ref page, ref perPage, ref query, ref noResult);
 
                 using (HttpRequestMessage httpRequestMessageLocalVar = new HttpRequestMessage())
                 {

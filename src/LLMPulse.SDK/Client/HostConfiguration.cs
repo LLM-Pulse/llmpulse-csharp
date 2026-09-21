@@ -70,7 +70,6 @@ namespace LLMPulse.SDK.Client
             _jsonOptions.Converters.Add(new GetAccount200ResponseLimitsJsonConverter());
             _jsonOptions.Converters.Add(new GetAccount200ResponseRateLimitsJsonConverter());
             _jsonOptions.Converters.Add(new GetAccount200ResponseSubscriptionJsonConverter());
-            _jsonOptions.Converters.Add(new GetTimeseriesCollectionIdParameterJsonConverter());
             _jsonOptions.Converters.Add(new IntelligenceTaskJsonConverter());
             _jsonOptions.Converters.Add(new IntelligenceTaskCreateRequestJsonConverter());
             _jsonOptions.Converters.Add(new IntelligenceTaskUpdateRequestJsonConverter());

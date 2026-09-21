@@ -23,7 +23,6 @@ using System.Net.Http.Headers;
 using System.Text.Json;
 using LLMPulse.SDK.Client;
 using LLMPulse.SDK.Logging;
-using LLMPulse.SDK.Model;
 using System.Diagnostics.CodeAnalysis;
 
 namespace LLMPulse.SDK.Api
@@ -51,7 +50,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"> (optional)</param>
         /// <param name="to">End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. (optional)</param>
         /// <param name="granularity"> (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="promptType">One prompt type or a comma-separated list: informational, navigational, commercial, transactional (optional)</param>
@@ -59,7 +58,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="competitors">Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM) (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IGetAiModelInsightsSummaryApiResponse"/>&gt;</returns>
-        Task<IGetAiModelInsightsSummaryApiResponse> GetAiModelInsightsSummaryAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<string> competitors = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IGetAiModelInsightsSummaryApiResponse> GetAiModelInsightsSummaryAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<string> competitors = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// AI Model Insights summary
@@ -72,7 +71,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"> (optional)</param>
         /// <param name="to">End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. (optional)</param>
         /// <param name="granularity"> (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="promptType">One prompt type or a comma-separated list: informational, navigational, commercial, transactional (optional)</param>
@@ -80,7 +79,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="competitors">Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM) (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IGetAiModelInsightsSummaryApiResponse"/>?&gt;</returns>
-        Task<IGetAiModelInsightsSummaryApiResponse?> GetAiModelInsightsSummaryOrDefaultAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<string> competitors = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IGetAiModelInsightsSummaryApiResponse?> GetAiModelInsightsSummaryOrDefaultAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<string> competitors = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Position distribution comparison
@@ -94,7 +93,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"> (optional)</param>
         /// <param name="to">End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. (optional)</param>
         /// <param name="granularity"> (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="promptType">One prompt type or a comma-separated list: informational, navigational, commercial, transactional (optional)</param>
@@ -104,7 +103,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brand2"> (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IGetAiModelPositionDistributionApiResponse"/>&gt;</returns>
-        Task<IGetAiModelPositionDistributionApiResponse> GetAiModelPositionDistributionAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<string> model = default, Option<int> brand1 = default, Option<int> brand2 = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IGetAiModelPositionDistributionApiResponse> GetAiModelPositionDistributionAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<string> model = default, Option<int> brand1 = default, Option<int> brand2 = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Position distribution comparison
@@ -117,7 +116,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"> (optional)</param>
         /// <param name="to">End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. (optional)</param>
         /// <param name="granularity"> (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="promptType">One prompt type or a comma-separated list: informational, navigational, commercial, transactional (optional)</param>
@@ -127,7 +126,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brand2"> (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IGetAiModelPositionDistributionApiResponse"/>?&gt;</returns>
-        Task<IGetAiModelPositionDistributionApiResponse?> GetAiModelPositionDistributionOrDefaultAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<string> model = default, Option<int> brand1 = default, Option<int> brand2 = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IGetAiModelPositionDistributionApiResponse?> GetAiModelPositionDistributionOrDefaultAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<string> model = default, Option<int> brand1 = default, Option<int> brand2 = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Google AI Overview result availability
@@ -141,7 +140,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"> (optional)</param>
         /// <param name="to">End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. (optional)</param>
         /// <param name="granularity"> (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="promptType">One prompt type or a comma-separated list: informational, navigational, commercial, transactional (optional)</param>
@@ -150,7 +149,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="perPage"> (optional, default to 20)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IGetAiOverviewResultsApiResponse"/>&gt;</returns>
-        Task<IGetAiOverviewResultsApiResponse> GetAiOverviewResultsAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> page = default, Option<int> perPage = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IGetAiOverviewResultsApiResponse> GetAiOverviewResultsAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> page = default, Option<int> perPage = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Google AI Overview result availability
@@ -163,7 +162,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"> (optional)</param>
         /// <param name="to">End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. (optional)</param>
         /// <param name="granularity"> (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="promptType">One prompt type or a comma-separated list: informational, navigational, commercial, transactional (optional)</param>
@@ -172,7 +171,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="perPage"> (optional, default to 20)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IGetAiOverviewResultsApiResponse"/>?&gt;</returns>
-        Task<IGetAiOverviewResultsApiResponse?> GetAiOverviewResultsOrDefaultAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> page = default, Option<int> perPage = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IGetAiOverviewResultsApiResponse?> GetAiOverviewResultsOrDefaultAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> page = default, Option<int> perPage = default, System.Threading.CancellationToken cancellationToken = default);
     }
 
     /// <summary>
@@ -318,7 +317,7 @@ namespace LLMPulse.SDK.Api
             BearerTokenProvider = bearerTokenProvider;
         }
 
-        partial void FormatGetAiModelInsightsSummary(ref int projectId, ref Option<int> range, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<string> promptType, ref Option<string> brandKind, ref Option<string> competitors);
+        partial void FormatGetAiModelInsightsSummary(ref int projectId, ref Option<int> range, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> granularity, ref Option<string> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<string> promptType, ref Option<string> brandKind, ref Option<string> competitors);
 
         /// <summary>
         /// Validates the request parameters
@@ -331,7 +330,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandKind"></param>
         /// <param name="competitors"></param>
         /// <returns></returns>
-        private void ValidateGetAiModelInsightsSummary(Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> competitors)
+        private void ValidateGetAiModelInsightsSummary(Option<string> granularity, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> competitors)
         {
             if (granularity.IsSet && granularity.Value == null)
                 throw new ArgumentNullException(nameof(granularity));
@@ -370,7 +369,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="promptType"></param>
         /// <param name="brandKind"></param>
         /// <param name="competitors"></param>
-        private void AfterGetAiModelInsightsSummaryDefaultImplementation(IGetAiModelInsightsSummaryApiResponse apiResponseLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> competitors)
+        private void AfterGetAiModelInsightsSummaryDefaultImplementation(IGetAiModelInsightsSummaryApiResponse apiResponseLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> competitors)
         {
             bool suppressDefaultLog = false;
             AfterGetAiModelInsightsSummary(ref suppressDefaultLog, apiResponseLocalVar, projectId, range, from, to, granularity, collectionId, countryCode, languageCode, promptType, brandKind, competitors);
@@ -394,7 +393,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="promptType"></param>
         /// <param name="brandKind"></param>
         /// <param name="competitors"></param>
-        partial void AfterGetAiModelInsightsSummary(ref bool suppressDefaultLog, IGetAiModelInsightsSummaryApiResponse apiResponseLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> competitors);
+        partial void AfterGetAiModelInsightsSummary(ref bool suppressDefaultLog, IGetAiModelInsightsSummaryApiResponse apiResponseLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> competitors);
 
         /// <summary>
         /// Logs exceptions that occur while retrieving the server response
@@ -413,7 +412,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="promptType"></param>
         /// <param name="brandKind"></param>
         /// <param name="competitors"></param>
-        private void OnErrorGetAiModelInsightsSummaryDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> competitors)
+        private void OnErrorGetAiModelInsightsSummaryDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> competitors)
         {
             bool suppressDefaultLogLocalVar = false;
             OnErrorGetAiModelInsightsSummary(ref suppressDefaultLogLocalVar, exceptionLocalVar, pathFormatLocalVar, pathLocalVar, projectId, range, from, to, granularity, collectionId, countryCode, languageCode, promptType, brandKind, competitors);
@@ -439,7 +438,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="promptType"></param>
         /// <param name="brandKind"></param>
         /// <param name="competitors"></param>
-        partial void OnErrorGetAiModelInsightsSummary(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> competitors);
+        partial void OnErrorGetAiModelInsightsSummary(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> competitors);
 
         /// <summary>
         /// AI Model Insights summary Per-model mentions, citations, brand net sentiment with raw counts, weighted visibility totals/shares, plus actor matrices. All actor entries use the standard shape &#x60;{ type, id, competitor_id, name, domain }&#x60; with bare (scheme-less) domains.
@@ -449,7 +448,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"> (optional)</param>
         /// <param name="to">End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. (optional)</param>
         /// <param name="granularity"> (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="promptType">One prompt type or a comma-separated list: informational, navigational, commercial, transactional (optional)</param>
@@ -457,7 +456,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="competitors">Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM) (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IGetAiModelInsightsSummaryApiResponse"/>&gt;</returns>
-        public async Task<IGetAiModelInsightsSummaryApiResponse?> GetAiModelInsightsSummaryOrDefaultAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<string> competitors = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IGetAiModelInsightsSummaryApiResponse?> GetAiModelInsightsSummaryOrDefaultAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<string> competitors = default, System.Threading.CancellationToken cancellationToken = default)
         {
             try
             {
@@ -478,7 +477,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"> (optional)</param>
         /// <param name="to">End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. (optional)</param>
         /// <param name="granularity"> (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="promptType">One prompt type or a comma-separated list: informational, navigational, commercial, transactional (optional)</param>
@@ -486,7 +485,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="competitors">Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM) (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IGetAiModelInsightsSummaryApiResponse"/>&gt;</returns>
-        public async Task<IGetAiModelInsightsSummaryApiResponse> GetAiModelInsightsSummaryAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<string> competitors = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IGetAiModelInsightsSummaryApiResponse> GetAiModelInsightsSummaryAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<string> competitors = default, System.Threading.CancellationToken cancellationToken = default)
         {
             UriBuilder uriBuilderLocalVar = new UriBuilder();
 
@@ -494,7 +493,7 @@ namespace LLMPulse.SDK.Api
             {
                 ValidateGetAiModelInsightsSummary(granularity, collectionId, countryCode, languageCode, promptType, brandKind, competitors);
 
-                FormatGetAiModelInsightsSummary(ref projectId, ref range, ref from, ref to, ref granularity, collectionId, ref countryCode, ref languageCode, ref promptType, ref brandKind, ref competitors);
+                FormatGetAiModelInsightsSummary(ref projectId, ref range, ref from, ref to, ref granularity, ref collectionId, ref countryCode, ref languageCode, ref promptType, ref brandKind, ref competitors);
 
                 using (HttpRequestMessage httpRequestMessageLocalVar = new HttpRequestMessage())
                 {
@@ -648,7 +647,7 @@ namespace LLMPulse.SDK.Api
             partial void OnDeserializationError(ref bool suppressDefaultLog, Exception exception, HttpStatusCode httpStatusCode);
         }
 
-        partial void FormatGetAiModelPositionDistribution(ref int projectId, ref Option<int> range, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<string> promptType, ref Option<string> brandKind, ref Option<string> model, ref Option<int> brand1, ref Option<int> brand2);
+        partial void FormatGetAiModelPositionDistribution(ref int projectId, ref Option<int> range, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> granularity, ref Option<string> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<string> promptType, ref Option<string> brandKind, ref Option<string> model, ref Option<int> brand1, ref Option<int> brand2);
 
         /// <summary>
         /// Validates the request parameters
@@ -661,7 +660,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandKind"></param>
         /// <param name="model"></param>
         /// <returns></returns>
-        private void ValidateGetAiModelPositionDistribution(Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> model)
+        private void ValidateGetAiModelPositionDistribution(Option<string> granularity, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> model)
         {
             if (granularity.IsSet && granularity.Value == null)
                 throw new ArgumentNullException(nameof(granularity));
@@ -702,7 +701,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="model"></param>
         /// <param name="brand1"></param>
         /// <param name="brand2"></param>
-        private void AfterGetAiModelPositionDistributionDefaultImplementation(IGetAiModelPositionDistributionApiResponse apiResponseLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> model, Option<int> brand1, Option<int> brand2)
+        private void AfterGetAiModelPositionDistributionDefaultImplementation(IGetAiModelPositionDistributionApiResponse apiResponseLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> model, Option<int> brand1, Option<int> brand2)
         {
             bool suppressDefaultLog = false;
             AfterGetAiModelPositionDistribution(ref suppressDefaultLog, apiResponseLocalVar, projectId, range, from, to, granularity, collectionId, countryCode, languageCode, promptType, brandKind, model, brand1, brand2);
@@ -728,7 +727,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="model"></param>
         /// <param name="brand1"></param>
         /// <param name="brand2"></param>
-        partial void AfterGetAiModelPositionDistribution(ref bool suppressDefaultLog, IGetAiModelPositionDistributionApiResponse apiResponseLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> model, Option<int> brand1, Option<int> brand2);
+        partial void AfterGetAiModelPositionDistribution(ref bool suppressDefaultLog, IGetAiModelPositionDistributionApiResponse apiResponseLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> model, Option<int> brand1, Option<int> brand2);
 
         /// <summary>
         /// Logs exceptions that occur while retrieving the server response
@@ -749,7 +748,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="model"></param>
         /// <param name="brand1"></param>
         /// <param name="brand2"></param>
-        private void OnErrorGetAiModelPositionDistributionDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> model, Option<int> brand1, Option<int> brand2)
+        private void OnErrorGetAiModelPositionDistributionDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> model, Option<int> brand1, Option<int> brand2)
         {
             bool suppressDefaultLogLocalVar = false;
             OnErrorGetAiModelPositionDistribution(ref suppressDefaultLogLocalVar, exceptionLocalVar, pathFormatLocalVar, pathLocalVar, projectId, range, from, to, granularity, collectionId, countryCode, languageCode, promptType, brandKind, model, brand1, brand2);
@@ -777,7 +776,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="model"></param>
         /// <param name="brand1"></param>
         /// <param name="brand2"></param>
-        partial void OnErrorGetAiModelPositionDistribution(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> model, Option<int> brand1, Option<int> brand2);
+        partial void OnErrorGetAiModelPositionDistribution(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<string> model, Option<int> brand1, Option<int> brand2);
 
         /// <summary>
         /// Position distribution comparison 
@@ -787,7 +786,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"> (optional)</param>
         /// <param name="to">End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. (optional)</param>
         /// <param name="granularity"> (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="promptType">One prompt type or a comma-separated list: informational, navigational, commercial, transactional (optional)</param>
@@ -797,7 +796,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brand2"> (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IGetAiModelPositionDistributionApiResponse"/>&gt;</returns>
-        public async Task<IGetAiModelPositionDistributionApiResponse?> GetAiModelPositionDistributionOrDefaultAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<string> model = default, Option<int> brand1 = default, Option<int> brand2 = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IGetAiModelPositionDistributionApiResponse?> GetAiModelPositionDistributionOrDefaultAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<string> model = default, Option<int> brand1 = default, Option<int> brand2 = default, System.Threading.CancellationToken cancellationToken = default)
         {
             try
             {
@@ -818,7 +817,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"> (optional)</param>
         /// <param name="to">End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. (optional)</param>
         /// <param name="granularity"> (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="promptType">One prompt type or a comma-separated list: informational, navigational, commercial, transactional (optional)</param>
@@ -828,7 +827,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brand2"> (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IGetAiModelPositionDistributionApiResponse"/>&gt;</returns>
-        public async Task<IGetAiModelPositionDistributionApiResponse> GetAiModelPositionDistributionAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<string> model = default, Option<int> brand1 = default, Option<int> brand2 = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IGetAiModelPositionDistributionApiResponse> GetAiModelPositionDistributionAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<string> model = default, Option<int> brand1 = default, Option<int> brand2 = default, System.Threading.CancellationToken cancellationToken = default)
         {
             UriBuilder uriBuilderLocalVar = new UriBuilder();
 
@@ -836,7 +835,7 @@ namespace LLMPulse.SDK.Api
             {
                 ValidateGetAiModelPositionDistribution(granularity, collectionId, countryCode, languageCode, promptType, brandKind, model);
 
-                FormatGetAiModelPositionDistribution(ref projectId, ref range, ref from, ref to, ref granularity, collectionId, ref countryCode, ref languageCode, ref promptType, ref brandKind, ref model, ref brand1, ref brand2);
+                FormatGetAiModelPositionDistribution(ref projectId, ref range, ref from, ref to, ref granularity, ref collectionId, ref countryCode, ref languageCode, ref promptType, ref brandKind, ref model, ref brand1, ref brand2);
 
                 using (HttpRequestMessage httpRequestMessageLocalVar = new HttpRequestMessage())
                 {
@@ -996,7 +995,7 @@ namespace LLMPulse.SDK.Api
             partial void OnDeserializationError(ref bool suppressDefaultLog, Exception exception, HttpStatusCode httpStatusCode);
         }
 
-        partial void FormatGetAiOverviewResults(ref int projectId, ref Option<int> range, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<string> promptType, ref Option<string> brandKind, ref Option<int> page, ref Option<int> perPage);
+        partial void FormatGetAiOverviewResults(ref int projectId, ref Option<int> range, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> granularity, ref Option<string> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<string> promptType, ref Option<string> brandKind, ref Option<int> page, ref Option<int> perPage);
 
         /// <summary>
         /// Validates the request parameters
@@ -1008,7 +1007,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="promptType"></param>
         /// <param name="brandKind"></param>
         /// <returns></returns>
-        private void ValidateGetAiOverviewResults(Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind)
+        private void ValidateGetAiOverviewResults(Option<string> granularity, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind)
         {
             if (granularity.IsSet && granularity.Value == null)
                 throw new ArgumentNullException(nameof(granularity));
@@ -1045,7 +1044,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandKind"></param>
         /// <param name="page"></param>
         /// <param name="perPage"></param>
-        private void AfterGetAiOverviewResultsDefaultImplementation(IGetAiOverviewResultsApiResponse apiResponseLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<int> page, Option<int> perPage)
+        private void AfterGetAiOverviewResultsDefaultImplementation(IGetAiOverviewResultsApiResponse apiResponseLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<int> page, Option<int> perPage)
         {
             bool suppressDefaultLog = false;
             AfterGetAiOverviewResults(ref suppressDefaultLog, apiResponseLocalVar, projectId, range, from, to, granularity, collectionId, countryCode, languageCode, promptType, brandKind, page, perPage);
@@ -1070,7 +1069,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandKind"></param>
         /// <param name="page"></param>
         /// <param name="perPage"></param>
-        partial void AfterGetAiOverviewResults(ref bool suppressDefaultLog, IGetAiOverviewResultsApiResponse apiResponseLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<int> page, Option<int> perPage);
+        partial void AfterGetAiOverviewResults(ref bool suppressDefaultLog, IGetAiOverviewResultsApiResponse apiResponseLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<int> page, Option<int> perPage);
 
         /// <summary>
         /// Logs exceptions that occur while retrieving the server response
@@ -1090,7 +1089,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandKind"></param>
         /// <param name="page"></param>
         /// <param name="perPage"></param>
-        private void OnErrorGetAiOverviewResultsDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<int> page, Option<int> perPage)
+        private void OnErrorGetAiOverviewResultsDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<int> page, Option<int> perPage)
         {
             bool suppressDefaultLogLocalVar = false;
             OnErrorGetAiOverviewResults(ref suppressDefaultLogLocalVar, exceptionLocalVar, pathFormatLocalVar, pathLocalVar, projectId, range, from, to, granularity, collectionId, countryCode, languageCode, promptType, brandKind, page, perPage);
@@ -1117,7 +1116,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandKind"></param>
         /// <param name="page"></param>
         /// <param name="perPage"></param>
-        partial void OnErrorGetAiOverviewResults(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<int> page, Option<int> perPage);
+        partial void OnErrorGetAiOverviewResults(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> granularity, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> promptType, Option<string> brandKind, Option<int> page, Option<int> perPage);
 
         /// <summary>
         /// Google AI Overview result availability 
@@ -1127,7 +1126,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"> (optional)</param>
         /// <param name="to">End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. (optional)</param>
         /// <param name="granularity"> (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="promptType">One prompt type or a comma-separated list: informational, navigational, commercial, transactional (optional)</param>
@@ -1136,7 +1135,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="perPage"> (optional, default to 20)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IGetAiOverviewResultsApiResponse"/>&gt;</returns>
-        public async Task<IGetAiOverviewResultsApiResponse?> GetAiOverviewResultsOrDefaultAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> page = default, Option<int> perPage = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IGetAiOverviewResultsApiResponse?> GetAiOverviewResultsOrDefaultAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> page = default, Option<int> perPage = default, System.Threading.CancellationToken cancellationToken = default)
         {
             try
             {
@@ -1157,7 +1156,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"> (optional)</param>
         /// <param name="to">End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. (optional)</param>
         /// <param name="granularity"> (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="promptType">One prompt type or a comma-separated list: informational, navigational, commercial, transactional (optional)</param>
@@ -1166,7 +1165,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="perPage"> (optional, default to 20)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IGetAiOverviewResultsApiResponse"/>&gt;</returns>
-        public async Task<IGetAiOverviewResultsApiResponse> GetAiOverviewResultsAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> page = default, Option<int> perPage = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IGetAiOverviewResultsApiResponse> GetAiOverviewResultsAsync(int projectId, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> granularity = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> promptType = default, Option<string> brandKind = default, Option<int> page = default, Option<int> perPage = default, System.Threading.CancellationToken cancellationToken = default)
         {
             UriBuilder uriBuilderLocalVar = new UriBuilder();
 
@@ -1174,7 +1173,7 @@ namespace LLMPulse.SDK.Api
             {
                 ValidateGetAiOverviewResults(granularity, collectionId, countryCode, languageCode, promptType, brandKind);
 
-                FormatGetAiOverviewResults(ref projectId, ref range, ref from, ref to, ref granularity, collectionId, ref countryCode, ref languageCode, ref promptType, ref brandKind, ref page, ref perPage);
+                FormatGetAiOverviewResults(ref projectId, ref range, ref from, ref to, ref granularity, ref collectionId, ref countryCode, ref languageCode, ref promptType, ref brandKind, ref page, ref perPage);
 
                 using (HttpRequestMessage httpRequestMessageLocalVar = new HttpRequestMessage())
                 {

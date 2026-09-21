@@ -54,7 +54,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="store">provider&#x3D;mobile_apps only (optional, default to google_play)</param>
         /// <param name="owned">Return only rows belonging to the account&#39;s own connected profile (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="brandKind">Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. (optional)</param>
@@ -64,7 +64,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListOwnedMediaApiResponse"/>&gt;</returns>
-        Task<IListOwnedMediaApiResponse> ListOwnedMediaAsync(int projectId, string provider, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<string> store = default, Option<bool> owned = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListOwnedMediaApiResponse> ListOwnedMediaAsync(int projectId, string provider, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<string> store = default, Option<bool> owned = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// List owned-media citations
@@ -80,7 +80,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="store">provider&#x3D;mobile_apps only (optional, default to google_play)</param>
         /// <param name="owned">Return only rows belonging to the account&#39;s own connected profile (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="brandKind">Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. (optional)</param>
@@ -90,7 +90,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListOwnedMediaApiResponse"/>?&gt;</returns>
-        Task<IListOwnedMediaApiResponse?> ListOwnedMediaOrDefaultAsync(int projectId, string provider, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<string> store = default, Option<bool> owned = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListOwnedMediaApiResponse?> ListOwnedMediaOrDefaultAsync(int projectId, string provider, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<string> store = default, Option<bool> owned = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// List cited Reddit content
@@ -111,7 +111,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="order">Sort field; the allowed set depends on view (optional)</param>
         /// <param name="direction"> (optional, default to desc)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="brandKind">Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. (optional)</param>
@@ -121,7 +121,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListRedditCitationsApiResponse"/>&gt;</returns>
-        Task<IListRedditCitationsApiResponse> ListRedditCitationsAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<string> subreddit = default, Option<string> author = default, Option<string> status = default, Option<bool> owned = default, Option<string> brand = default, Option<string> order = default, Option<string> direction = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListRedditCitationsApiResponse> ListRedditCitationsAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<string> subreddit = default, Option<string> author = default, Option<string> status = default, Option<bool> owned = default, Option<string> brand = default, Option<string> order = default, Option<string> direction = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
 
         /// <summary>
         /// List cited Reddit content
@@ -141,7 +141,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="order">Sort field; the allowed set depends on view (optional)</param>
         /// <param name="direction"> (optional, default to desc)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="brandKind">Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. (optional)</param>
@@ -151,7 +151,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListRedditCitationsApiResponse"/>?&gt;</returns>
-        Task<IListRedditCitationsApiResponse?> ListRedditCitationsOrDefaultAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<string> subreddit = default, Option<string> author = default, Option<string> status = default, Option<bool> owned = default, Option<string> brand = default, Option<string> order = default, Option<string> direction = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
+        Task<IListRedditCitationsApiResponse?> ListRedditCitationsOrDefaultAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<string> subreddit = default, Option<string> author = default, Option<string> status = default, Option<bool> owned = default, Option<string> brand = default, Option<string> order = default, Option<string> direction = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default);
     }
 
     /// <summary>
@@ -277,7 +277,7 @@ namespace LLMPulse.SDK.Api
             BearerTokenProvider = bearerTokenProvider;
         }
 
-        partial void FormatListOwnedMedia(ref int projectId, ref string provider, ref Option<int> page, ref Option<int> perPage, ref Option<string> view, ref Option<string> store, ref Option<bool> owned, ref Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<string> brandKind, ref Option<int> range, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> output);
+        partial void FormatListOwnedMedia(ref int projectId, ref string provider, ref Option<int> page, ref Option<int> perPage, ref Option<string> view, ref Option<string> store, ref Option<bool> owned, ref Option<string> model, ref Option<string> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<string> brandKind, ref Option<int> range, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> output);
 
         /// <summary>
         /// Validates the request parameters
@@ -292,7 +292,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandKind"></param>
         /// <param name="output"></param>
         /// <returns></returns>
-        private void ValidateListOwnedMedia(string provider, Option<string> view, Option<string> store, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<string> output)
+        private void ValidateListOwnedMedia(string provider, Option<string> view, Option<string> store, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<string> output)
         {
             if (provider == null)
                 throw new ArgumentNullException(nameof(provider));
@@ -342,7 +342,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <param name="output"></param>
-        private void AfterListOwnedMediaDefaultImplementation(IListOwnedMediaApiResponse apiResponseLocalVar, int projectId, string provider, Option<int> page, Option<int> perPage, Option<string> view, Option<string> store, Option<bool> owned, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output)
+        private void AfterListOwnedMediaDefaultImplementation(IListOwnedMediaApiResponse apiResponseLocalVar, int projectId, string provider, Option<int> page, Option<int> perPage, Option<string> view, Option<string> store, Option<bool> owned, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output)
         {
             bool suppressDefaultLog = false;
             AfterListOwnedMedia(ref suppressDefaultLog, apiResponseLocalVar, projectId, provider, page, perPage, view, store, owned, model, collectionId, countryCode, languageCode, brandKind, range, from, to, output);
@@ -371,7 +371,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <param name="output"></param>
-        partial void AfterListOwnedMedia(ref bool suppressDefaultLog, IListOwnedMediaApiResponse apiResponseLocalVar, int projectId, string provider, Option<int> page, Option<int> perPage, Option<string> view, Option<string> store, Option<bool> owned, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output);
+        partial void AfterListOwnedMedia(ref bool suppressDefaultLog, IListOwnedMediaApiResponse apiResponseLocalVar, int projectId, string provider, Option<int> page, Option<int> perPage, Option<string> view, Option<string> store, Option<bool> owned, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output);
 
         /// <summary>
         /// Logs exceptions that occur while retrieving the server response
@@ -395,7 +395,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <param name="output"></param>
-        private void OnErrorListOwnedMediaDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, string provider, Option<int> page, Option<int> perPage, Option<string> view, Option<string> store, Option<bool> owned, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output)
+        private void OnErrorListOwnedMediaDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, string provider, Option<int> page, Option<int> perPage, Option<string> view, Option<string> store, Option<bool> owned, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output)
         {
             bool suppressDefaultLogLocalVar = false;
             OnErrorListOwnedMedia(ref suppressDefaultLogLocalVar, exceptionLocalVar, pathFormatLocalVar, pathLocalVar, projectId, provider, page, perPage, view, store, owned, model, collectionId, countryCode, languageCode, brandKind, range, from, to, output);
@@ -426,7 +426,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <param name="output"></param>
-        partial void OnErrorListOwnedMedia(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, string provider, Option<int> page, Option<int> perPage, Option<string> view, Option<string> store, Option<bool> owned, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output);
+        partial void OnErrorListOwnedMedia(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, string provider, Option<int> page, Option<int> perPage, Option<string> view, Option<string> store, Option<bool> owned, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output);
 
         /// <summary>
         /// List owned-media citations Which owned-media content AI answers cite, by platform. &#x60;provider&#x60; is required. Each row carries a &#x60;yours&#x60; flag so you can compare your own presence against everyone else cited on the same platform. view&#x3D;own_citations returns the raw citations of the connected profile only and stays empty until a profile is connected. For Reddit use /dimensions/reddit. Requires the Growth plan or above.
@@ -439,7 +439,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="store">provider&#x3D;mobile_apps only (optional, default to google_play)</param>
         /// <param name="owned">Return only rows belonging to the account&#39;s own connected profile (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="brandKind">Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. (optional)</param>
@@ -449,7 +449,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListOwnedMediaApiResponse"/>&gt;</returns>
-        public async Task<IListOwnedMediaApiResponse?> ListOwnedMediaOrDefaultAsync(int projectId, string provider, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<string> store = default, Option<bool> owned = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListOwnedMediaApiResponse?> ListOwnedMediaOrDefaultAsync(int projectId, string provider, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<string> store = default, Option<bool> owned = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
         {
             try
             {
@@ -473,7 +473,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="store">provider&#x3D;mobile_apps only (optional, default to google_play)</param>
         /// <param name="owned">Return only rows belonging to the account&#39;s own connected profile (optional)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="brandKind">Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. (optional)</param>
@@ -483,7 +483,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListOwnedMediaApiResponse"/>&gt;</returns>
-        public async Task<IListOwnedMediaApiResponse> ListOwnedMediaAsync(int projectId, string provider, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<string> store = default, Option<bool> owned = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListOwnedMediaApiResponse> ListOwnedMediaAsync(int projectId, string provider, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<string> store = default, Option<bool> owned = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
         {
             UriBuilder uriBuilderLocalVar = new UriBuilder();
 
@@ -491,7 +491,7 @@ namespace LLMPulse.SDK.Api
             {
                 ValidateListOwnedMedia(provider, view, store, model, collectionId, countryCode, languageCode, brandKind, output);
 
-                FormatListOwnedMedia(ref projectId, ref provider, ref page, ref perPage, ref view, ref store, ref owned, ref model, collectionId, ref countryCode, ref languageCode, ref brandKind, ref range, ref from, ref to, ref output);
+                FormatListOwnedMedia(ref projectId, ref provider, ref page, ref perPage, ref view, ref store, ref owned, ref model, ref collectionId, ref countryCode, ref languageCode, ref brandKind, ref range, ref from, ref to, ref output);
 
                 using (HttpRequestMessage httpRequestMessageLocalVar = new HttpRequestMessage())
                 {
@@ -705,7 +705,7 @@ namespace LLMPulse.SDK.Api
             partial void OnDeserializationError(ref bool suppressDefaultLog, Exception exception, HttpStatusCode httpStatusCode);
         }
 
-        partial void FormatListRedditCitations(ref int projectId, ref Option<int> page, ref Option<int> perPage, ref Option<string> view, ref Option<string> subreddit, ref Option<string> author, ref Option<string> status, ref Option<bool> owned, ref Option<string> brand, ref Option<string> order, ref Option<string> direction, ref Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<string> brandKind, ref Option<int> range, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> output);
+        partial void FormatListRedditCitations(ref int projectId, ref Option<int> page, ref Option<int> perPage, ref Option<string> view, ref Option<string> subreddit, ref Option<string> author, ref Option<string> status, ref Option<bool> owned, ref Option<string> brand, ref Option<string> order, ref Option<string> direction, ref Option<string> model, ref Option<string> collectionId, ref Option<string> countryCode, ref Option<string> languageCode, ref Option<string> brandKind, ref Option<int> range, ref Option<DateTime> from, ref Option<DateTime> to, ref Option<string> output);
 
         /// <summary>
         /// Validates the request parameters
@@ -724,7 +724,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="brandKind"></param>
         /// <param name="output"></param>
         /// <returns></returns>
-        private void ValidateListRedditCitations(Option<string> view, Option<string> subreddit, Option<string> author, Option<string> status, Option<string> brand, Option<string> order, Option<string> direction, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<string> output)
+        private void ValidateListRedditCitations(Option<string> view, Option<string> subreddit, Option<string> author, Option<string> status, Option<string> brand, Option<string> order, Option<string> direction, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<string> output)
         {
             if (view.IsSet && view.Value == null)
                 throw new ArgumentNullException(nameof(view));
@@ -790,7 +790,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <param name="output"></param>
-        private void AfterListRedditCitationsDefaultImplementation(IListRedditCitationsApiResponse apiResponseLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<string> subreddit, Option<string> author, Option<string> status, Option<bool> owned, Option<string> brand, Option<string> order, Option<string> direction, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output)
+        private void AfterListRedditCitationsDefaultImplementation(IListRedditCitationsApiResponse apiResponseLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<string> subreddit, Option<string> author, Option<string> status, Option<bool> owned, Option<string> brand, Option<string> order, Option<string> direction, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output)
         {
             bool suppressDefaultLog = false;
             AfterListRedditCitations(ref suppressDefaultLog, apiResponseLocalVar, projectId, page, perPage, view, subreddit, author, status, owned, brand, order, direction, model, collectionId, countryCode, languageCode, brandKind, range, from, to, output);
@@ -823,7 +823,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <param name="output"></param>
-        partial void AfterListRedditCitations(ref bool suppressDefaultLog, IListRedditCitationsApiResponse apiResponseLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<string> subreddit, Option<string> author, Option<string> status, Option<bool> owned, Option<string> brand, Option<string> order, Option<string> direction, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output);
+        partial void AfterListRedditCitations(ref bool suppressDefaultLog, IListRedditCitationsApiResponse apiResponseLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<string> subreddit, Option<string> author, Option<string> status, Option<bool> owned, Option<string> brand, Option<string> order, Option<string> direction, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output);
 
         /// <summary>
         /// Logs exceptions that occur while retrieving the server response
@@ -851,7 +851,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <param name="output"></param>
-        private void OnErrorListRedditCitationsDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<string> subreddit, Option<string> author, Option<string> status, Option<bool> owned, Option<string> brand, Option<string> order, Option<string> direction, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output)
+        private void OnErrorListRedditCitationsDefaultImplementation(Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<string> subreddit, Option<string> author, Option<string> status, Option<bool> owned, Option<string> brand, Option<string> order, Option<string> direction, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output)
         {
             bool suppressDefaultLogLocalVar = false;
             OnErrorListRedditCitations(ref suppressDefaultLogLocalVar, exceptionLocalVar, pathFormatLocalVar, pathLocalVar, projectId, page, perPage, view, subreddit, author, status, owned, brand, order, direction, model, collectionId, countryCode, languageCode, brandKind, range, from, to, output);
@@ -886,7 +886,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <param name="output"></param>
-        partial void OnErrorListRedditCitations(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<string> subreddit, Option<string> author, Option<string> status, Option<bool> owned, Option<string> brand, Option<string> order, Option<string> direction, Option<string> model, Option<GetTimeseriesCollectionIdParameter> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output);
+        partial void OnErrorListRedditCitations(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, Option<int> page, Option<int> perPage, Option<string> view, Option<string> subreddit, Option<string> author, Option<string> status, Option<bool> owned, Option<string> brand, Option<string> order, Option<string> direction, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output);
 
         /// <summary>
         /// List cited Reddit content Which Reddit content AI answers cite for your tracked prompts. view&#x3D;subreddits (default) returns one row per subreddit with its citation count, unique authors and positive/negative sentiment split; view&#x3D;authors returns one row per author; view&#x3D;threads returns the individual cited threads with upvotes, comments, average position and dominant sentiment. Requires the Growth plan or above.
@@ -903,7 +903,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="order">Sort field; the allowed set depends on view (optional)</param>
         /// <param name="direction"> (optional, default to desc)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="brandKind">Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. (optional)</param>
@@ -913,7 +913,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListRedditCitationsApiResponse"/>&gt;</returns>
-        public async Task<IListRedditCitationsApiResponse?> ListRedditCitationsOrDefaultAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<string> subreddit = default, Option<string> author = default, Option<string> status = default, Option<bool> owned = default, Option<string> brand = default, Option<string> order = default, Option<string> direction = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListRedditCitationsApiResponse?> ListRedditCitationsOrDefaultAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<string> subreddit = default, Option<string> author = default, Option<string> status = default, Option<bool> owned = default, Option<string> brand = default, Option<string> order = default, Option<string> direction = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
         {
             try
             {
@@ -941,7 +941,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="order">Sort field; the allowed set depends on view (optional)</param>
         /// <param name="direction"> (optional, default to desc)</param>
         /// <param name="model">Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. (optional)</param>
-        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs (optional)</param>
+        /// <param name="collectionId">One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. (optional)</param>
         /// <param name="countryCode">One ISO country code or a comma-separated list (e.g. US,GB,DE) (optional)</param>
         /// <param name="languageCode">One ISO language code or a comma-separated list (e.g. en,es,de) (optional)</param>
         /// <param name="brandKind">Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. (optional)</param>
@@ -951,7 +951,7 @@ namespace LLMPulse.SDK.Api
         /// <param name="output">Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. (optional)</param>
         /// <param name="cancellationToken">Cancellation Token to cancel the request.</param>
         /// <returns><see cref="Task"/>&lt;<see cref="IListRedditCitationsApiResponse"/>&gt;</returns>
-        public async Task<IListRedditCitationsApiResponse> ListRedditCitationsAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<string> subreddit = default, Option<string> author = default, Option<string> status = default, Option<bool> owned = default, Option<string> brand = default, Option<string> order = default, Option<string> direction = default, Option<string> model = default, Option<GetTimeseriesCollectionIdParameter> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
+        public async Task<IListRedditCitationsApiResponse> ListRedditCitationsAsync(int projectId, Option<int> page = default, Option<int> perPage = default, Option<string> view = default, Option<string> subreddit = default, Option<string> author = default, Option<string> status = default, Option<bool> owned = default, Option<string> brand = default, Option<string> order = default, Option<string> direction = default, Option<string> model = default, Option<string> collectionId = default, Option<string> countryCode = default, Option<string> languageCode = default, Option<string> brandKind = default, Option<int> range = default, Option<DateTime> from = default, Option<DateTime> to = default, Option<string> output = default, System.Threading.CancellationToken cancellationToken = default)
         {
             UriBuilder uriBuilderLocalVar = new UriBuilder();
 
@@ -959,7 +959,7 @@ namespace LLMPulse.SDK.Api
             {
                 ValidateListRedditCitations(view, subreddit, author, status, brand, order, direction, model, collectionId, countryCode, languageCode, brandKind, output);
 
-                FormatListRedditCitations(ref projectId, ref page, ref perPage, ref view, ref subreddit, ref author, ref status, ref owned, ref brand, ref order, ref direction, ref model, collectionId, ref countryCode, ref languageCode, ref brandKind, ref range, ref from, ref to, ref output);
+                FormatListRedditCitations(ref projectId, ref page, ref perPage, ref view, ref subreddit, ref author, ref status, ref owned, ref brand, ref order, ref direction, ref model, ref collectionId, ref countryCode, ref languageCode, ref brandKind, ref range, ref from, ref to, ref output);
 
                 using (HttpRequestMessage httpRequestMessageLocalVar = new HttpRequestMessage())
                 {
