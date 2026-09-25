@@ -12,7 +12,7 @@
     <Description>A library generated from a OpenAPI doc</Description>
     <Copyright>No Copyright</Copyright>
     <RootNamespace>LLMPulse.SDK</RootNamespace>
-    <Version>1.47.0</Version>
+    <Version>1.48.0</Version>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\LLMPulse.SDK.xml</DocumentationFile>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryUrl>https://github.com/LLM-Pulse/llmpulse-csharp.git</RepositoryUrl>

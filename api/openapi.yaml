@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.47.0
+  version: 1.48.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -2913,7 +2913,8 @@ paths:
         style: form
       responses:
         "200":
-          description: Paginated prompts
+          description: "Paginated prompts. Every row carries app_url, the link that\
+            \ opens the prompt in the app"
       summary: List prompts
       tags:
       - Prompts
@@ -3095,7 +3096,8 @@ paths:
         style: form
       responses:
         "200":
-          description: Paginated executions
+          description: "Paginated executions. Every row carries app_url, the link\
+            \ that opens the answer in the app"
       summary: List prompt executions
       tags:
       - Prompts
@@ -6332,7 +6334,8 @@ paths:
         style: form
       responses:
         "200":
-          description: Paginated answers
+          description: "Paginated answers. Every item carries app_url, the link that\
+            \ opens the answer in the app"
         "422":
           content:
             application/json:
@@ -7749,7 +7752,8 @@ paths:
         style: form
       responses:
         "200":
-          description: Paginated technical GEO report summaries
+          description: "Paginated technical GEO report summaries. Every summary carries\
+            \ app_url, the link that opens the report in the app"
         "422":
           content:
             application/json:
@@ -7778,7 +7782,8 @@ paths:
         required: true
       responses:
         "201":
-          description: Created
+          description: Created. app_urls maps each created report type to the link
+            that opens that report in the app
         "403":
           content:
             application/json:
@@ -7851,7 +7856,8 @@ paths:
         style: simple
       responses:
         "200":
-          description: Report status and completed result data
+          description: "Report status and completed result data, plus app_url, the\
+            \ link that opens the report in the app"
         "404":
           content:
             application/json:
@@ -9264,6 +9270,7 @@ components:
         citation_rate: 4.145608029883936
         avg_mention_position: 7.386281948385884
         avg_position: 1.2315135367772556
+        app_url: https://openapi-generator.tech
       properties:
         prompt_id:
           type: integer
@@ -9290,6 +9297,11 @@ components:
         avg_position:
           nullable: true
           type: number
+        app_url:
+          description: "Opens this prompt in the app. The link names its project,\
+            \ so it opens there for any user with access to that project"
+          format: uri
+          type: string
       type: object
     PromptSummaryResponse:
       example:
@@ -9315,6 +9327,7 @@ components:
           citation_rate: 4.145608029883936
           avg_mention_position: 7.386281948385884
           avg_position: 1.2315135367772556
+          app_url: https://openapi-generator.tech
         - prompt_id: 5
           prompt_text: prompt_text
           model: model
@@ -9326,6 +9339,7 @@ components:
           citation_rate: 4.145608029883936
           avg_mention_position: 7.386281948385884
           avg_position: 1.2315135367772556
+          app_url: https://openapi-generator.tech
         request_id: request_id
       properties:
         project_id:
@@ -9643,6 +9657,7 @@ components:
         locale:
           country_code: country_code
           language_code: language_code
+        app_url: https://openapi-generator.tech
       properties:
         id:
           type: integer
@@ -9705,6 +9720,11 @@ components:
           type: array
         locale:
           $ref: "#/components/schemas/AnswerDetails_locale"
+        app_url:
+          description: "Opens this answer in the app. The link names its project,\
+            \ so it opens there for any user with access to that project"
+          format: uri
+          type: string
       type: object
     ProjectCreateRequest:
       example:
@@ -11177,9 +11197,9 @@ components:
       type: object
   securitySchemes:
     BearerAuth:
-      description: API key authentication. Keys start with `llmpulse_` and are managed
-        at https://llmpulse.ai/app/api_keys (Scale plan or above). Used for the REST
-        API and as a headless option for /mcp.
+      description: API key authentication. Keys are managed at https://llmpulse.ai/app/api_keys
+        (Scale plan or above). Used for the REST API and as a headless option for
+        /mcp.
       scheme: bearer
       type: http
 
