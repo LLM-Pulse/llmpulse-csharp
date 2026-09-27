@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.48.0
+  version: 1.49.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -5256,12 +5256,20 @@ paths:
         \ honor the project's exact-subdomain setting. Filter vocabulary aligns with\
         \ `source_type` returned by the API. Unavailable page content keeps the cited\
         \ URL and citation metrics. Page metadata/content and unknown brand_mentioned/competitor_mentioned\
-        \ return null; content_gap_status is content_unavailable (or missing_page_cache).\
-        \ Mention arrays stay empty until usable content has completed analysis. status_code\
-        \ shows a saved successful response or observed 404/410; other crawl failures\
-        \ and error_message are hidden. last_crawled_at dates the saved copy. Domain/host\
-        \ crawled_urls_count counts usable copies; mention counts are null when no\
-        \ URL has completed analysis."
+        \ return null. content_gap_status is content_unavailable (or missing_page_cache)\
+        \ without usable content, and mentions_not_processed when the page has usable\
+        \ content but its mention analysis has not completed for this project. Mention\
+        \ fields (brand_mentioned, competitor_mentioned, brand_position, brands, mentions,\
+        \ content_gap_status) describe the analysis for the requesting project: a\
+        \ page not yet analyzed for it returns null (never false) brand_mentioned,\
+        \ competitor_mentioned and brand_position, empty brands and mentions arrays\
+        \ and page_cache.mentions_processed false. page_cache.mentions_processed is\
+        \ true exactly when brand_mentioned is not null. An analyzed page keeps its\
+        \ last result until a newer analysis replaces it. status_code shows a saved\
+        \ successful response or observed 404/410; other crawl failures and error_message\
+        \ are hidden. last_crawled_at dates the saved copy. Domain/host crawled_urls_count\
+        \ counts usable copies; brand_mentioned_urls_count and competitor_mentioned_urls_count\
+        \ count only URLs analyzed for the project and are null when none is."
       operationId: listCitationGroups
       parameters:
       - description: Project ID
@@ -5437,7 +5445,10 @@ paths:
           - negative
           type: string
         style: form
-      - explode: true
+      - description: "mentioned: the cited page mentions your brand. gap: it mentions\
+          \ a competitor but not your brand. Only pages with usable content whose\
+          \ mention analysis has completed for this project match."
+        explode: true
         in: query
         name: content_gap
         required: false
@@ -5603,14 +5614,22 @@ paths:
       - Sources & Citation Intelligence
   /citation_intelligence/urls/{url_sha256}:
     get:
-      description: Unavailable page content keeps the cited URL and citation metrics.
-        Page metadata/content and unknown brand_mentioned/competitor_mentioned return
-        null; content_gap_status is content_unavailable (or missing_page_cache). Mention
-        arrays stay empty until usable content has completed analysis. status_code
-        shows a saved successful response or observed 404/410; other crawl failures
-        and error_message are hidden. last_crawled_at dates the saved copy. Domain/host
-        crawled_urls_count counts usable copies; mention counts are null when no URL
-        has completed analysis.
+      description: "Unavailable page content keeps the cited URL and citation metrics.\
+        \ Page metadata/content and unknown brand_mentioned/competitor_mentioned return\
+        \ null. content_gap_status is content_unavailable (or missing_page_cache)\
+        \ without usable content, and mentions_not_processed when the page has usable\
+        \ content but its mention analysis has not completed for this project. Mention\
+        \ fields (brand_mentioned, competitor_mentioned, brand_position, brands, mentions,\
+        \ content_gap_status) describe the analysis for the requesting project: a\
+        \ page not yet analyzed for it returns null (never false) brand_mentioned,\
+        \ competitor_mentioned and brand_position, empty brands and mentions arrays\
+        \ and page_cache.mentions_processed false. page_cache.mentions_processed is\
+        \ true exactly when brand_mentioned is not null. An analyzed page keeps its\
+        \ last result until a newer analysis replaces it. status_code shows a saved\
+        \ successful response or observed 404/410; other crawl failures and error_message\
+        \ are hidden. last_crawled_at dates the saved copy. Domain/host crawled_urls_count\
+        \ counts usable copies; brand_mentioned_urls_count and competitor_mentioned_urls_count\
+        \ count only URLs analyzed for the project and are null when none is."
       operationId: getCitedUrlDetail
       parameters:
       - description: Project ID
@@ -5706,14 +5725,22 @@ paths:
       - Sources & Citation Intelligence
   /citation_intelligence/urls/{url_sha256}/content:
     get:
-      description: Unavailable page content keeps the cited URL and citation metrics.
-        Page metadata/content and unknown brand_mentioned/competitor_mentioned return
-        null; content_gap_status is content_unavailable (or missing_page_cache). Mention
-        arrays stay empty until usable content has completed analysis. status_code
-        shows a saved successful response or observed 404/410; other crawl failures
-        and error_message are hidden. last_crawled_at dates the saved copy. Domain/host
-        crawled_urls_count counts usable copies; mention counts are null when no URL
-        has completed analysis.
+      description: "Unavailable page content keeps the cited URL and citation metrics.\
+        \ Page metadata/content and unknown brand_mentioned/competitor_mentioned return\
+        \ null. content_gap_status is content_unavailable (or missing_page_cache)\
+        \ without usable content, and mentions_not_processed when the page has usable\
+        \ content but its mention analysis has not completed for this project. Mention\
+        \ fields (brand_mentioned, competitor_mentioned, brand_position, brands, mentions,\
+        \ content_gap_status) describe the analysis for the requesting project: a\
+        \ page not yet analyzed for it returns null (never false) brand_mentioned,\
+        \ competitor_mentioned and brand_position, empty brands and mentions arrays\
+        \ and page_cache.mentions_processed false. page_cache.mentions_processed is\
+        \ true exactly when brand_mentioned is not null. An analyzed page keeps its\
+        \ last result until a newer analysis replaces it. status_code shows a saved\
+        \ successful response or observed 404/410; other crawl failures and error_message\
+        \ are hidden. last_crawled_at dates the saved copy. Domain/host crawled_urls_count\
+        \ counts usable copies; brand_mentioned_urls_count and competitor_mentioned_urls_count\
+        \ count only URLs analyzed for the project and are null when none is."
       operationId: getCitedUrlContent
       parameters:
       - description: Project ID
