@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 **Id** | **int** |  | [optional] 
 **CompetitorId** | **int** |  | [optional] 
 **Name** | **string** |  | [optional] 
-**Domain** | **string** | Bare (scheme-less) domain | [optional] 
+**Domain** | **string** | Bare (scheme-less) domain. Null for the project actor when the project has no URL. | [optional] 
 
 [[Back to Model list]](../../README.md#documentation-for-models) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to README]](../../README.md)
 

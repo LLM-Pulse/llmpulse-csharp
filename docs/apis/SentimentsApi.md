@@ -4,16 +4,16 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 
 | Method | HTTP request | Description |
 |--------|--------------|-------------|
-| [**ListSentimentCategories**](SentimentsApi.md#listsentimentcategories) | **GET** /dimensions/sentiments | List sentiment categories |
-| [**ListSentimentRecords**](SentimentsApi.md#listsentimentrecords) | **GET** /sentiments | List sentiment records |
+| [**ListSentimentCategories**](SentimentsApi.md#listsentimentcategories) | **GET** /dimensions/sentiments | List sentiment categories (Growth plan or above) |
+| [**ListSentimentRecords**](SentimentsApi.md#listsentimentrecords) | **GET** /sentiments | List sentiment records (Growth plan or above) |
 
 <a id="listsentimentcategories"></a>
 # **ListSentimentCategories**
 > void ListSentimentCategories (int projectId, string output = null)
 
-List sentiment categories
+List sentiment categories (Growth plan or above)
 
-Sentiment metric keys + labels + colors. For records, use /sentiments.
+Sentiment metric keys + labels + colors. For records, use /sentiments. Requires the Growth plan; lower tiers receive ERR_PLAN_REQUIRED.
 
 
 ### Parameters
@@ -34,13 +34,14 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | Sentiment buckets |  -  |
+| **403** | Endpoint requires the Growth plan or above |  -  |
 
 [[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
 
@@ -48,7 +49,9 @@ void (empty response body)
 # **ListSentimentRecords**
 > void ListSentimentRecords (int projectId, int competitorId = null, bool brandOnly = null, string analysis = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, DateTime from = null, DateTime to = null, int page = null, int perPage = null)
 
-List sentiment records
+List sentiment records (Growth plan or above)
+
+Requires the Growth plan; lower tiers receive ERR_PLAN_REQUIRED.
 
 
 ### Parameters
@@ -86,6 +89,7 @@ void (empty response body)
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | Paginated sentiments |  -  |
+| **403** | Endpoint requires the Growth plan or above |  -  |
 | **422** | Invalid parameters |  -  |
 
 [[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)

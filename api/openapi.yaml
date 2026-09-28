@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.50.0
+  version: 1.51.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -2740,7 +2740,8 @@ paths:
       - Projects
   /dimensions/sentiments:
     get:
-      description: "Sentiment metric keys + labels + colors. For records, use /sentiments."
+      description: "Sentiment metric keys + labels + colors. For records, use /sentiments.\
+        \ Requires the Growth plan; lower tiers receive ERR_PLAN_REQUIRED."
       operationId: listSentimentCategories
       parameters:
       - description: Project ID
@@ -2768,7 +2769,18 @@ paths:
       responses:
         "200":
           description: Sentiment buckets
-      summary: List sentiment categories
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Growth plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Endpoint requires the Growth plan or above
+      summary: List sentiment categories (Growth plan or above)
       tags:
       - Sentiments
   /dimensions/prompts:
@@ -6430,6 +6442,7 @@ paths:
       - Answers
   /sentiments:
     get:
+      description: Requires the Growth plan; lower tiers receive ERR_PLAN_REQUIRED.
       operationId: listSentimentRecords
       parameters:
       - description: Project ID
@@ -6555,6 +6568,17 @@ paths:
       responses:
         "200":
           description: Paginated sentiments
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Growth plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Endpoint requires the Growth plan or above
         "422":
           content:
             application/json:
@@ -6566,7 +6590,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Invalid parameters
-      summary: List sentiment records
+      summary: List sentiment records (Growth plan or above)
       tags:
       - Sentiments
   /recommendations:
@@ -8831,6 +8855,17 @@ components:
           schema:
             $ref: "#/components/schemas/ApiError"
       description: Endpoint requires a higher plan tier
+    GrowthPlanRequired:
+      content:
+        application/json:
+          example:
+            error:
+              code: ERR_PLAN_REQUIRED
+              message: Growth plan or above required
+            request_id: abc-123
+          schema:
+            $ref: "#/components/schemas/ApiError"
+      description: Endpoint requires the Growth plan or above
     SearchConsoleForbidden:
       content:
         application/json:
@@ -8957,8 +8992,9 @@ components:
           description: "Internal project label (sidebar, settings, admin)"
           type: string
         brand_name:
-          description: LLM-facing brand label (used in prompts and customer-facing
-            charts). Defaults to `name` when not set.
+          description: "LLM-facing brand label (used in prompts and customer-facing\
+            \ charts). Null when not set, in which case prompts and charts use `name`."
+          nullable: true
           type: string
       type: object
     ProjectDetails:
@@ -8967,8 +9003,10 @@ components:
       - properties:
           url:
             format: uri
+            nullable: true
             type: string
           description:
+            nullable: true
             type: string
           matching_names:
             items:
@@ -8980,6 +9018,7 @@ components:
               \ the in-app multi-select. Deliberately untyped so generated clients\
               \ decode either shape"
           business_model:
+            nullable: true
             type: string
           business_model_other:
             description: Set only when business_model is OTHER
@@ -8990,10 +9029,13 @@ components:
               type: string
             type: array
           target_audience:
+            nullable: true
             type: string
           brand_voice:
+            nullable: true
             type: string
           goals:
+            nullable: true
             type: string
           country_code:
             type: string
@@ -9002,8 +9044,10 @@ components:
           paused:
             type: boolean
           google_play_id:
+            nullable: true
             type: string
           app_store_id:
+            nullable: true
             type: string
           created_at:
             format: date-time
@@ -9052,6 +9096,9 @@ components:
         name:
           type: string
         domain:
+          description: Bare (scheme-less) domain. Null only on the own-brand row (include_project_brand=true)
+            when the project has no URL.
+          nullable: true
           type: string
         actor_type:
           description: Only present when include_project_brand=true
@@ -9088,12 +9135,16 @@ components:
         matching_names:
           items:
             type: string
+          nullable: true
           type: array
         google_play_id:
+          nullable: true
           type: string
         app_store_id:
+          nullable: true
           type: string
         color:
+          nullable: true
           type: string
         created_at:
           format: date-time
@@ -9120,18 +9171,26 @@ components:
         name:
           type: string
         domain:
-          description: Bare (scheme-less) domain
+          description: Bare (scheme-less) domain. Null for the project actor when
+            the project has no URL.
+          nullable: true
           type: string
       type: object
     TimeseriesPoint:
       example:
-        date: 2000-01-23T04:56:07.000+00:00
+        date: 2000-01-23
         value: 5.962133916683182
       properties:
         date:
-          format: date-time
+          description: "Calendar day in Europe/Madrid (YYYY-MM-DD). With granularity\
+            \ week or month it is the first day of the bucket (the Monday, or the\
+            \ 1st of the month)."
+          format: date
           type: string
         value:
+          description: "Null when the metric has no value for the bucket, e.g. a rate,\
+            \ position or sentiment metric on a day without answers."
+          nullable: true
           type: number
       type: object
     TimeseriesSeries:
@@ -9144,9 +9203,9 @@ components:
           domain: domain
         metric: metric
         data:
-        - date: 2000-01-23T04:56:07.000+00:00
+        - date: 2000-01-23
           value: 5.962133916683182
-        - date: 2000-01-23T04:56:07.000+00:00
+        - date: 2000-01-23
           value: 5.962133916683182
       properties:
         actor:
@@ -9175,9 +9234,9 @@ components:
               domain: domain
             metric: metric
             data:
-            - date: 2000-01-23T04:56:07.000+00:00
+            - date: 2000-01-23
               value: 5.962133916683182
-            - date: 2000-01-23T04:56:07.000+00:00
+            - date: 2000-01-23
               value: 5.962133916683182
           - actor:
               type: project
@@ -9187,9 +9246,9 @@ components:
               domain: domain
             metric: metric
             data:
-            - date: 2000-01-23T04:56:07.000+00:00
+            - date: 2000-01-23
               value: 5.962133916683182
-            - date: 2000-01-23T04:56:07.000+00:00
+            - date: 2000-01-23
               value: 5.962133916683182
         request_id: request_id
       properties:
@@ -9243,9 +9302,9 @@ components:
               domain: domain
             metric: metric
             data:
-            - date: 2000-01-23T04:56:07.000+00:00
+            - date: 2000-01-23
               value: 5.962133916683182
-            - date: 2000-01-23T04:56:07.000+00:00
+            - date: 2000-01-23
               value: 5.962133916683182
           - actor:
               type: project
@@ -9255,9 +9314,9 @@ components:
               domain: domain
             metric: metric
             data:
-            - date: 2000-01-23T04:56:07.000+00:00
+            - date: 2000-01-23
               value: 5.962133916683182
-            - date: 2000-01-23T04:56:07.000+00:00
+            - date: 2000-01-23
               value: 5.962133916683182
         request_id: request_id
         summary:
@@ -9431,9 +9490,9 @@ components:
             name: name
             domain: domain
           data:
-          - date: 2000-01-23T04:56:07.000+00:00
+          - date: 2000-01-23
             value: 5.962133916683182
-          - date: 2000-01-23T04:56:07.000+00:00
+          - date: 2000-01-23
             value: 5.962133916683182
         - actor:
             type: project
@@ -9442,9 +9501,9 @@ components:
             name: name
             domain: domain
           data:
-          - date: 2000-01-23T04:56:07.000+00:00
+          - date: 2000-01-23
             value: 5.962133916683182
-          - date: 2000-01-23T04:56:07.000+00:00
+          - date: 2000-01-23
             value: 5.962133916683182
         current:
         - actor:
@@ -9666,7 +9725,7 @@ components:
         response: response
         response_truncated: true
         executed_at: 2000-01-23T04:56:07.000+00:00
-        duration_ms: 1
+        duration_ms: 1.4658129805029452
         success: true
         fan_out_queries:
         - fan_out_queries
@@ -9712,19 +9771,26 @@ components:
         model:
           type: string
         response:
+          nullable: true
           type: string
         response_truncated:
           type: boolean
         executed_at:
           format: date-time
+          nullable: true
           type: string
         duration_ms:
-          type: integer
+          description: "Milliseconds, rounded to one decimal place"
+          nullable: true
+          type: number
         success:
+          description: Null while the answer is still pending
+          nullable: true
           type: boolean
         fan_out_queries:
           items:
             type: string
+          nullable: true
           type: array
         mentions:
           items:
@@ -10185,7 +10251,9 @@ components:
           nullable: true
           type: integer
         result_data:
-          description: Only present when status='completed'
+          description: The generated content once status is completed; null before
+            that
+          nullable: true
           type: object
         error_message:
           nullable: true
@@ -10805,6 +10873,7 @@ components:
           type: integer
         last_delivered_at:
           format: date-time
+          nullable: true
           type: string
         created_at:
           format: date-time
@@ -10905,6 +10974,7 @@ components:
           type: integer
         last_delivered_at:
           format: date-time
+          nullable: true
           type: string
         created_at:
           format: date-time
@@ -11118,9 +11188,9 @@ components:
           name: name
           domain: domain
         data:
-        - date: 2000-01-23T04:56:07.000+00:00
+        - date: 2000-01-23
           value: 5.962133916683182
-        - date: 2000-01-23T04:56:07.000+00:00
+        - date: 2000-01-23
           value: 5.962133916683182
       properties:
         actor:
