@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.49.0
+  version: 1.50.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -6937,10 +6937,11 @@ paths:
   /projects:
     post:
       description: "Create a complete project in one call: project fields, prompts\
-        \ (queued for execution and categorization), competitors, weekly email subscription.\
-        \ Idempotent via `external_identifier` (embed-enabled accounts only; replay\
-        \ returns 200 with the existing project). Requires a `read_write` scope API\
-        \ key."
+        \ (queued for execution and categorization), collections tagging those prompts,\
+        \ competitors, weekly email subscription. The response lists same_domain_projects\
+        \ so an accidental duplicate is visible; it never blocks the create. Idempotent\
+        \ via `external_identifier` (embed-enabled accounts only; replay returns 200\
+        \ with the existing project). Requires a `read_write` scope API key."
       operationId: createProject
       requestBody:
         content:
@@ -6988,15 +6989,15 @@ paths:
       - Projects
   /projects/{id}:
     patch:
-      description: "Updates the project profile, the same fields as Project Settings:\
-        \ brand_name, description, industry, business_model (plus business_model_other\
-        \ when it is OTHER), target_audience, brand_voice, goals, primary_products,\
-        \ matching_names. Send only the fields to change; unknown fields are rejected.\
-        \ All seven Brand Book fields feed every GEO Writer task and prompt suggestions;\
-        \ only industry, description, and target_audience help Recommendations. A\
-        \ matching_names change re-runs mention/citation matching over the project\
-        \ history in the background (rematching=true); further edits are rejected\
-        \ while that runs. Requires a `read_write` scope API key."
+      description: "Updates the project name and profile, the same fields as Project\
+        \ Settings: name, brand_name, description, industry, business_model (plus\
+        \ business_model_other when it is OTHER), target_audience, brand_voice, goals,\
+        \ primary_products, matching_names. Send only the fields to change; unknown\
+        \ fields are rejected. All seven Brand Book fields feed every GEO Writer task\
+        \ and prompt suggestions; only industry, description, and target_audience\
+        \ help Recommendations. A matching_names change re-runs mention/citation matching\
+        \ over the project history in the background (rematching=true); further edits\
+        \ are rejected while that runs. Requires a `read_write` scope API key."
       operationId: updateProject
       parameters:
       - explode: false
@@ -8974,7 +8975,10 @@ components:
               type: string
             type: array
           industry:
-            type: string
+            description: "Industry as stored: one key as a string (e.g. SAAS), or\
+              \ an array of key strings when the project was created with a list or\
+              \ the in-app multi-select. Deliberately untyped so generated clients\
+              \ decode either shape"
           business_model:
             type: string
           business_model_other:
@@ -9016,7 +9020,7 @@ components:
         matching_names:
         - matching_names
         - matching_names
-        industry: industry
+        industry: ""
         business_model: business_model
         business_model_other: business_model_other
         primary_products:
@@ -9406,9 +9410,19 @@ components:
         - date: 2000-01-23
           mentions: 6
           partial: true
+          confidence: low
+          margin_of_error: 21.9
         - date: 2000-01-23
           mentions: 6
           partial: true
+          confidence: low
+          margin_of_error: 21.9
+        sample:
+          date: 2000-01-23
+          mentions: 1
+          partial: true
+          confidence: confidence
+          margin_of_error: 5.962133916683182
         over_time:
         - actor:
             type: project
@@ -9439,36 +9453,36 @@ components:
             competitor_id: 1
             name: name
             domain: domain
-          share: 1.4658129805029452
-          previous_share: 5.962133916683182
-          avg_share: 5.637376656633329
+          share: 5.637376656633329
+          previous_share: 2.3021358869347655
+          avg_share: 7.061401241503109
         - actor:
             type: project
             id: 6
             competitor_id: 1
             name: name
             domain: domain
-          share: 1.4658129805029452
-          previous_share: 5.962133916683182
-          avg_share: 5.637376656633329
+          share: 5.637376656633329
+          previous_share: 2.3021358869347655
+          avg_share: 7.061401241503109
         breakdown:
-        - rank: 2
+        - rank: 9
           actor:
             type: project
             id: 6
             competitor_id: 1
             name: name
             domain: domain
-          share: 7.061401241503109
+          share: 3.616076749251911
           others: true
-        - rank: 2
+        - rank: 9
           actor:
             type: project
             id: 6
             competitor_id: 1
             name: name
             domain: domain
-          share: 7.061401241503109
+          share: 3.616076749251911
           others: true
         others:
         - "{}"
@@ -9480,10 +9494,13 @@ components:
           description: "Per-bucket sample size and completeness: mentions is the total\
             \ the shares were computed on (1-3 mentions produce the 100/50/33.33 low-sample\
             \ patterns); partial marks buckets still collecting data or clipped by\
-            \ the requested window."
+            \ the requested window; confidence and margin_of_error read the sample\
+            \ size."
           items:
             $ref: "#/components/schemas/SovResponse_periods_inner"
           type: array
+        sample:
+          $ref: "#/components/schemas/SovResponse_sample"
         over_time:
           items:
             $ref: "#/components/schemas/SovResponse_over_time_inner"
@@ -9780,6 +9797,22 @@ components:
         - prompts
         - prompts
         - prompts
+        collections:
+        - name: Comparisons
+          prompts:
+          - top crm tools 2026
+        - name: Comparisons
+          prompts:
+          - top crm tools 2026
+        - name: Comparisons
+          prompts:
+          - top crm tools 2026
+        - name: Comparisons
+          prompts:
+          - top crm tools 2026
+        - name: Comparisons
+          prompts:
+          - top crm tools 2026
         competitors:
         - domain: domain
           brand_name: brand_name
@@ -9811,6 +9844,8 @@ components:
           format: uri
           type: string
         name:
+          description: "Project name, as plain text. It can be changed later with\
+            \ PATCH /projects/{id}"
           example: Acme
           type: string
         main_country:
@@ -9824,6 +9859,10 @@ components:
         description:
           type: string
         industry:
+          description: "Industry keys, case-insensitive; a single key string is also\
+            \ accepted. An unknown key returns ERR_INVALID_PARAM listing the valid\
+            \ keys (the same list as the in-app industry picker, e.g. TECHNOLOGY,\
+            \ SAAS, ECOMMERCE)"
           example:
           - SAAS
           items:
@@ -9863,6 +9902,15 @@ components:
             type: string
           maxItems: 100
           type: array
+        collections:
+          description: "Collections (prompt tags) created with the project, each tagging\
+            \ prompts of this request by their exact text, so no separate tagging\
+            \ calls are needed. A text that is not in prompts returns ERR_INVALID_PARAM.\
+            \ A team member also needs Tags: Create permission."
+          items:
+            $ref: "#/components/schemas/ProjectCreateRequest_collections_inner"
+          maxItems: 50
+          type: array
         competitors:
           items:
             $ref: "#/components/schemas/ProjectCreateRequest_competitors_inner"
@@ -9900,12 +9948,28 @@ components:
         competitors:
           created: 1
           processing: false
+        collections:
+        - id: 5
+          name: name
+          prompts_attached: 5
+        - id: 5
+          name: name
+          prompts_attached: 5
+        same_domain_projects:
+        - id: 2
+          name: name
+          country_code: country_code
+          language_code: language_code
+        - id: 2
+          name: name
+          country_code: country_code
+          language_code: language_code
         email_subscription:
           weekly_email_subscribed: true
         limits:
-          projects_remaining: 5
-          prompts_available: 5
-          competitors_remaining: 2
+          projects_remaining: 7
+          prompts_available: 9
+          competitors_remaining: 3
         idempotent: true
         request_id: request_id
       properties:
@@ -9916,6 +9980,19 @@ components:
           $ref: "#/components/schemas/ProjectCreateResponse_prompts"
         competitors:
           $ref: "#/components/schemas/ProjectCreateResponse_competitors"
+        collections:
+          description: Collections created from the request's collections field (empty
+            when none were sent; absent on an idempotent replay)
+          items:
+            $ref: "#/components/schemas/ProjectCreateResponse_collections_inner"
+          type: array
+        same_domain_projects:
+          description: "Projects the caller can already see on the same domain (absent\
+            \ on an idempotent replay). Informational only: the create is never blocked,\
+            \ since one domain tracked per market is a normal setup."
+          items:
+            $ref: "#/components/schemas/ProjectCreateResponse_same_domain_projects_inner"
+          type: array
         email_subscription:
           $ref: "#/components/schemas/ProjectCreateResponse_email_subscription"
         limits:
@@ -10276,6 +10353,7 @@ components:
     getAccount_200_response:
       example:
         plan: plan
+        plan_name: plan_name
         tracking_frequency: tracking_frequency
         role: owner
         subscription:
@@ -10314,6 +10392,10 @@ components:
       properties:
         plan:
           description: "Plan key (starter, growth, scale, ...)"
+          type: string
+        plan_name:
+          description: Display name of the plan to show people (e.g. Scale++ for the
+            scaleplusplus key)
           type: string
         tracking_frequency:
           description: "How often prompts run (weekly, daily, monthly, ...)"
@@ -10475,6 +10557,10 @@ components:
       type: object
     updateProject_request:
       properties:
+        name:
+          description: "Project name shown in the app. A label: it does not change\
+            \ mention detection unless brand_name is empty. Cannot be blank"
+          type: string
         brand_name:
           description: Brand name used to detect mentions. Applies to future runs;
             it does not rewrite history
@@ -10484,7 +10570,9 @@ components:
             (Brand Book)
           type: string
         industry:
-          description: Single industry key (e.g. SAAS); unknown keys are rejected
+          description: "Single industry key (e.g. SAAS), stored as sent; an array\
+            \ of keys is also accepted and stored as an array, like the in-app multi-select.\
+            \ Unknown keys are rejected with the valid keys listed"
           type: string
         business_model:
           description: Business model key (e.g. B2B_SAAS); unknown keys are rejected
@@ -10973,6 +11061,8 @@ components:
         date: 2000-01-23
         mentions: 6
         partial: true
+        confidence: low
+        margin_of_error: 21.9
       properties:
         date:
           format: date
@@ -10981,6 +11071,43 @@ components:
           type: integer
         partial:
           type: boolean
+        confidence:
+          description: "How far the shares of this period can be trusted, from its\
+            \ mentions: none (0), low (under 30), medium (under 100) or high (100\
+            \ or more)."
+          example: low
+          type: string
+        margin_of_error:
+          description: "Worst-case 95% margin of a share in percentage points, 98\
+            \ / sqrt(mentions); mentions within one answer are not independent, so\
+            \ the real margin is at least this wide. null with no mentions."
+          example: 21.9
+          nullable: true
+          type: number
+      type: object
+    SovResponse_sample:
+      description: "The period the current shares were computed on (the last one with\
+        \ mentions), same shape as a periods item; null when the window has no mentions."
+      example:
+        date: 2000-01-23
+        mentions: 1
+        partial: true
+        confidence: confidence
+        margin_of_error: 5.962133916683182
+      nullable: true
+      properties:
+        date:
+          format: date
+          type: string
+        mentions:
+          type: integer
+        partial:
+          type: boolean
+        confidence:
+          type: string
+        margin_of_error:
+          nullable: true
+          type: number
       type: object
     SovResponse_over_time_inner:
       example:
@@ -11011,9 +11138,9 @@ components:
           competitor_id: 1
           name: name
           domain: domain
-        share: 1.4658129805029452
-        previous_share: 5.962133916683182
-        avg_share: 5.637376656633329
+        share: 5.637376656633329
+        previous_share: 2.3021358869347655
+        avg_share: 7.061401241503109
       properties:
         actor:
           $ref: "#/components/schemas/Actor"
@@ -11032,14 +11159,14 @@ components:
       type: object
     SovResponse_breakdown_inner:
       example:
-        rank: 2
+        rank: 9
         actor:
           type: project
           id: 6
           competitor_id: 1
           name: name
           domain: domain
-        share: 7.061401241503109
+        share: 3.616076749251911
         others: true
       properties:
         rank:
@@ -11076,6 +11203,25 @@ components:
           type: string
         language_code:
           type: string
+      type: object
+    ProjectCreateRequest_collections_inner:
+      example:
+        name: Comparisons
+        prompts:
+        - top crm tools 2026
+      properties:
+        name:
+          example: Comparisons
+          maxLength: 100
+          type: string
+        prompts:
+          example:
+          - top crm tools 2026
+          items:
+            type: string
+          type: array
+      required:
+      - name
       type: object
     ProjectCreateRequest_competitors_inner:
       example:
@@ -11148,6 +11294,35 @@ components:
           example: false
           type: boolean
       type: object
+    ProjectCreateResponse_collections_inner:
+      example:
+        id: 5
+        name: name
+        prompts_attached: 5
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        prompts_attached:
+          type: integer
+      type: object
+    ProjectCreateResponse_same_domain_projects_inner:
+      example:
+        id: 2
+        name: name
+        country_code: country_code
+        language_code: language_code
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        country_code:
+          type: string
+        language_code:
+          type: string
+      type: object
     ProjectCreateResponse_email_subscription:
       example:
         weekly_email_subscribed: true
@@ -11157,9 +11332,9 @@ components:
       type: object
     ProjectCreateResponse_limits:
       example:
-        projects_remaining: 5
-        prompts_available: 5
-        competitors_remaining: 2
+        projects_remaining: 7
+        prompts_available: 9
+        competitors_remaining: 3
       properties:
         projects_remaining:
           nullable: true
