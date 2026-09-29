@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.51.0
+  version: 1.52.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -7821,10 +7821,11 @@ paths:
       tags:
       - Technical GEO Reports
     post:
-      description: "Launches the full technical GEO analysis bundle (crawlability,\
-        \ schema, content readiness, discoverability, site structure, robots.txt,\
-        \ agent readiness, llms.txt, AI visibility) for a URL + country. Each report\
-        \ runs in a background job. Requires a `read_write` scope API key."
+      description: Launches the full nine-report technical GEO analysis bundle for
+        a URL + country. The bundle starts only when at least nine daily units remain.
+        Each successfully created report uses one unit; a report that is not created
+        uses none. Daily allocations vary by account. Each report runs in a background
+        job. Requires a `read_write` scope API key.
       operationId: createTechnicalGeoReports
       requestBody:
         content:
@@ -7867,10 +7868,12 @@ paths:
         \ is completed. While it is running, result_data is null and poll_after_seconds\
         \ tells clients when to check again. Summaries carry output_language_code\
         \ (the ISO 639-1 code an llms_txt report was requested in; null for an llms_txt\
-        \ report left on the website's own language in the app, and for every other\
-        \ report type); a completed llms_txt result_data also returns manually_edited_at,\
-        \ original_llms_txt_content and original_llms_full_txt_content (the generated\
-        \ files, set once the customer edited the files in the app) and metadata.output_language_code."
+        \ report written in the website's own language, requested as auto or chosen\
+        \ in the app, and for every other report type); a completed llms_txt result_data\
+        \ also returns content_version (send it back to PATCH /technical_geo_reports/{id}/content),\
+        \ manually_edited_at, original_llms_txt_content and original_llms_full_txt_content\
+        \ (the generated files, kept from the first manual edit in the app, the API\
+        \ or MCP) and metadata.output_language_code."
       operationId: getTechnicalGeoReport
       parameters:
       - description: Project ID
@@ -7933,6 +7936,149 @@ paths:
                 $ref: "#/components/schemas/ApiError"
           description: Invalid parameters
       summary: Get a technical GEO report
+      tags:
+      - Technical GEO Reports
+  /technical_geo_reports/{id}/content:
+    patch:
+      description: "Replaces the llms.txt and llms-full.txt files of a completed llms_txt\
+        \ report in place, without generating them again. `edits` maps llms_txt and/or\
+        \ llms_full_txt to the full replacement text. `content_version` must equal\
+        \ result_data.content_version of the report as last read; when the report\
+        \ changed since, the edit is refused as stale and the message names the current\
+        \ version. A missing or stale content_version, a blank file, a file over 200,000\
+        \ characters, a value that is not text, an unknown file key, an empty `edits`\
+        \ object, a report that has not completed or a report_type other than llms_txt\
+        \ is rejected with ERR_INVALID_PARAM and nothing is written. Files are stored\
+        \ with Unix line endings and one trailing newline. A file identical to the\
+        \ stored one is ignored, and the response lists the files that actually changed.\
+        \ The first edit keeps the generated files in original_llms_txt_content and\
+        \ original_llms_full_txt_content so POST /technical_geo_reports/{id}/revert_content\
+        \ can restore them; running the report again creates a new report without\
+        \ these edits. Requires a `read_write` scope API key and, for team members,\
+        \ create permission on GEO Optimization."
+      operationId: updateTechnicalGeoReportContent
+      parameters:
+      - description: Report id returned by POST /technical_geo_reports or GET /technical_geo_reports
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TechnicalGeoReportContentUpdateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TechnicalGeoReportContentUpdateResponse"
+          description: "The report with its current files, plus the files that changed"
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Edit llms.txt report content
+      tags:
+      - Technical GEO Reports
+  /technical_geo_reports/{id}/revert_content:
+    post:
+      description: "Discards every manual edit on the llms_txt report and restores\
+        \ the llms.txt and llms-full.txt files exactly as they were generated. Returns\
+        \ ERR_INVALID_PARAM when the report has no manual edits or report_type is\
+        \ not llms_txt. Requires a `read_write` scope API key and, for team members,\
+        \ create permission on GEO Optimization."
+      operationId: revertTechnicalGeoReportContent
+      parameters:
+      - description: Report id returned by POST /technical_geo_reports or GET /technical_geo_reports
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TechnicalGeoReportContentRevertRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LlmsTxtTechnicalGeoReport"
+          description: The report with its generated files restored
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Revert llms.txt report content
       tags:
       - Technical GEO Reports
   /intelligence_tasks:
@@ -10318,6 +10464,191 @@ components:
         changed_paths:
         - changed_paths
         - changed_paths
+    TechnicalGeoReportContentUpdateRequest:
+      example:
+        project_id: 0
+        report_type: llms_txt
+        content_version: "1790683200123456"
+        edits:
+          llms_txt: |
+            # example.com
+
+            > What example.com does, in one paragraph.
+      properties:
+        project_id:
+          type: integer
+        report_type:
+          description: Only llms_txt reports have editable content
+          enum:
+          - llms_txt
+          type: string
+        content_version:
+          description: result_data.content_version of the report as last read. It
+            changes on every save; a value that no longer matches is refused as stale
+          example: "1790683200123456"
+          type: string
+        edits:
+          $ref: "#/components/schemas/TechnicalGeoReportContentUpdateRequest_edits"
+      required:
+      - content_version
+      - edits
+      - project_id
+      - report_type
+      type: object
+    TechnicalGeoReportContentRevertRequest:
+      example:
+        project_id: 0
+        report_type: llms_txt
+      properties:
+        project_id:
+          type: integer
+        report_type:
+          description: Only llms_txt reports have editable content
+          enum:
+          - llms_txt
+          type: string
+      required:
+      - project_id
+      - report_type
+      type: object
+    LlmsTxtTechnicalGeoReport:
+      description: "An llms_txt technical GEO report with its files, in the shape\
+        \ GET /technical_geo_reports/{id} returns"
+      example:
+        id: 0
+        report_type: report_type
+        project_id: 6
+        batch_id: 1
+        url: url
+        domain: domain
+        country_code: country_code
+        output_language_code: output_language_code
+        status: status
+        result_available: true
+        overall_score: 5.962133916683182
+        created_at: 2000-01-23T04:56:07.000+00:00
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        result_data:
+          llms_txt_content: llms_txt_content
+          llms_full_txt_content: llms_full_txt_content
+          manually_edited_at: 2000-01-23T04:56:07.000+00:00
+          content_version: content_version
+          original_llms_txt_content: original_llms_txt_content
+          original_llms_full_txt_content: original_llms_full_txt_content
+          crawl_data: "{}"
+          metadata: "{}"
+          pages_crawled: 5
+          generation_time_ms: 2
+          openai_tokens_used: 7
+        error_message: error_message
+        poll_after_seconds: 5
+        app_url: https://openapi-generator.tech
+        request_id: request_id
+      properties:
+        id:
+          type: integer
+        report_type:
+          description: Always llms_txt
+          type: string
+        project_id:
+          type: integer
+        batch_id:
+          description: Bundle the report was created in; null for a report created
+            on its own
+          nullable: true
+          type: integer
+        url:
+          description: Always null for llms_txt reports; domain names the website
+          nullable: true
+          type: string
+        domain:
+          type: string
+        country_code:
+          nullable: true
+          type: string
+        output_language_code:
+          description: ISO 639-1 code the files were requested in; null when they
+            are written in the website's own language
+          nullable: true
+          type: string
+        status:
+          type: string
+        result_available:
+          type: boolean
+        overall_score:
+          description: Always null for llms_txt reports
+          nullable: true
+          type: number
+        created_at:
+          format: date-time
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+        result_data:
+          $ref: "#/components/schemas/LlmsTxtTechnicalGeoReport_result_data"
+        error_message:
+          nullable: true
+          type: string
+        poll_after_seconds:
+          description: Seconds to wait before polling again while the report runs;
+            null once it has finished
+          nullable: true
+          type: integer
+        app_url:
+          description: Opens this report in the app
+          format: uri
+          type: string
+        request_id:
+          type: string
+      type: object
+    TechnicalGeoReportContentUpdateResponse:
+      allOf:
+      - $ref: "#/components/schemas/LlmsTxtTechnicalGeoReport"
+      - properties:
+          changed_files:
+            description: Files whose text actually changed; empty when every file
+              matched the stored text
+            items:
+              enum:
+              - llms_txt
+              - llms_full_txt
+              type: string
+            type: array
+        type: object
+      example:
+        id: 0
+        report_type: report_type
+        project_id: 6
+        batch_id: 1
+        url: url
+        domain: domain
+        country_code: country_code
+        output_language_code: output_language_code
+        status: status
+        result_available: true
+        overall_score: 5.962133916683182
+        created_at: 2000-01-23T04:56:07.000+00:00
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        result_data:
+          llms_txt_content: llms_txt_content
+          llms_full_txt_content: llms_full_txt_content
+          manually_edited_at: 2000-01-23T04:56:07.000+00:00
+          content_version: content_version
+          original_llms_txt_content: original_llms_txt_content
+          original_llms_full_txt_content: original_llms_full_txt_content
+          crawl_data: "{}"
+          metadata: "{}"
+          pages_crawled: 5
+          generation_time_ms: 2
+          openai_tokens_used: 7
+        error_message: error_message
+        poll_after_seconds: 9
+        app_url: https://openapi-generator.tech
+        request_id: request_id
+        changed_files:
+        - llms_txt
+        - llms_txt
     ApiError:
       example:
         error:
@@ -10831,9 +11162,10 @@ components:
           type: string
         output_language_code:
           description: "ISO 639-1 code of the language the llms.txt files are written\
-            \ in (for example es). Defaults to the project language, else en. Only\
-            \ the llms.txt report of the bundle uses it; an unsupported code returns\
-            \ 422 ERR_INVALID_PARAM"
+            \ in (for example es), or auto to keep the language detected on the website.\
+            \ Defaults to the project language, else en. Only the llms.txt report\
+            \ of the bundle uses it; the response echoes the code used, or auto. An\
+            \ unsupported code returns 422 ERR_INVALID_PARAM"
           type: string
       required:
       - project_id
@@ -11431,6 +11763,86 @@ components:
           - created
           - exists
           type: string
+      type: object
+    TechnicalGeoReportContentUpdateRequest_edits:
+      additionalProperties: false
+      description: "The files to replace, each mapped to its full replacement text:\
+        \ never blank, at most 200,000 characters. Send one file or both; a file identical\
+        \ to the stored one is ignored."
+      example:
+        llms_txt: |
+          # example.com
+
+          > What example.com does, in one paragraph.
+      properties:
+        llms_txt:
+          description: Full text of llms.txt
+          type: string
+        llms_full_txt:
+          description: Full text of llms-full.txt
+          type: string
+      type: object
+    LlmsTxtTechnicalGeoReport_result_data:
+      description: The files and generation details once the report has completed;
+        null before that
+      example:
+        llms_txt_content: llms_txt_content
+        llms_full_txt_content: llms_full_txt_content
+        manually_edited_at: 2000-01-23T04:56:07.000+00:00
+        content_version: content_version
+        original_llms_txt_content: original_llms_txt_content
+        original_llms_full_txt_content: original_llms_full_txt_content
+        crawl_data: "{}"
+        metadata: "{}"
+        pages_crawled: 5
+        generation_time_ms: 2
+        openai_tokens_used: 7
+      nullable: true
+      properties:
+        llms_txt_content:
+          description: "Current llms.txt, manual edits included"
+          type: string
+        llms_full_txt_content:
+          description: "Current llms-full.txt, manual edits included"
+          nullable: true
+          type: string
+        manually_edited_at:
+          description: "When the files were last edited by hand in the app, the API\
+            \ or MCP; null while they are as generated"
+          format: date-time
+          nullable: true
+          type: string
+        content_version:
+          description: Send it back as content_version when editing the files. It
+            changes on every save
+          type: string
+        original_llms_txt_content:
+          description: "The generated llms.txt, kept from the first manual edit; null\
+            \ while the files are as generated"
+          nullable: true
+          type: string
+        original_llms_full_txt_content:
+          description: "The generated llms-full.txt, kept from the first manual edit;\
+            \ null while the files are as generated"
+          nullable: true
+          type: string
+        crawl_data:
+          nullable: true
+          type: object
+        metadata:
+          description: "Generation details, including output_language_code, the language\
+            \ the files were written in"
+          nullable: true
+          type: object
+        pages_crawled:
+          nullable: true
+          type: integer
+        generation_time_ms:
+          nullable: true
+          type: integer
+        openai_tokens_used:
+          nullable: true
+          type: integer
       type: object
     ApiError_error:
       example:

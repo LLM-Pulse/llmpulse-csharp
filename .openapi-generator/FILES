@@ -61,6 +61,8 @@ docs/models/ListCompetitors200Response.md
 docs/models/ListProjects200Response.md
 docs/models/ListWebhooks200Response.md
 docs/models/ListWebhooks200ResponseDataInner.md
+docs/models/LlmsTxtTechnicalGeoReport.md
+docs/models/LlmsTxtTechnicalGeoReportResultData.md
 docs/models/Ping200Response.md
 docs/models/Project.md
 docs/models/ProjectCreateRequest.md
@@ -93,6 +95,10 @@ docs/models/SovResponseSample.md
 docs/models/SummaryResponse.md
 docs/models/SummaryResponseAllOfPositionDistribution.md
 docs/models/SummaryResponseAllOfSummaryValueInner.md
+docs/models/TechnicalGeoReportContentRevertRequest.md
+docs/models/TechnicalGeoReportContentUpdateRequest.md
+docs/models/TechnicalGeoReportContentUpdateRequestEdits.md
+docs/models/TechnicalGeoReportContentUpdateResponse.md
 docs/models/TimeseriesPoint.md
 docs/models/TimeseriesResponse.md
 docs/models/TimeseriesSeries.md
@@ -189,6 +195,8 @@ src/LLMPulse.SDK/Model/ListCompetitors200Response.cs
 src/LLMPulse.SDK/Model/ListProjects200Response.cs
 src/LLMPulse.SDK/Model/ListWebhooks200Response.cs
 src/LLMPulse.SDK/Model/ListWebhooks200ResponseDataInner.cs
+src/LLMPulse.SDK/Model/LlmsTxtTechnicalGeoReport.cs
+src/LLMPulse.SDK/Model/LlmsTxtTechnicalGeoReportResultData.cs
 src/LLMPulse.SDK/Model/Ping200Response.cs
 src/LLMPulse.SDK/Model/Project.cs
 src/LLMPulse.SDK/Model/ProjectCreateRequest.cs
@@ -221,6 +229,10 @@ src/LLMPulse.SDK/Model/SovResponseSample.cs
 src/LLMPulse.SDK/Model/SummaryResponse.cs
 src/LLMPulse.SDK/Model/SummaryResponseAllOfPositionDistribution.cs
 src/LLMPulse.SDK/Model/SummaryResponseAllOfSummaryValueInner.cs
+src/LLMPulse.SDK/Model/TechnicalGeoReportContentRevertRequest.cs
+src/LLMPulse.SDK/Model/TechnicalGeoReportContentUpdateRequest.cs
+src/LLMPulse.SDK/Model/TechnicalGeoReportContentUpdateRequestEdits.cs
+src/LLMPulse.SDK/Model/TechnicalGeoReportContentUpdateResponse.cs
 src/LLMPulse.SDK/Model/TimeseriesPoint.cs
 src/LLMPulse.SDK/Model/TimeseriesResponse.cs
 src/LLMPulse.SDK/Model/TimeseriesSeries.cs
