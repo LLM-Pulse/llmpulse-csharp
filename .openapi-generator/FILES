@@ -63,6 +63,9 @@ docs/models/ListWebhooks200Response.md
 docs/models/ListWebhooks200ResponseDataInner.md
 docs/models/LlmsTxtTechnicalGeoReport.md
 docs/models/LlmsTxtTechnicalGeoReportResultData.md
+docs/models/LocalBusiness.md
+docs/models/LocalBusinessesResponse.md
+docs/models/LocalBusinessesTotals.md
 docs/models/Ping200Response.md
 docs/models/Project.md
 docs/models/ProjectCreateRequest.md
@@ -197,6 +200,9 @@ src/LLMPulse.SDK/Model/ListWebhooks200Response.cs
 src/LLMPulse.SDK/Model/ListWebhooks200ResponseDataInner.cs
 src/LLMPulse.SDK/Model/LlmsTxtTechnicalGeoReport.cs
 src/LLMPulse.SDK/Model/LlmsTxtTechnicalGeoReportResultData.cs
+src/LLMPulse.SDK/Model/LocalBusiness.cs
+src/LLMPulse.SDK/Model/LocalBusinessesResponse.cs
+src/LLMPulse.SDK/Model/LocalBusinessesTotals.cs
 src/LLMPulse.SDK/Model/Ping200Response.cs
 src/LLMPulse.SDK/Model/Project.cs
 src/LLMPulse.SDK/Model/ProjectCreateRequest.cs

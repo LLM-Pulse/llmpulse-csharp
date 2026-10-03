@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.52.0
+  version: 1.53.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -61,9 +61,10 @@ tags:
     \ by the connected web analytics provider, and AI crawler traffic hitting your\
     \ origin server. Scale plan and above."
   name: AI & Agent Traffic
-- description: "Commercial surfaces inside AI answers: the product cards models return\
-    \ and the paid placements that run alongside them, with the merchants and advertisers\
-    \ behind each. Scale plan and above."
+- description: "Commercial surfaces inside AI answers: the product cards models return,\
+    \ the paid placements that run alongside them, and the local businesses they list\
+    \ for prompts with local intent. Shopping and ads need the Scale plan or above;\
+    \ local businesses are available on every plan."
   name: Shopping & Ads
 - description: "Which of your own channels and which community conversations AI answers\
     \ cite: YouTube, Instagram, Facebook, TikTok, LinkedIn, app-store listings and\
@@ -3817,6 +3818,235 @@ paths:
                 $ref: "#/components/schemas/ApiError"
           description: Invalid parameters
       summary: List AI ad placements
+      tags:
+      - Shopping & Ads
+  /dimensions/local_businesses:
+    get:
+      description: "Local businesses (shops, restaurants, services) listed inside\
+        \ AI answers, one row per business: its name at its address, so two locations\
+        \ of a chain are two rows. Each row carries its appearance count, the number\
+        \ of prompts that listed it, its average rating and average position in the\
+        \ list, its review count, and whether it is yours or a tracked competitor.\
+        \ Every response also carries a totals block matching the KPI cards in the\
+        \ app. Local business lists come from a subset of models and only for prompts\
+        \ with local intent. Available on every plan."
+      operationId: listLocalBusinesses
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: Return only listings identified as the tracked brand's own locations.
+          The totals block stays account-wide.
+        explode: true
+        in: query
+        name: owned
+        required: false
+        schema:
+          type: boolean
+        style: form
+      - description: Sort field
+        explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          default: appearances
+          enum:
+          - appearances
+          - business
+          - rating
+          - reviews
+          - avg_position
+          - prompts
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: direction
+        required: false
+        schema:
+          default: desc
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - description: Case-insensitive substring filter on the business name or address
+        explode: true
+        in: query
+        name: query
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter by AI model. Models the API key's user has not enabled
+          are silently dropped.
+        explode: true
+        in: query
+        name: model
+        required: false
+        schema:
+          enum:
+          - chatgpt
+          - perplexity
+          - gemini
+          - ai_overview
+          - ai_mode
+          - copilot
+          - claude
+          - grok
+          - deepseek
+          - meta_ai
+          - amazon_rufus
+          - naver_ai
+          - baidu_ai
+          type: string
+        style: form
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
+        explode: true
+        in: query
+        name: collection_id
+        required: false
+        schema:
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
+        style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter by prompt ID
+        explode: true
+        in: query
+        name: prompt
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
+        explode: true
+        in: query
+        name: prompt_type
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - description: Number of days to look back (alternative to from/to)
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/LocalBusinessesResponse"
+          description: Paginated local business rows plus totals
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: List local businesses
       tags:
       - Shopping & Ads
   /dimensions/owned_media:
@@ -8411,10 +8641,10 @@ paths:
         \ a JSON envelope (`event`, `occurred_at`, `project_id`, `subscription_id`,\
         \ `data`) to the URL every time the event occurs, signed via the `X-LLMPulse-Signature`\
         \ header (HMAC-SHA256 of the raw body computed with the subscription secret).\
-        \ Failed deliveries are retried 5 times with backoff; subscriptions auto-disable\
-        \ after 20 consecutive failed deliveries. Idempotent for the same project\
-        \ + event + URL. Requires a `read_write` scope API key and the Scale plan\
-        \ or above."
+        \ Failed deliveries receive up to 5 attempts in total, including the first,\
+        \ with backoff; subscriptions auto-disable after 20 consecutive failed deliveries.\
+        \ Idempotent for the same project + event + URL. Requires a `read_write` scope\
+        \ API key and the Scale plan or above."
       operationId: createWebhook
       requestBody:
         content:
@@ -10649,6 +10879,143 @@ components:
         changed_files:
         - llms_txt
         - llms_txt
+    LocalBusiness:
+      example:
+        business_key: business_key
+        title: title
+        address: address
+        domain: domain
+        url: url
+        phone: phone
+        avg_rating: 2.027123023002322
+        reviews: 4
+        avg_position: 7.386281948385884
+        prompts: 1
+        appearances: 1
+        is_client: true
+        competitor_id: 1
+        competitor_name: competitor_name
+      properties:
+        business_key:
+          description: "Stable grouping key: the lowercased name and address"
+          type: string
+        title:
+          type: string
+        address:
+          nullable: true
+          type: string
+        domain:
+          nullable: true
+          type: string
+        url:
+          nullable: true
+          type: string
+        phone:
+          nullable: true
+          type: string
+        avg_rating:
+          nullable: true
+          type: number
+        reviews:
+          nullable: true
+          type: integer
+        avg_position:
+          description: Average rank of the business in the answer's list (1 = first)
+          nullable: true
+          type: number
+        prompts:
+          type: integer
+        appearances:
+          type: integer
+        is_client:
+          type: boolean
+        competitor_id:
+          nullable: true
+          type: integer
+        competitor_name:
+          nullable: true
+          type: string
+      type: object
+    LocalBusinessesTotals:
+      example:
+        businesses: 5
+        your_businesses: 2
+        appearances: 7
+        avg_rating: 9.301444243932576
+        executions_with_local_businesses: 3
+      properties:
+        businesses:
+          type: integer
+        your_businesses:
+          type: integer
+        appearances:
+          type: integer
+        avg_rating:
+          nullable: true
+          type: number
+        executions_with_local_businesses:
+          type: integer
+      type: object
+    LocalBusinessesResponse:
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        totals:
+          businesses: 5
+          your_businesses: 2
+          appearances: 7
+          avg_rating: 9.301444243932576
+          executions_with_local_businesses: 3
+        data:
+        - business_key: business_key
+          title: title
+          address: address
+          domain: domain
+          url: url
+          phone: phone
+          avg_rating: 2.027123023002322
+          reviews: 4
+          avg_position: 7.386281948385884
+          prompts: 1
+          appearances: 1
+          is_client: true
+          competitor_id: 1
+          competitor_name: competitor_name
+        - business_key: business_key
+          title: title
+          address: address
+          domain: domain
+          url: url
+          phone: phone
+          avg_rating: 2.027123023002322
+          reviews: 4
+          avg_position: 7.386281948385884
+          prompts: 1
+          appearances: 1
+          is_client: true
+          competitor_id: 1
+          competitor_name: competitor_name
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        totals:
+          $ref: "#/components/schemas/LocalBusinessesTotals"
+        data:
+          items:
+            $ref: "#/components/schemas/LocalBusiness"
+          type: array
+        request_id:
+          type: string
+      type: object
     ApiError:
       example:
         error:

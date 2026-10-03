@@ -27,32 +27,30 @@ using LLMPulse.SDK.Client;
 namespace LLMPulse.SDK.Model
 {
     /// <summary>
-    /// TopSourcesResponse
+    /// LocalBusinessesResponse
     /// </summary>
-    public partial class TopSourcesResponse : IValidatableObject
+    public partial class LocalBusinessesResponse : IValidatableObject
     {
         /// <summary>
-        /// Initializes a new instance of the <see cref="TopSourcesResponse" /> class.
+        /// Initializes a new instance of the <see cref="LocalBusinessesResponse" /> class.
         /// </summary>
         /// <param name="projectId">projectId</param>
-        /// <param name="from">from</param>
-        /// <param name="to">to</param>
-        /// <param name="sort">sort</param>
         /// <param name="page">page</param>
         /// <param name="perPage">perPage</param>
         /// <param name="total">total</param>
+        /// <param name="totals">totals</param>
         /// <param name="data">data</param>
+        /// <param name="requestId">requestId</param>
         [JsonConstructor]
-        public TopSourcesResponse(Option<int?> projectId = default, Option<DateTime?> from = default, Option<DateTime?> to = default, Option<string?> sort = default, Option<int?> page = default, Option<int?> perPage = default, Option<int?> total = default, Option<List<TopSourcesResponseDataInner>?> data = default)
+        public LocalBusinessesResponse(Option<int?> projectId = default, Option<int?> page = default, Option<int?> perPage = default, Option<int?> total = default, Option<LocalBusinessesTotals?> totals = default, Option<List<LocalBusiness>?> data = default, Option<string?> requestId = default)
         {
             ProjectIdOption = projectId;
-            FromOption = from;
-            ToOption = to;
-            SortOption = sort;
             PageOption = page;
             PerPageOption = perPage;
             TotalOption = total;
+            TotalsOption = totals;
             DataOption = data;
+            RequestIdOption = requestId;
             OnCreated();
         }
 
@@ -70,45 +68,6 @@ namespace LLMPulse.SDK.Model
         /// </summary>
         [JsonPropertyName("project_id")]
         public int? ProjectId { get { return this.ProjectIdOption.Value; } set { this.ProjectIdOption = new(value); } }
-
-        /// <summary>
-        /// Used to track the state of From
-        /// </summary>
-        [JsonIgnore]
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public Option<DateTime?> FromOption { get; private set; }
-
-        /// <summary>
-        /// Gets or Sets From
-        /// </summary>
-        [JsonPropertyName("from")]
-        public DateTime? From { get { return this.FromOption.Value; } set { this.FromOption = new(value); } }
-
-        /// <summary>
-        /// Used to track the state of To
-        /// </summary>
-        [JsonIgnore]
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public Option<DateTime?> ToOption { get; private set; }
-
-        /// <summary>
-        /// Gets or Sets To
-        /// </summary>
-        [JsonPropertyName("to")]
-        public DateTime? To { get { return this.ToOption.Value; } set { this.ToOption = new(value); } }
-
-        /// <summary>
-        /// Used to track the state of Sort
-        /// </summary>
-        [JsonIgnore]
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public Option<string?> SortOption { get; private set; }
-
-        /// <summary>
-        /// Gets or Sets Sort
-        /// </summary>
-        [JsonPropertyName("sort")]
-        public string? Sort { get { return this.SortOption.Value; } set { this.SortOption = new(value); } }
 
         /// <summary>
         /// Used to track the state of Page
@@ -150,17 +109,43 @@ namespace LLMPulse.SDK.Model
         public int? Total { get { return this.TotalOption.Value; } set { this.TotalOption = new(value); } }
 
         /// <summary>
+        /// Used to track the state of Totals
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<LocalBusinessesTotals?> TotalsOption { get; private set; }
+
+        /// <summary>
+        /// Gets or Sets Totals
+        /// </summary>
+        [JsonPropertyName("totals")]
+        public LocalBusinessesTotals? Totals { get { return this.TotalsOption.Value; } set { this.TotalsOption = new(value); } }
+
+        /// <summary>
         /// Used to track the state of Data
         /// </summary>
         [JsonIgnore]
         [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public Option<List<TopSourcesResponseDataInner>?> DataOption { get; private set; }
+        public Option<List<LocalBusiness>?> DataOption { get; private set; }
 
         /// <summary>
         /// Gets or Sets Data
         /// </summary>
         [JsonPropertyName("data")]
-        public List<TopSourcesResponseDataInner>? Data { get { return this.DataOption.Value; } set { this.DataOption = new(value); } }
+        public List<LocalBusiness>? Data { get { return this.DataOption.Value; } set { this.DataOption = new(value); } }
+
+        /// <summary>
+        /// Used to track the state of RequestId
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<string?> RequestIdOption { get; private set; }
+
+        /// <summary>
+        /// Gets or Sets RequestId
+        /// </summary>
+        [JsonPropertyName("request_id")]
+        public string? RequestId { get { return this.RequestIdOption.Value; } set { this.RequestIdOption = new(value); } }
 
         /// <summary>
         /// Returns the string presentation of the object
@@ -169,15 +154,14 @@ namespace LLMPulse.SDK.Model
         public override string ToString()
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append("class TopSourcesResponse {\n");
+            sb.Append("class LocalBusinessesResponse {\n");
             sb.Append("  ProjectId: ").Append(ProjectId).Append("\n");
-            sb.Append("  From: ").Append(From).Append("\n");
-            sb.Append("  To: ").Append(To).Append("\n");
-            sb.Append("  Sort: ").Append(Sort).Append("\n");
             sb.Append("  Page: ").Append(Page).Append("\n");
             sb.Append("  PerPage: ").Append(PerPage).Append("\n");
             sb.Append("  Total: ").Append(Total).Append("\n");
+            sb.Append("  Totals: ").Append(Totals).Append("\n");
             sb.Append("  Data: ").Append(Data).Append("\n");
+            sb.Append("  RequestId: ").Append(RequestId).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -194,39 +178,29 @@ namespace LLMPulse.SDK.Model
     }
 
     /// <summary>
-    /// A Json converter for type <see cref="TopSourcesResponse" />
+    /// A Json converter for type <see cref="LocalBusinessesResponse" />
     /// </summary>
-    public partial class TopSourcesResponseJsonConverter : JsonConverter<TopSourcesResponse>
+    public partial class LocalBusinessesResponseJsonConverter : JsonConverter<LocalBusinessesResponse>
     {
         partial void OnCreated();
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TopSourcesResponseJsonConverter" /> class.
+        /// Initializes a new instance of the <see cref="LocalBusinessesResponseJsonConverter" /> class.
         /// </summary>
-        public TopSourcesResponseJsonConverter()
+        public LocalBusinessesResponseJsonConverter()
         {
             OnCreated();
         }
 
         /// <summary>
-        /// The format to use to serialize From
-        /// </summary>
-        public string FromFormat { get; private set; } = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffffK";
-
-        /// <summary>
-        /// The format to use to serialize To
-        /// </summary>
-        public string ToFormat { get; private set; } = "yyyy'-'MM'-'dd'T'HH':'mm':'ss'.'fffffffK";
-
-        /// <summary>
-        /// Deserializes json to <see cref="TopSourcesResponse" />
+        /// Deserializes json to <see cref="LocalBusinessesResponse" />
         /// </summary>
         /// <param name="utf8JsonReader"></param>
         /// <param name="typeToConvert"></param>
         /// <param name="jsonSerializerOptions"></param>
         /// <returns></returns>
         /// <exception cref="JsonException"></exception>
-        public override TopSourcesResponse Read(ref Utf8JsonReader utf8JsonReader, Type typeToConvert, JsonSerializerOptions jsonSerializerOptions)
+        public override LocalBusinessesResponse Read(ref Utf8JsonReader utf8JsonReader, Type typeToConvert, JsonSerializerOptions jsonSerializerOptions)
         {
             int currentDepth = utf8JsonReader.CurrentDepth;
 
@@ -236,13 +210,12 @@ namespace LLMPulse.SDK.Model
             JsonTokenType startingTokenType = utf8JsonReader.TokenType;
 
             Option<int?> projectId = default;
-            Option<DateTime?> from = default;
-            Option<DateTime?> to = default;
-            Option<string?> sort = default;
             Option<int?> page = default;
             Option<int?> perPage = default;
             Option<int?> total = default;
-            Option<List<TopSourcesResponseDataInner>?> data = default;
+            Option<LocalBusinessesTotals?> totals = default;
+            Option<List<LocalBusiness>?> data = default;
+            Option<string?> requestId = default;
 
             while (utf8JsonReader.Read())
             {
@@ -262,15 +235,6 @@ namespace LLMPulse.SDK.Model
                         case "project_id":
                             projectId = new Option<int?>(utf8JsonReader.TokenType == JsonTokenType.Null ? (int?)null : utf8JsonReader.GetInt32());
                             break;
-                        case "from":
-                            from = new Option<DateTime?>(JsonSerializer.Deserialize<DateTime>(ref utf8JsonReader, jsonSerializerOptions));
-                            break;
-                        case "to":
-                            to = new Option<DateTime?>(JsonSerializer.Deserialize<DateTime>(ref utf8JsonReader, jsonSerializerOptions));
-                            break;
-                        case "sort":
-                            sort = new Option<string?>(utf8JsonReader.GetString()!);
-                            break;
                         case "page":
                             page = new Option<int?>(utf8JsonReader.TokenType == JsonTokenType.Null ? (int?)null : utf8JsonReader.GetInt32());
                             break;
@@ -280,8 +244,14 @@ namespace LLMPulse.SDK.Model
                         case "total":
                             total = new Option<int?>(utf8JsonReader.TokenType == JsonTokenType.Null ? (int?)null : utf8JsonReader.GetInt32());
                             break;
+                        case "totals":
+                            totals = new Option<LocalBusinessesTotals?>(JsonSerializer.Deserialize<LocalBusinessesTotals>(ref utf8JsonReader, jsonSerializerOptions)!);
+                            break;
                         case "data":
-                            data = new Option<List<TopSourcesResponseDataInner>?>(JsonSerializer.Deserialize<List<TopSourcesResponseDataInner>>(ref utf8JsonReader, jsonSerializerOptions)!);
+                            data = new Option<List<LocalBusiness>?>(JsonSerializer.Deserialize<List<LocalBusiness>>(ref utf8JsonReader, jsonSerializerOptions)!);
+                            break;
+                        case "request_id":
+                            requestId = new Option<string?>(utf8JsonReader.GetString()!);
                             break;
                         default:
                             break;
@@ -290,88 +260,86 @@ namespace LLMPulse.SDK.Model
             }
 
             if (projectId.IsSet && projectId.Value == null)
-                throw new ArgumentNullException(nameof(projectId), "Property is not nullable for class TopSourcesResponse.");
-
-            if (from.IsSet && from.Value == null)
-                throw new ArgumentNullException(nameof(from), "Property is not nullable for class TopSourcesResponse.");
-
-            if (to.IsSet && to.Value == null)
-                throw new ArgumentNullException(nameof(to), "Property is not nullable for class TopSourcesResponse.");
-
-            if (sort.IsSet && sort.Value == null)
-                throw new ArgumentNullException(nameof(sort), "Property is not nullable for class TopSourcesResponse.");
+                throw new ArgumentNullException(nameof(projectId), "Property is not nullable for class LocalBusinessesResponse.");
 
             if (page.IsSet && page.Value == null)
-                throw new ArgumentNullException(nameof(page), "Property is not nullable for class TopSourcesResponse.");
+                throw new ArgumentNullException(nameof(page), "Property is not nullable for class LocalBusinessesResponse.");
 
             if (perPage.IsSet && perPage.Value == null)
-                throw new ArgumentNullException(nameof(perPage), "Property is not nullable for class TopSourcesResponse.");
+                throw new ArgumentNullException(nameof(perPage), "Property is not nullable for class LocalBusinessesResponse.");
 
             if (total.IsSet && total.Value == null)
-                throw new ArgumentNullException(nameof(total), "Property is not nullable for class TopSourcesResponse.");
+                throw new ArgumentNullException(nameof(total), "Property is not nullable for class LocalBusinessesResponse.");
+
+            if (totals.IsSet && totals.Value == null)
+                throw new ArgumentNullException(nameof(totals), "Property is not nullable for class LocalBusinessesResponse.");
 
             if (data.IsSet && data.Value == null)
-                throw new ArgumentNullException(nameof(data), "Property is not nullable for class TopSourcesResponse.");
+                throw new ArgumentNullException(nameof(data), "Property is not nullable for class LocalBusinessesResponse.");
 
-            return new TopSourcesResponse(projectId, from, to, sort, page, perPage, total, data);
+            if (requestId.IsSet && requestId.Value == null)
+                throw new ArgumentNullException(nameof(requestId), "Property is not nullable for class LocalBusinessesResponse.");
+
+            return new LocalBusinessesResponse(projectId, page, perPage, total, totals, data, requestId);
         }
 
         /// <summary>
-        /// Serializes a <see cref="TopSourcesResponse" />
+        /// Serializes a <see cref="LocalBusinessesResponse" />
         /// </summary>
         /// <param name="writer"></param>
-        /// <param name="topSourcesResponse"></param>
+        /// <param name="localBusinessesResponse"></param>
         /// <param name="jsonSerializerOptions"></param>
         /// <exception cref="NotImplementedException"></exception>
-        public override void Write(Utf8JsonWriter writer, TopSourcesResponse topSourcesResponse, JsonSerializerOptions jsonSerializerOptions)
+        public override void Write(Utf8JsonWriter writer, LocalBusinessesResponse localBusinessesResponse, JsonSerializerOptions jsonSerializerOptions)
         {
             writer.WriteStartObject();
 
-            WriteProperties(writer, topSourcesResponse, jsonSerializerOptions);
+            WriteProperties(writer, localBusinessesResponse, jsonSerializerOptions);
             writer.WriteEndObject();
         }
 
         /// <summary>
-        /// Serializes the properties of <see cref="TopSourcesResponse" />
+        /// Serializes the properties of <see cref="LocalBusinessesResponse" />
         /// </summary>
         /// <param name="writer"></param>
-        /// <param name="topSourcesResponse"></param>
+        /// <param name="localBusinessesResponse"></param>
         /// <param name="jsonSerializerOptions"></param>
         /// <exception cref="NotImplementedException"></exception>
-        public void WriteProperties(Utf8JsonWriter writer, TopSourcesResponse topSourcesResponse, JsonSerializerOptions jsonSerializerOptions)
+        public void WriteProperties(Utf8JsonWriter writer, LocalBusinessesResponse localBusinessesResponse, JsonSerializerOptions jsonSerializerOptions)
         {
-            if (topSourcesResponse.SortOption.IsSet && topSourcesResponse.Sort == null)
-                throw new ArgumentNullException(nameof(topSourcesResponse.Sort), "Property is required for class TopSourcesResponse.");
+            if (localBusinessesResponse.TotalsOption.IsSet && localBusinessesResponse.Totals == null)
+                throw new ArgumentNullException(nameof(localBusinessesResponse.Totals), "Property is required for class LocalBusinessesResponse.");
 
-            if (topSourcesResponse.DataOption.IsSet && topSourcesResponse.Data == null)
-                throw new ArgumentNullException(nameof(topSourcesResponse.Data), "Property is required for class TopSourcesResponse.");
+            if (localBusinessesResponse.DataOption.IsSet && localBusinessesResponse.Data == null)
+                throw new ArgumentNullException(nameof(localBusinessesResponse.Data), "Property is required for class LocalBusinessesResponse.");
 
-            if (topSourcesResponse.ProjectIdOption.IsSet)
-                writer.WriteNumber("project_id", topSourcesResponse.ProjectIdOption.Value!.Value);
+            if (localBusinessesResponse.RequestIdOption.IsSet && localBusinessesResponse.RequestId == null)
+                throw new ArgumentNullException(nameof(localBusinessesResponse.RequestId), "Property is required for class LocalBusinessesResponse.");
 
-            if (topSourcesResponse.FromOption.IsSet)
-                writer.WriteString("from", topSourcesResponse.FromOption.Value!.Value.ToString(FromFormat));
+            if (localBusinessesResponse.ProjectIdOption.IsSet)
+                writer.WriteNumber("project_id", localBusinessesResponse.ProjectIdOption.Value!.Value);
 
-            if (topSourcesResponse.ToOption.IsSet)
-                writer.WriteString("to", topSourcesResponse.ToOption.Value!.Value.ToString(ToFormat));
+            if (localBusinessesResponse.PageOption.IsSet)
+                writer.WriteNumber("page", localBusinessesResponse.PageOption.Value!.Value);
 
-            if (topSourcesResponse.SortOption.IsSet)
-                writer.WriteString("sort", topSourcesResponse.Sort);
+            if (localBusinessesResponse.PerPageOption.IsSet)
+                writer.WriteNumber("per_page", localBusinessesResponse.PerPageOption.Value!.Value);
 
-            if (topSourcesResponse.PageOption.IsSet)
-                writer.WriteNumber("page", topSourcesResponse.PageOption.Value!.Value);
+            if (localBusinessesResponse.TotalOption.IsSet)
+                writer.WriteNumber("total", localBusinessesResponse.TotalOption.Value!.Value);
 
-            if (topSourcesResponse.PerPageOption.IsSet)
-                writer.WriteNumber("per_page", topSourcesResponse.PerPageOption.Value!.Value);
-
-            if (topSourcesResponse.TotalOption.IsSet)
-                writer.WriteNumber("total", topSourcesResponse.TotalOption.Value!.Value);
-
-            if (topSourcesResponse.DataOption.IsSet)
+            if (localBusinessesResponse.TotalsOption.IsSet)
+            {
+                writer.WritePropertyName("totals");
+                JsonSerializer.Serialize(writer, localBusinessesResponse.Totals, jsonSerializerOptions);
+            }
+            if (localBusinessesResponse.DataOption.IsSet)
             {
                 writer.WritePropertyName("data");
-                JsonSerializer.Serialize(writer, topSourcesResponse.Data, jsonSerializerOptions);
+                JsonSerializer.Serialize(writer, localBusinessesResponse.Data, jsonSerializerOptions);
             }
+            if (localBusinessesResponse.RequestIdOption.IsSet)
+                writer.WriteString("request_id", localBusinessesResponse.RequestId);
         }
     }
 }

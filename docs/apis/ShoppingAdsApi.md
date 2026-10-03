@@ -5,6 +5,7 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 | Method | HTTP request | Description |
 |--------|--------------|-------------|
 | [**ListAds**](ShoppingAdsApi.md#listads) | **GET** /dimensions/ads | List AI ad placements |
+| [**ListLocalBusinesses**](ShoppingAdsApi.md#listlocalbusinesses) | **GET** /dimensions/local_businesses | List local businesses |
 | [**ListShopping**](ShoppingAdsApi.md#listshopping) | **GET** /dimensions/shopping | List shopping results |
 
 <a id="listads"></a>
@@ -58,6 +59,60 @@ void (empty response body)
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | Paginated ad rows plus totals |  -  |
+| **422** | Invalid parameters |  -  |
+
+[[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
+
+<a id="listlocalbusinesses"></a>
+# **ListLocalBusinesses**
+> LocalBusinessesResponse ListLocalBusinesses (int projectId, int page = null, int perPage = null, bool owned = null, string order = null, string direction = null, string query = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, int range = null, DateTime from = null, DateTime to = null, string output = null)
+
+List local businesses
+
+Local businesses (shops, restaurants, services) listed inside AI answers, one row per business: its name at its address, so two locations of a chain are two rows. Each row carries its appearance count, the number of prompts that listed it, its average rating and average position in the list, its review count, and whether it is yours or a tracked competitor. Every response also carries a totals block matching the KPI cards in the app. Local business lists come from a subset of models and only for prompts with local intent. Available on every plan.
+
+
+### Parameters
+
+| Name | Type | Description | Notes |
+|------|------|-------------|-------|
+| **projectId** | **int** | Project ID |  |
+| **page** | **int** |  | [optional] [default to 1] |
+| **perPage** | **int** |  | [optional] [default to 20] |
+| **owned** | **bool** | Return only listings identified as the tracked brand&#39;s own locations. The totals block stays account-wide. | [optional]  |
+| **order** | **string** | Sort field | [optional] [default to appearances] |
+| **direction** | **string** |  | [optional] [default to desc] |
+| **query** | **string** | Case-insensitive substring filter on the business name or address | [optional]  |
+| **model** | **string** | Filter by AI model. Models the API key&#39;s user has not enabled are silently dropped. | [optional]  |
+| **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
+| **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
+| **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
+| **prompt** | **int** | Filter by prompt ID | [optional]  |
+| **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
+| **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
+| **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
+| **from** | **DateTime** |  | [optional]  |
+| **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
+| **output** | **string** | Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. | [optional]  |
+
+### Return type
+
+[**LocalBusinessesResponse**](LocalBusinessesResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Paginated local business rows plus totals |  -  |
 | **422** | Invalid parameters |  -  |
 
 [[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
