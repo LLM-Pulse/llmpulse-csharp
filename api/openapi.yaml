@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.53.0
+  version: 1.55.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -90,6 +90,12 @@ tags:
 - description: "Mark a date on the project timeline (a campaign launch, a site migration)\
     \ so charts show what happened when."
   name: Annotations
+- description: "The endpoints behind the LLM Pulse app for Shopify: match a store\
+    \ to its project, push the orders AI assistants referred to the store and read\
+    \ them back, and turn catalog products into buyer prompts to track. They need\
+    \ an API key (Scale plan or above) and are not available to accounts with a white-label\
+    \ portal or an embed, which receive ERR_INTEGRATION_UNAVAILABLE (403)."
+  name: Store Integrations
 - description: "Outbound event notifications: subscribe an HTTPS URL to project events\
     \ and receive HMAC-signed deliveries with no polling. Scale plan and above."
   name: Webhooks
@@ -146,7 +152,15 @@ paths:
         \ JSON. The subscription block is only present for callers who can access\
         \ Billing and Plans in the app (the account owner, or a team member with billing\
         \ access); everyone else gets the same response without that key. requests_per_minute\
-        \ is the ceiling of the key used for the call, not a fixed number."
+        \ is the ceiling of the key used for the call, not a fixed number. For a key\
+        \ limited to some projects, the response carries nothing about the rest of\
+        \ the account: plan, plan_name, subscription and limits.team_members are absent,\
+        \ api_key_project_ids lists the key's projects, limits.prompts.used counts\
+        \ those projects' prompts, limits.prompts and limits.intelligence_tasks show\
+        \ only remaining and unlimited (the capacity the key can still spend, without\
+        \ the account total), and the projects quota is capped at the projects it\
+        \ reaches. tracking_frequency stays, as the cadence those projects' data is\
+        \ collected at."
       operationId: getAccount
       responses:
         "200":
@@ -7015,12 +7029,14 @@ paths:
             application/json:
               example:
                 error:
-                  code: ERR_INSUFFICIENT_SCOPE
-                  message: insufficient_scope_write_required
+                  code: ERR_KEY_PROJECT_SCOPED
+                  message: api_key_limited_to_projects
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
-          description: API key lacks write permission
+          description: "Writes with a read-only key answer ERR_INSUFFICIENT_SCOPE,\
+            \ and a key limited to some projects ERR_KEY_PROJECT_SCOPED, with the\
+            \ same status: this operation acts on the whole account"
       summary: Start a project draft (wizard step 1)
       tags:
       - Projects
@@ -7049,6 +7065,19 @@ paths:
       responses:
         "200":
           description: Draft envelope
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_KEY_PROJECT_SCOPED
+                  message: api_key_limited_to_projects
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Writes with a read-only key answer ERR_INSUFFICIENT_SCOPE,\
+            \ and a key limited to some projects ERR_KEY_PROJECT_SCOPED, with the\
+            \ same status: this operation acts on the whole account"
         "404":
           content:
             application/json:
@@ -7091,12 +7120,14 @@ paths:
             application/json:
               example:
                 error:
-                  code: ERR_INSUFFICIENT_SCOPE
-                  message: insufficient_scope_write_required
+                  code: ERR_KEY_PROJECT_SCOPED
+                  message: api_key_limited_to_projects
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
-          description: API key lacks write permission
+          description: "Writes with a read-only key answer ERR_INSUFFICIENT_SCOPE,\
+            \ and a key limited to some projects ERR_KEY_PROJECT_SCOPED, with the\
+            \ same status: this operation acts on the whole account"
         "404":
           content:
             application/json:
@@ -7157,12 +7188,14 @@ paths:
             application/json:
               example:
                 error:
-                  code: ERR_INSUFFICIENT_SCOPE
-                  message: insufficient_scope_write_required
+                  code: ERR_KEY_PROJECT_SCOPED
+                  message: api_key_limited_to_projects
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
-          description: API key lacks write permission
+          description: "Writes with a read-only key answer ERR_INSUFFICIENT_SCOPE,\
+            \ and a key limited to some projects ERR_KEY_PROJECT_SCOPED, with the\
+            \ same status: this operation acts on the whole account"
         "404":
           content:
             application/json:
@@ -7221,12 +7254,14 @@ paths:
             application/json:
               example:
                 error:
-                  code: ERR_INSUFFICIENT_SCOPE
-                  message: insufficient_scope_write_required
+                  code: ERR_KEY_PROJECT_SCOPED
+                  message: api_key_limited_to_projects
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
-          description: API key lacks write permission
+          description: "Writes with a read-only key answer ERR_INSUFFICIENT_SCOPE,\
+            \ and a key limited to some projects ERR_KEY_PROJECT_SCOPED, with the\
+            \ same status: this operation acts on the whole account"
         "422":
           content:
             application/json:
@@ -8334,6 +8369,7 @@ paths:
           - update
           - pr_insights
           - custom
+          - product_listing
           type: string
         style: form
       - explode: true
@@ -8369,6 +8405,14 @@ paths:
       tags:
       - GEO Writer
     post:
+      description: "Creates a GEO Writer task, processed asynchronously: poll GET\
+        \ /intelligence_tasks/{id} until status is completed. Prompt-based mode takes\
+        \ prompt_id; agentic mode takes custom_topic and/or user_instructions. task_type\
+        \ product_listing is API-only and serves store apps: send a product object\
+        \ (title required) and optionally prompt_ids, and the completed result_data\
+        \ holds ready-to-apply product page copy. Edit and revert it with PATCH /intelligence_tasks/{id}\
+        \ and POST /intelligence_tasks/{id}/revert. Requires a `read_write` scope\
+        \ API key."
       operationId: createIntelligenceTask
       requestBody:
         content:
@@ -8575,6 +8619,516 @@ paths:
       summary: Revert GEO Writer task content
       tags:
       - GEO Writer
+  /store_connection:
+    get:
+      description: "Tells a store app whether the API key's account can use it and\
+        \ which project the store belongs to: the live project whose domain equals\
+        \ the store domain, else one whose domain is a parent or a subdomain of it,\
+        \ else null. candidates lists every live project of the account so the app\
+        \ can offer a picker. Takes no project_id. Not available to accounts with\
+        \ a white-label portal or an embed (ERR_INTEGRATION_UNAVAILABLE)."
+      operationId: getStoreConnection
+      parameters:
+      - description: Store platform
+        explode: true
+        in: query
+        name: platform
+        required: true
+        schema:
+          enum:
+          - shopify
+          type: string
+        style: form
+      - description: "Store domain, with or without scheme, e.g. acme-store.com"
+        explode: true
+        in: query
+        name: domain
+        required: true
+        schema:
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StoreConnectionResponse"
+          description: "Eligibility, the matching project and the candidates"
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INTEGRATION_UNAVAILABLE
+                  message: Store integrations are not available for white-label or
+                    embed accounts
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "The account has a white-label portal or an embed, so store\
+            \ integrations are not available (ERR_INTEGRATION_UNAVAILABLE). Writes\
+            \ with a read-only key answer ERR_INSUFFICIENT_SCOPE, and a team member\
+            \ without the permission ERR_INSUFFICIENT_PERMISSION, with the same status"
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Match a store to a project
+      tags:
+      - Store Integrations
+  /ai_orders:
+    get:
+      description: "Reads back the AI-referred orders a store app pushed for a project:\
+        \ totals, one row per AI assistant and a daily series of the days with orders.\
+        \ Revenue values are decimal strings in currency. Team members need read access\
+        \ to AI Traffic. Not available to accounts with a white-label portal or an\
+        \ embed (ERR_INTEGRATION_UNAVAILABLE)."
+      operationId: listAiOrders
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: Store platform
+        explode: true
+        in: query
+        name: platform
+        required: false
+        schema:
+          default: shopify
+          enum:
+          - shopify
+          type: string
+        style: form
+      - description: First day (YYYY-MM-DD). Defaults to 89 days before to
+        explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: Last day (YYYY-MM-DD). Defaults to today; the window is at most
+          400 days
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiOrdersResponse"
+          description: "Totals, per-assistant rows and the daily series"
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INTEGRATION_UNAVAILABLE
+                  message: Store integrations are not available for white-label or
+                    embed accounts
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "The account has a white-label portal or an embed, so store\
+            \ integrations are not available (ERR_INTEGRATION_UNAVAILABLE). Writes\
+            \ with a read-only key answer ERR_INSUFFICIENT_SCOPE, and a team member\
+            \ without the permission ERR_INSUFFICIENT_PERMISSION, with the same status"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Read AI-referred store orders
+      tags:
+      - Store Integrations
+    put:
+      description: "Replaces the daily AI-referred orders and revenue of the from..to\
+        \ window. Send the raw referring host or utm_source of each order's first\
+        \ visit as referrer: LLM Pulse classifies it and ignores anything that is\
+        \ not an AI assistant. Entries for the same day and assistant are summed.\
+        \ Every stored row of that project and platform inside the window is replaced,\
+        \ so pushing the same window again converges instead of counting twice. Rows\
+        \ are kept per project and platform, not per store, so one store reports per\
+        \ project. Requires a `read_write` scope API key and, for team members, update\
+        \ access to AI Traffic. Not available to accounts with a white-label portal\
+        \ or an embed (ERR_INTEGRATION_UNAVAILABLE)."
+      operationId: replaceAiOrders
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiOrdersUpdateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiOrdersUpdateResponse"
+          description: Rows stored and entries ignored
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INTEGRATION_UNAVAILABLE
+                  message: Store integrations are not available for white-label or
+                    embed accounts
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "The account has a white-label portal or an embed, so store\
+            \ integrations are not available (ERR_INTEGRATION_UNAVAILABLE). Writes\
+            \ with a read-only key answer ERR_INSUFFICIENT_SCOPE, and a team member\
+            \ without the permission ERR_INSUFFICIENT_PERMISSION, with the same status"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Replace AI-referred store orders for a window
+      tags:
+      - Store Integrations
+  /catalog_prompt_suggestions:
+    get:
+      description: "Lists the buyer prompts suggested from a store catalog, oldest\
+        \ first, with their status and the product each one came from. Team members\
+        \ need read access to Prompts. Not available to accounts with a white-label\
+        \ portal or an embed (ERR_INTEGRATION_UNAVAILABLE)."
+      operationId: listCatalogPromptSuggestions
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: Only suggestions in this status
+        explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          enum:
+          - pending
+          - accepted
+          - rejected
+          type: string
+        style: form
+      - description: Only suggestions for this store product id
+        explode: true
+        in: query
+        name: product_external_id
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 50
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogPromptSuggestionsResponse"
+          description: Paginated suggestions
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INTEGRATION_UNAVAILABLE
+                  message: Store integrations are not available for white-label or
+                    embed accounts
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "The account has a white-label portal or an embed, so store\
+            \ integrations are not available (ERR_INTEGRATION_UNAVAILABLE). Writes\
+            \ with a read-only key answer ERR_INSUFFICIENT_SCOPE, and a team member\
+            \ without the permission ERR_INSUFFICIENT_PERMISSION, with the same status"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+      summary: List catalog prompt suggestions
+      tags:
+      - Store Integrations
+    post:
+      description: "Writes buyer prompts for up to 20 catalog products and saves them\
+        \ as pending suggestions in the project's Suggested prompts queue, with the\
+        \ product recorded on each. Generation draws on the hourly prompt-suggestion\
+        \ allowance the app also uses (ERR_QUOTA_EXCEEDED once it is used up); a failed\
+        \ generation returns ERR_GENERATION_FAILED (502) and can be retried. Requires\
+        \ a `read_write` scope API key and, for team members, create access to Prompts.\
+        \ Not available to accounts with a white-label portal or an embed (ERR_INTEGRATION_UNAVAILABLE)."
+      operationId: createCatalogPromptSuggestions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CatalogPromptSuggestionsCreateRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogPromptSuggestionsCreateResponse"
+          description: The suggestions saved for these products
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INTEGRATION_UNAVAILABLE
+                  message: Store integrations are not available for white-label or
+                    embed accounts
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "The account has a white-label portal or an embed, so store\
+            \ integrations are not available (ERR_INTEGRATION_UNAVAILABLE). Writes\
+            \ with a read-only key answer ERR_INSUFFICIENT_SCOPE, and a team member\
+            \ without the permission ERR_INSUFFICIENT_PERMISSION, with the same status"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+        "502":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_GENERATION_FAILED
+                  message: "suggestions could not be generated, try again"
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: The AI generation failed; retry the request
+      summary: Suggest buyer prompts from catalog products
+      tags:
+      - Store Integrations
+  /catalog_prompt_suggestions/accept:
+    post:
+      description: "Starts tracking pending suggestions: each one becomes a prompt,\
+        \ tagged with a collection named after its product. Suggestions that are no\
+        \ longer pending come back in skipped. All accepted suggestions must share\
+        \ one country and language. When the new prompts would exceed the plan, the\
+        \ call returns ERR_LIMIT_REACHED and accepts nothing. Requires a `read_write`\
+        \ scope API key and, for team members, create access to Prompts. Not available\
+        \ to accounts with a white-label portal or an embed (ERR_INTEGRATION_UNAVAILABLE)."
+      operationId: acceptCatalogPromptSuggestions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CatalogPromptSuggestionIdsRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogPromptSuggestionsAcceptResponse"
+          description: Accepted and skipped suggestions
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INTEGRATION_UNAVAILABLE
+                  message: Store integrations are not available for white-label or
+                    embed accounts
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "The account has a white-label portal or an embed, so store\
+            \ integrations are not available (ERR_INTEGRATION_UNAVAILABLE). Writes\
+            \ with a read-only key answer ERR_INSUFFICIENT_SCOPE, and a team member\
+            \ without the permission ERR_INSUFFICIENT_PERMISSION, with the same status"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Accept catalog prompt suggestions
+      tags:
+      - Store Integrations
+  /catalog_prompt_suggestions/reject:
+    post:
+      description: "Marks pending suggestions as rejected; suggestions that are no\
+        \ longer pending stay as they are. Requires a `read_write` scope API key and,\
+        \ for team members, update access to Prompts. Not available to accounts with\
+        \ a white-label portal or an embed (ERR_INTEGRATION_UNAVAILABLE)."
+      operationId: rejectCatalogPromptSuggestions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CatalogPromptSuggestionIdsRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CatalogPromptSuggestionsRejectResponse"
+          description: How many suggestions were rejected
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INTEGRATION_UNAVAILABLE
+                  message: Store integrations are not available for white-label or
+                    embed accounts
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "The account has a white-label portal or an embed, so store\
+            \ integrations are not available (ERR_INTEGRATION_UNAVAILABLE). Writes\
+            \ with a read-only key answer ERR_INSUFFICIENT_SCOPE, and a team member\
+            \ without the permission ERR_INSUFFICIENT_PERMISSION, with the same status"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Reject catalog prompt suggestions
+      tags:
+      - Store Integrations
   /webhooks:
     get:
       description: "Lists active webhook subscriptions for the account, optionally\
@@ -9267,6 +9821,19 @@ components:
           schema:
             $ref: "#/components/schemas/ApiError"
       description: API key lacks write permission
+    KeyProjectScoped:
+      content:
+        application/json:
+          example:
+            error:
+              code: ERR_KEY_PROJECT_SCOPED
+              message: api_key_limited_to_projects
+            request_id: abc-123
+          schema:
+            $ref: "#/components/schemas/ApiError"
+      description: "Writes with a read-only key answer ERR_INSUFFICIENT_SCOPE, and\
+        \ a key limited to some projects ERR_KEY_PROJECT_SCOPED, with the same status:\
+        \ this operation acts on the whole account"
     InsufficientPermission:
       content:
         application/json:
@@ -9279,6 +9846,32 @@ components:
             $ref: "#/components/schemas/ApiError"
       description: API key belongs to a team member whose permission matrix does not
         grant this feature
+    IntegrationUnavailable:
+      content:
+        application/json:
+          example:
+            error:
+              code: ERR_INTEGRATION_UNAVAILABLE
+              message: Store integrations are not available for white-label or embed
+                accounts
+            request_id: abc-123
+          schema:
+            $ref: "#/components/schemas/ApiError"
+      description: "The account has a white-label portal or an embed, so store integrations\
+        \ are not available (ERR_INTEGRATION_UNAVAILABLE). Writes with a read-only\
+        \ key answer ERR_INSUFFICIENT_SCOPE, and a team member without the permission\
+        \ ERR_INSUFFICIENT_PERMISSION, with the same status"
+    GenerationFailed:
+      content:
+        application/json:
+          example:
+            error:
+              code: ERR_GENERATION_FAILED
+              message: "suggestions could not be generated, try again"
+            request_id: abc-123
+          schema:
+            $ref: "#/components/schemas/ApiError"
+      description: The AI generation failed; retry the request
     UnprocessableEntity:
       content:
         application/json:
@@ -9320,12 +9913,13 @@ components:
       maxItems: 10
       type: array
     AccountQuota:
-      description: A consumable quota. limit and remaining are null when unlimited
-        is true.
+      description: "A consumable quota. limit and remaining are null when unlimited\
+        \ is true. For a key limited to some projects, prompts and intelligence_tasks\
+        \ carry no limit (and intelligence_tasks no used): only the capacity left."
       example:
-        limit: 0
-        used: 6
-        remaining: 1
+        limit: 6
+        used: 1
+        remaining: 5
         unlimited: true
         period: period
       properties:
@@ -10507,6 +11101,679 @@ components:
         request_id:
           type: string
       type: object
+    StoreConnectionResponse:
+      example:
+        platform: platform
+        domain: domain
+        project:
+          id: 0
+          name: name
+          domain: domain
+          country_code: country_code
+          language_code: language_code
+        ambiguous: true
+        candidates:
+        - id: 6
+          name: name
+          domain: domain
+        - id: 6
+          name: name
+          domain: domain
+        account:
+          plan: plan
+        request_id: request_id
+      properties:
+        platform:
+          description: "The store platform, e.g. shopify"
+          type: string
+        domain:
+          description: "The store domain as compared: lowercase, without scheme, www\
+            \ or path"
+          type: string
+        project:
+          $ref: "#/components/schemas/StoreConnectionResponse_project"
+        ambiguous:
+          description: True when several live projects match the store domain (for
+            example one project per market). project is then null and the app asks
+            the key holder to pick from candidates.
+          type: boolean
+        candidates:
+          description: "Every live project of the account, for a project picker"
+          items:
+            $ref: "#/components/schemas/StoreConnectionResponse_candidates_inner"
+          type: array
+        account:
+          $ref: "#/components/schemas/StoreConnectionResponse_account"
+        request_id:
+          type: string
+      required:
+      - account
+      - ambiguous
+      - candidates
+      - domain
+      - platform
+      - project
+      - request_id
+      type: object
+    AiOrdersResponse:
+      example:
+        project_id: 0
+        platform: platform
+        currency: currency
+        from: 2000-01-23
+        to: 2000-01-23
+        totals:
+          orders: 6
+          revenue: revenue
+        by_source:
+        - source: source
+          name: name
+          orders: 1
+          revenue: revenue
+        - source: source
+          name: name
+          orders: 1
+          revenue: revenue
+        series:
+        - day: 2000-01-23
+          orders: 5
+          revenue: revenue
+        - day: 2000-01-23
+          orders: 5
+          revenue: revenue
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        platform:
+          type: string
+        currency:
+          description: ISO 4217 code of the most recent stored day; null when the
+            window holds no stored order
+          nullable: true
+          type: string
+        from:
+          format: date
+          type: string
+        to:
+          format: date
+          type: string
+        totals:
+          $ref: "#/components/schemas/AiOrdersResponse_totals"
+        by_source:
+          description: "One row per AI assistant, highest revenue first"
+          items:
+            $ref: "#/components/schemas/AiOrdersResponse_by_source_inner"
+          type: array
+        series:
+          description: "Days that have stored orders, oldest first"
+          items:
+            $ref: "#/components/schemas/AiOrdersResponse_series_inner"
+          type: array
+        request_id:
+          type: string
+      required:
+      - by_source
+      - currency
+      - from
+      - platform
+      - project_id
+      - request_id
+      - series
+      - to
+      - totals
+      type: object
+    AiOrdersUpdateRequest:
+      example:
+        project_id: 0
+        platform: shopify
+        currency: currency
+        from: 2000-01-23
+        to: 2000-01-23
+        days:
+        - day: 2000-01-23
+          referrer: referrer
+          orders: 0
+          revenue: revenue
+        - day: 2000-01-23
+          referrer: referrer
+          orders: 0
+          revenue: revenue
+        - day: 2000-01-23
+          referrer: referrer
+          orders: 0
+          revenue: revenue
+        - day: 2000-01-23
+          referrer: referrer
+          orders: 0
+          revenue: revenue
+        - day: 2000-01-23
+          referrer: referrer
+          orders: 0
+          revenue: revenue
+      properties:
+        project_id:
+          type: integer
+        platform:
+          enum:
+          - shopify
+          type: string
+        currency:
+          description: "ISO 4217 code, e.g. EUR"
+          type: string
+        from:
+          description: First day of the window this push replaces
+          format: date
+          type: string
+        to:
+          description: Last day of the window; at most 400 days after from
+          format: date
+          type: string
+        days:
+          items:
+            $ref: "#/components/schemas/AiOrdersUpdateRequest_days_inner"
+          maxItems: 400
+          type: array
+      required:
+      - currency
+      - days
+      - from
+      - platform
+      - project_id
+      - to
+      type: object
+    AiOrdersUpdateResponse:
+      example:
+        project_id: 0
+        platform: platform
+        stored: 6
+        ignored: 1
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        platform:
+          type: string
+        stored:
+          description: "Rows stored, one per day and AI assistant"
+          type: integer
+        ignored:
+          description: Entries whose referrer is not an AI assistant
+          type: integer
+        request_id:
+          type: string
+      required:
+      - ignored
+      - platform
+      - project_id
+      - request_id
+      - stored
+      type: object
+    CatalogPromptSuggestion:
+      example:
+        id: 5
+        prompt: prompt
+        status: status
+        source: source
+        country_code: country_code
+        language_code: language_code
+        product:
+          external_id: external_id
+          handle: handle
+          title: title
+        prompt_id: 2
+        accepted_at: 2000-01-23T04:56:07.000+00:00
+        created_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        prompt:
+          type: string
+        status:
+          description: "pending, accepted or rejected"
+          type: string
+        source:
+          description: Always catalog
+          type: string
+        country_code:
+          nullable: true
+          type: string
+        language_code:
+          nullable: true
+          type: string
+        product:
+          $ref: "#/components/schemas/CatalogPromptSuggestion_product"
+        prompt_id:
+          description: The tracked prompt an accepted suggestion became; null until
+            accepted
+          nullable: true
+          type: integer
+        accepted_at:
+          description: When the suggestion was accepted; null until then
+          format: date-time
+          nullable: true
+          type: string
+        created_at:
+          format: date-time
+          type: string
+      required:
+      - accepted_at
+      - country_code
+      - created_at
+      - id
+      - language_code
+      - product
+      - prompt
+      - prompt_id
+      - source
+      - status
+      type: object
+    CatalogPromptSuggestionsResponse:
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        data:
+        - id: 5
+          prompt: prompt
+          status: status
+          source: source
+          country_code: country_code
+          language_code: language_code
+          product:
+            external_id: external_id
+            handle: handle
+            title: title
+          prompt_id: 2
+          accepted_at: 2000-01-23T04:56:07.000+00:00
+          created_at: 2000-01-23T04:56:07.000+00:00
+        - id: 5
+          prompt: prompt
+          status: status
+          source: source
+          country_code: country_code
+          language_code: language_code
+          product:
+            external_id: external_id
+            handle: handle
+            title: title
+          prompt_id: 2
+          accepted_at: 2000-01-23T04:56:07.000+00:00
+          created_at: 2000-01-23T04:56:07.000+00:00
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        data:
+          items:
+            $ref: "#/components/schemas/CatalogPromptSuggestion"
+          type: array
+        request_id:
+          type: string
+      required:
+      - data
+      - page
+      - per_page
+      - project_id
+      - request_id
+      - total
+      type: object
+    CatalogProduct:
+      example:
+        external_id: external_id
+        title: title
+        handle: handle
+        product_type: product_type
+        vendor: vendor
+        tags:
+        - tags
+        - tags
+        - tags
+        - tags
+        - tags
+        collections:
+        - collections
+        - collections
+        - collections
+        - collections
+        - collections
+        url: url
+      properties:
+        external_id:
+          description: "The store's product id, e.g. gid://shopify/Product/1"
+          type: string
+        title:
+          type: string
+        handle:
+          type: string
+        product_type:
+          type: string
+        vendor:
+          type: string
+        tags:
+          items:
+            type: string
+          maxItems: 20
+          type: array
+        collections:
+          items:
+            type: string
+          maxItems: 20
+          type: array
+        url:
+          type: string
+      required:
+      - external_id
+      - title
+      type: object
+    CatalogPromptSuggestionsCreateRequest:
+      example:
+        project_id: 0
+        platform: shopify
+        country_code: country_code
+        language_code: language_code
+        products:
+        - external_id: external_id
+          title: title
+          handle: handle
+          product_type: product_type
+          vendor: vendor
+          tags:
+          - tags
+          - tags
+          - tags
+          - tags
+          - tags
+          collections:
+          - collections
+          - collections
+          - collections
+          - collections
+          - collections
+          url: url
+        - external_id: external_id
+          title: title
+          handle: handle
+          product_type: product_type
+          vendor: vendor
+          tags:
+          - tags
+          - tags
+          - tags
+          - tags
+          - tags
+          collections:
+          - collections
+          - collections
+          - collections
+          - collections
+          - collections
+          url: url
+        - external_id: external_id
+          title: title
+          handle: handle
+          product_type: product_type
+          vendor: vendor
+          tags:
+          - tags
+          - tags
+          - tags
+          - tags
+          - tags
+          collections:
+          - collections
+          - collections
+          - collections
+          - collections
+          - collections
+          url: url
+        - external_id: external_id
+          title: title
+          handle: handle
+          product_type: product_type
+          vendor: vendor
+          tags:
+          - tags
+          - tags
+          - tags
+          - tags
+          - tags
+          collections:
+          - collections
+          - collections
+          - collections
+          - collections
+          - collections
+          url: url
+        - external_id: external_id
+          title: title
+          handle: handle
+          product_type: product_type
+          vendor: vendor
+          tags:
+          - tags
+          - tags
+          - tags
+          - tags
+          - tags
+          collections:
+          - collections
+          - collections
+          - collections
+          - collections
+          - collections
+          url: url
+      properties:
+        project_id:
+          type: integer
+        platform:
+          enum:
+          - shopify
+          type: string
+        country_code:
+          description: Defaults to the project country
+          type: string
+        language_code:
+          description: Defaults to the project language
+          type: string
+        products:
+          items:
+            $ref: "#/components/schemas/CatalogProduct"
+          maxItems: 20
+          minItems: 1
+          type: array
+      required:
+      - platform
+      - products
+      - project_id
+      type: object
+    CatalogPromptSuggestionsCreateResponse:
+      example:
+        project_id: 0
+        created: 6
+        skipped: 1
+        data:
+        - id: 5
+          prompt: prompt
+          status: status
+          source: source
+          country_code: country_code
+          language_code: language_code
+          product:
+            external_id: external_id
+            handle: handle
+            title: title
+          prompt_id: 2
+          accepted_at: 2000-01-23T04:56:07.000+00:00
+          created_at: 2000-01-23T04:56:07.000+00:00
+        - id: 5
+          prompt: prompt
+          status: status
+          source: source
+          country_code: country_code
+          language_code: language_code
+          product:
+            external_id: external_id
+            handle: handle
+            title: title
+          prompt_id: 2
+          accepted_at: 2000-01-23T04:56:07.000+00:00
+          created_at: 2000-01-23T04:56:07.000+00:00
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        created:
+          type: integer
+        skipped:
+          description: "Generated prompts not saved because the project already holds\
+            \ them as a suggestion (from any source or product, in any status)."
+          type: integer
+        data:
+          items:
+            $ref: "#/components/schemas/CatalogPromptSuggestion"
+          type: array
+        request_id:
+          type: string
+      required:
+      - created
+      - data
+      - project_id
+      - request_id
+      - skipped
+      type: object
+    CatalogPromptSuggestionIdsRequest:
+      example:
+        project_id: 0
+        ids:
+        - 6
+        - 6
+        - 6
+        - 6
+        - 6
+      properties:
+        project_id:
+          type: integer
+        ids:
+          items:
+            type: integer
+          maxItems: 100
+          minItems: 1
+          type: array
+      required:
+      - ids
+      - project_id
+      type: object
+    CatalogPromptSuggestionsAcceptResponse:
+      example:
+        project_id: 0
+        accepted:
+        - suggestion_id: 6
+          prompt_id: 1
+          collection_id: 5
+        - suggestion_id: 6
+          prompt_id: 1
+          collection_id: 5
+        skipped:
+        - suggestion_id: 5
+          reason: reason
+        - suggestion_id: 5
+          reason: reason
+        prompts_available: 2
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        accepted:
+          items:
+            $ref: "#/components/schemas/CatalogPromptSuggestionsAcceptResponse_accepted_inner"
+          type: array
+        skipped:
+          items:
+            $ref: "#/components/schemas/CatalogPromptSuggestionsAcceptResponse_skipped_inner"
+          type: array
+        prompts_available:
+          description: Prompt slots left on the plan; null when unlimited
+          nullable: true
+          type: integer
+        request_id:
+          type: string
+      required:
+      - accepted
+      - project_id
+      - prompts_available
+      - request_id
+      - skipped
+      type: object
+    CatalogPromptSuggestionsRejectResponse:
+      example:
+        project_id: 0
+        rejected: 6
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        rejected:
+          type: integer
+        request_id:
+          type: string
+      required:
+      - project_id
+      - rejected
+      - request_id
+      type: object
+    IntelligenceTaskProduct:
+      description: The store product a product_listing task rewrites
+      example:
+        external_id: external_id
+        title: title
+        description_html: description_html
+        seo_title: seo_title
+        seo_description: seo_description
+        url: url
+        product_type: product_type
+        images:
+        - id: id
+          alt: alt
+        - id: id
+          alt: alt
+        - id: id
+          alt: alt
+        - id: id
+          alt: alt
+        - id: id
+          alt: alt
+      properties:
+        external_id:
+          type: string
+        title:
+          type: string
+        description_html:
+          maxLength: 20000
+          type: string
+        seo_title:
+          type: string
+        seo_description:
+          type: string
+        url:
+          type: string
+        product_type:
+          type: string
+        images:
+          items:
+            $ref: "#/components/schemas/IntelligenceTaskProduct_images_inner"
+          maxItems: 20
+          type: array
+      required:
+      - title
+      type: object
     IntelligenceTaskCreateRequest:
       example:
         project_id: 0
@@ -10517,18 +11784,48 @@ components:
         output_language_code: output_language_code
         existing_content: existing_content
         existing_content_url: https://openapi-generator.tech
+        product:
+          external_id: external_id
+          title: title
+          description_html: description_html
+          seo_title: seo_title
+          seo_description: seo_description
+          url: url
+          product_type: product_type
+          images:
+          - id: id
+            alt: alt
+          - id: id
+            alt: alt
+          - id: id
+            alt: alt
+          - id: id
+            alt: alt
+          - id: id
+            alt: alt
+        prompt_ids:
+        - 1
+        - 1
+        - 1
+        - 1
+        - 1
       properties:
         project_id:
           type: integer
         task_type:
+          description: "product_listing is API-only: it needs product and returns\
+            \ ready-to-apply product page copy"
           enum:
           - brief
           - create
           - update
           - pr_insights
           - custom
+          - product_listing
           type: string
         prompt_id:
+          description: Not used by product_listing; send null or omit it
+          nullable: true
           type: integer
         custom_topic:
           type: string
@@ -10541,6 +11838,15 @@ components:
         existing_content_url:
           format: uri
           type: string
+        product:
+          $ref: "#/components/schemas/IntelligenceTaskProduct"
+        prompt_ids:
+          description: "product_listing only: up to 20 project prompts the copy should\
+            \ answer"
+          items:
+            type: integer
+          maxItems: 20
+          type: array
       required:
       - project_id
       - task_type
@@ -10627,8 +11933,11 @@ components:
           nullable: true
           type: integer
         result_data:
-          description: The generated content once status is completed; null before
-            that
+          description: "The generated content once status is completed; null before\
+            \ that. A product_listing task returns title, summary, description_html\
+            \ (p, ul, ol, li, strong, em, h3 and br only), faq (question and answer\
+            \ pairs), seo_title, seo_description, image_alts (image_id and alt), changes\
+            \ (field and reason) and labels"
           nullable: true
           type: object
         error_message:
@@ -11068,24 +12377,24 @@ components:
     getAccount_200_response_limits:
       example:
         prompts:
-          limit: 0
-          used: 6
-          remaining: 1
+          limit: 6
+          used: 1
+          remaining: 5
           unlimited: true
           period: period
         projects:
-          limit: 0
-          used: 6
-          remaining: 1
+          limit: 6
+          used: 1
+          remaining: 5
           unlimited: true
           period: period
         competitors_per_project:
           limit: 5
           unlimited: true
         intelligence_tasks:
-          limit: 0
-          used: 6
-          remaining: 1
+          limit: 6
+          used: 1
+          remaining: 5
           unlimited: true
           period: period
         team_members:
@@ -11105,8 +12414,8 @@ components:
       type: object
     getAccount_200_response_rate_limits:
       example:
-        requests_per_minute: 5
-        write_requests_per_minute: 2
+        requests_per_minute: 2
+        write_requests_per_minute: 7
       properties:
         requests_per_minute:
           description: "The ceiling enforced for the API key used on this call, which\
@@ -11122,46 +12431,50 @@ components:
         plan_name: plan_name
         tracking_frequency: tracking_frequency
         role: owner
+        api_key_project_ids:
+        - 0
+        - 0
         subscription:
           status: status
           trialing: true
           current_period_ends_at: 2000-01-23T04:56:07.000+00:00
         limits:
           prompts:
-            limit: 0
-            used: 6
-            remaining: 1
+            limit: 6
+            used: 1
+            remaining: 5
             unlimited: true
             period: period
           projects:
-            limit: 0
-            used: 6
-            remaining: 1
+            limit: 6
+            used: 1
+            remaining: 5
             unlimited: true
             period: period
           competitors_per_project:
             limit: 5
             unlimited: true
           intelligence_tasks:
-            limit: 0
-            used: 6
-            remaining: 1
+            limit: 6
+            used: 1
+            remaining: 5
             unlimited: true
             period: period
           team_members:
             limit: 5
             unlimited: true
         rate_limits:
-          requests_per_minute: 5
-          write_requests_per_minute: 2
+          requests_per_minute: 2
+          write_requests_per_minute: 7
         request_id: request_id
       properties:
         plan:
-          description: "Plan key (starter, growth, scale, ...)"
+          description: "Plan key (starter, growth, scale, ...). Absent for a key limited\
+            \ to some projects."
           type: string
         plan_name:
           description: Display name of the plan to show people (e.g. Scale++ for the
-            scaleplusplus key)
+            scaleplusplus key). Absent for a key limited to some projects.
           type: string
         tracking_frequency:
           description: "How often prompts run (weekly, daily, monthly, ...)"
@@ -11172,6 +12485,13 @@ components:
           - owner
           - member
           type: string
+        api_key_project_ids:
+          description: "The projects the calling API key is limited to; null for a\
+            \ key that sees the whole account, and for OAuth"
+          items:
+            type: integer
+          nullable: true
+          type: array
         subscription:
           $ref: "#/components/schemas/getAccount_200_response_subscription"
         limits:
@@ -12131,6 +13451,210 @@ components:
           - exists
           type: string
       type: object
+    StoreConnectionResponse_project:
+      description: "The live project the store maps to: its domain equals the store's,\
+        \ or is a parent or subdomain of it. Null when no project matches"
+      example:
+        id: 0
+        name: name
+        domain: domain
+        country_code: country_code
+        language_code: language_code
+      nullable: true
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        domain:
+          type: string
+        country_code:
+          nullable: true
+          type: string
+        language_code:
+          nullable: true
+          type: string
+      required:
+      - domain
+      - id
+      - name
+      type: object
+    StoreConnectionResponse_candidates_inner:
+      example:
+        id: 6
+        name: name
+        domain: domain
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        domain:
+          description: Empty when the project has no website URL
+          type: string
+      required:
+      - domain
+      - id
+      - name
+      type: object
+    StoreConnectionResponse_account:
+      example:
+        plan: plan
+      properties:
+        plan:
+          description: "Internal plan key of the account, e.g. scale or scaleplus;\
+            \ null for a key limited to some projects"
+          nullable: true
+          type: string
+      type: object
+    AiOrdersResponse_totals:
+      example:
+        orders: 6
+        revenue: revenue
+      properties:
+        orders:
+          type: integer
+        revenue:
+          description: "Decimal amount with two decimals, e.g. 1834.20"
+          type: string
+      required:
+      - orders
+      - revenue
+      type: object
+    AiOrdersResponse_by_source_inner:
+      example:
+        source: source
+        name: name
+        orders: 1
+        revenue: revenue
+      properties:
+        source:
+          description: "AI assistant slug, e.g. chatgpt or perplexity"
+          type: string
+        name:
+          description: "Display name, e.g. ChatGPT"
+          type: string
+        orders:
+          type: integer
+        revenue:
+          type: string
+      required:
+      - name
+      - orders
+      - revenue
+      - source
+      type: object
+    AiOrdersResponse_series_inner:
+      example:
+        day: 2000-01-23
+        orders: 5
+        revenue: revenue
+      properties:
+        day:
+          format: date
+          type: string
+        orders:
+          type: integer
+        revenue:
+          type: string
+      required:
+      - day
+      - orders
+      - revenue
+      type: object
+    AiOrdersUpdateRequest_days_inner:
+      example:
+        day: 2000-01-23
+        referrer: referrer
+        orders: 0
+        revenue: revenue
+      properties:
+        day:
+          description: Must fall inside from..to
+          format: date
+          type: string
+        referrer:
+          description: "Raw referring host or utm_source of the order's first visit,\
+            \ e.g. chatgpt.com. Entries that are not an AI assistant are ignored"
+          type: string
+        orders:
+          minimum: 0
+          type: integer
+        revenue:
+          description: "Non-negative decimal amount in currency, e.g. 120.50. A JSON\
+            \ number is accepted too"
+          type: string
+      required:
+      - day
+      - orders
+      - referrer
+      - revenue
+      type: object
+    CatalogPromptSuggestion_product:
+      description: The catalog product the suggestion was written for
+      example:
+        external_id: external_id
+        handle: handle
+        title: title
+      properties:
+        external_id:
+          description: "The store's product id, e.g. gid://shopify/Product/1"
+          nullable: true
+          type: string
+        handle:
+          nullable: true
+          type: string
+        title:
+          nullable: true
+          type: string
+      type: object
+    CatalogPromptSuggestionsAcceptResponse_accepted_inner:
+      example:
+        suggestion_id: 6
+        prompt_id: 1
+        collection_id: 5
+      properties:
+        suggestion_id:
+          type: integer
+        prompt_id:
+          type: integer
+        collection_id:
+          description: The collection named after the product; null when the product
+            has no title or the team member cannot create tags
+          nullable: true
+          type: integer
+      required:
+      - collection_id
+      - prompt_id
+      - suggestion_id
+      type: object
+    CatalogPromptSuggestionsAcceptResponse_skipped_inner:
+      example:
+        suggestion_id: 5
+        reason: reason
+      properties:
+        suggestion_id:
+          type: integer
+        reason:
+          description: "accepted or rejected (the suggestion was no longer pending),\
+            \ or pending_deletion"
+          type: string
+      required:
+      - reason
+      - suggestion_id
+      type: object
+    IntelligenceTaskProduct_images_inner:
+      example:
+        id: id
+        alt: alt
+      properties:
+        id:
+          type: string
+        alt:
+          type: string
+      required:
+      - id
+      type: object
     TechnicalGeoReportContentUpdateRequest_edits:
       additionalProperties: false
       description: "The files to replace, each mapped to its full replacement text:\
@@ -12224,7 +13748,10 @@ components:
           - ERR_REVOKED_API_KEY
           - ERR_INSUFFICIENT_SCOPE
           - ERR_INSUFFICIENT_PERMISSION
+          - ERR_KEY_PROJECT_SCOPED
           - ERR_PLAN_REQUIRED
+          - ERR_INTEGRATION_UNAVAILABLE
+          - ERR_GENERATION_FAILED
           - ERR_ACCOUNT_INACTIVE
           - ERR_DRAFT_NOT_FOUND
           - ERR_DRAFT_STATE
@@ -12250,7 +13777,8 @@ components:
     BearerAuth:
       description: API key authentication. Keys are managed at https://llmpulse.ai/app/api_keys
         (Scale plan or above). Used for the REST API and as a headless option for
-        /mcp.
+        /mcp. A key can be limited to one or several projects when it is created;
+        the set cannot be changed later.
       scheme: bearer
       type: http
 
