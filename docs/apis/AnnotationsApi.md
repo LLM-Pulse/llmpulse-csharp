@@ -11,7 +11,7 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 
 <a id="createannotation"></a>
 # **CreateAnnotation**
-> void CreateAnnotation (CreateAnnotationRequest createAnnotationRequest)
+> AnnotationCreateResponse CreateAnnotation (CreateAnnotationRequest createAnnotationRequest)
 
 Create a timeline annotation
 
@@ -26,7 +26,7 @@ Marks a date in the project timeseries with a title + description. Available on 
 
 ### Return type
 
-void (empty response body)
+[**AnnotationCreateResponse**](AnnotationCreateResponse.md)
 
 ### Authorization
 

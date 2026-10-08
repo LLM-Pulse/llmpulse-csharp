@@ -13,6 +13,7 @@ Name | Type | Description | Notes
 **LastDeliveredAt** | **DateTime** |  | [optional] 
 **CreatedAt** | **DateTime** |  | [optional] 
 **Secret** | **string** | HMAC signing secret (whsec_...). Only returned on create. | [optional] 
+**RequestId** | **string** |  | [optional] 
 
 [[Back to Model list]](../../README.md#documentation-for-models) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to README]](../../README.md)
 

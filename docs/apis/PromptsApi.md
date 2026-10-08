@@ -89,7 +89,7 @@ void (empty response body)
 
 <a id="listpromptexecutions"></a>
 # **ListPromptExecutions**
-> void ListPromptExecutions (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string mentionFilter = null, string citationFilter = null, string competitors = null, string output = null)
+> PromptExecutionsResponse ListPromptExecutions (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string mentionFilter = null, string citationFilter = null, string competitors = null, string output = null)
 
 List prompt executions
 
@@ -115,7 +115,7 @@ List prompt executions
 
 ### Return type
 
-void (empty response body)
+[**PromptExecutionsResponse**](PromptExecutionsResponse.md)
 
 ### Authorization
 
@@ -124,7 +124,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details
@@ -136,7 +136,7 @@ void (empty response body)
 
 <a id="listprompts"></a>
 # **ListPrompts**
-> void ListPrompts (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, DateTime from = null, DateTime to = null, string output = null)
+> PromptsResponse ListPrompts (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, DateTime from = null, DateTime to = null, string output = null)
 
 List prompts
 
@@ -160,7 +160,7 @@ List prompts
 
 ### Return type
 
-void (empty response body)
+[**PromptsResponse**](PromptsResponse.md)
 
 ### Authorization
 
@@ -169,7 +169,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details

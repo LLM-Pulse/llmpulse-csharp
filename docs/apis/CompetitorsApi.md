@@ -12,7 +12,7 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 
 <a id="createcompetitor"></a>
 # **CreateCompetitor**
-> void CreateCompetitor (CreateCompetitorRequest createCompetitorRequest)
+> CompetitorCreateResponse CreateCompetitor (CreateCompetitorRequest createCompetitorRequest)
 
 Add a competitor
 
@@ -27,7 +27,7 @@ Adds a competitor with its own citation URL matching rule. Honours the per-plan 
 
 ### Return type
 
-void (empty response body)
+[**CompetitorCreateResponse**](CompetitorCreateResponse.md)
 
 ### Authorization
 

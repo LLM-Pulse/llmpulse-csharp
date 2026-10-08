@@ -9,6 +9,8 @@ Name | Type | Description | Notes
 **CompetitorsPerProject** | [**AccountCapacity**](AccountCapacity.md) |  | [optional] 
 **IntelligenceTasks** | [**AccountQuota**](AccountQuota.md) |  | [optional] 
 **TeamMembers** | [**AccountCapacity**](AccountCapacity.md) |  | [optional] 
+**RecurringGeoAudits** | [**AccountQuota**](AccountQuota.md) |  | [optional] 
+**GeoAuditManualRuns** | [**AccountQuota**](AccountQuota.md) |  | [optional] 
 
 [[Back to Model list]](../../README.md#documentation-for-models) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to README]](../../README.md)
 

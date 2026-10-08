@@ -5,6 +5,7 @@
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **PromptsCount** | **int** |  | [optional] 
+**PromptsByBrandKind** | [**ProjectDetailsAllOfStatsPromptsByBrandKind**](ProjectDetailsAllOfStatsPromptsByBrandKind.md) |  | [optional] 
 **CompetitorsCount** | **int** |  | [optional] 
 **CollectionsCount** | **int** |  | [optional] 
 

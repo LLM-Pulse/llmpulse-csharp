@@ -85,7 +85,7 @@ Get a GEO Writer task
 
 <a id="listintelligencetasks"></a>
 # **ListIntelligenceTasks**
-> void ListIntelligenceTasks (int projectId, string taskType = null, string status = null, int page = null, int perPage = null)
+> IntelligenceTasksResponse ListIntelligenceTasks (int projectId, string taskType = null, string status = null, int page = null, int perPage = null)
 
 List GEO Writer tasks
 
@@ -102,7 +102,7 @@ List GEO Writer tasks
 
 ### Return type
 
-void (empty response body)
+[**IntelligenceTasksResponse**](IntelligenceTasksResponse.md)
 
 ### Authorization
 
@@ -111,7 +111,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details

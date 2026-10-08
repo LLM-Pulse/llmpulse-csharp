@@ -209,7 +209,7 @@ void (empty response body)
 
 <a id="listlocales"></a>
 # **ListLocales**
-> void ListLocales (int projectId)
+> LocalesResponse ListLocales (int projectId)
 
 List locales with data
 
@@ -222,7 +222,7 @@ List locales with data
 
 ### Return type
 
-void (empty response body)
+[**LocalesResponse**](LocalesResponse.md)
 
 ### Authorization
 
@@ -231,7 +231,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details
@@ -243,7 +243,7 @@ void (empty response body)
 
 <a id="listmodels"></a>
 # **ListModels**
-> void ListModels (int projectId)
+> ModelsResponse ListModels (int projectId)
 
 List models with data
 
@@ -256,7 +256,7 @@ List models with data
 
 ### Return type
 
-void (empty response body)
+[**ModelsResponse**](ModelsResponse.md)
 
 ### Authorization
 
@@ -265,7 +265,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details

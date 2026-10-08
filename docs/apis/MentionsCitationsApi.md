@@ -103,7 +103,7 @@ void (empty response body)
 
 <a id="listcitations"></a>
 # **ListCitations**
-> void ListCitations (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
+> CitationsResponse ListCitations (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
 
 List brand citations
 
@@ -128,7 +128,7 @@ Includes visible citations and background source references. Background referenc
 
 ### Return type
 
-void (empty response body)
+[**CitationsResponse**](CitationsResponse.md)
 
 ### Authorization
 
@@ -137,7 +137,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details
@@ -194,7 +194,7 @@ void (empty response body)
 
 <a id="listcompetitormentions"></a>
 # **ListCompetitorMentions**
-> void ListCompetitorMentions (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
+> CompetitorMentionsResponse ListCompetitorMentions (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
 
 List competitor mentions
 
@@ -216,7 +216,7 @@ List competitor mentions
 
 ### Return type
 
-void (empty response body)
+[**CompetitorMentionsResponse**](CompetitorMentionsResponse.md)
 
 ### Authorization
 
@@ -225,7 +225,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details
@@ -237,7 +237,7 @@ void (empty response body)
 
 <a id="listmentions"></a>
 # **ListMentions**
-> void ListMentions (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
+> MentionsResponse ListMentions (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
 
 List brand mentions
 
@@ -260,7 +260,7 @@ List brand mentions
 
 ### Return type
 
-void (empty response body)
+[**MentionsResponse**](MentionsResponse.md)
 
 ### Authorization
 
@@ -269,7 +269,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details

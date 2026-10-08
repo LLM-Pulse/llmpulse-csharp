@@ -86,7 +86,7 @@ void (empty response body)
 
 <a id="listrecommendations"></a>
 # **ListRecommendations**
-> void ListRecommendations (int projectId, string recommendationType = null, string status = null, int page = null, int perPage = null)
+> RecommendationsResponse ListRecommendations (int projectId, string recommendationType = null, string status = null, int page = null, int perPage = null)
 
 List recommendation runs
 
@@ -103,7 +103,7 @@ List recommendation runs
 
 ### Return type
 
-void (empty response body)
+[**RecommendationsResponse**](RecommendationsResponse.md)
 
 ### Authorization
 
@@ -112,7 +112,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details

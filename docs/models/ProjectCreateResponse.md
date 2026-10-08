@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**DraftId** | **string** | The finalized draft; only present on POST /project_drafts/{id}/finalize | [optional] 
 **Project** | **Object** | Same shape as GET /dimensions/projects/{id} | [optional] 
 **Prompts** | [**ProjectCreateResponsePrompts**](ProjectCreateResponsePrompts.md) |  | [optional] 
 **Competitors** | [**ProjectCreateResponseCompetitors**](ProjectCreateResponseCompetitors.md) |  | [optional] 

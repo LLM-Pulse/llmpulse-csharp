@@ -7,11 +7,13 @@ Name | Type | Description | Notes
 **ProjectId** | **int** |  | [optional] 
 **From** | **DateTime** |  | [optional] 
 **To** | **DateTime** |  | [optional] 
+**Filters** | [**MetricsFiltersEcho**](MetricsFiltersEcho.md) |  | [optional] 
 **Sort** | **string** |  | [optional] 
 **Page** | **int** |  | [optional] 
 **PerPage** | **int** |  | [optional] 
 **Total** | **int** |  | [optional] 
 **Data** | [**List&lt;TopSourcesResponseDataInner&gt;**](TopSourcesResponseDataInner.md) |  | [optional] 
+**RequestId** | **string** |  | [optional] 
 
 [[Back to Model list]](../../README.md#documentation-for-models) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to README]](../../README.md)
 

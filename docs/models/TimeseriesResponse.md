@@ -7,8 +7,8 @@ Name | Type | Description | Notes
 **ProjectId** | **int** |  | [optional] 
 **From** | **DateTime** |  | [optional] 
 **To** | **DateTime** |  | [optional] 
-**Granularity** | **string** |  | [optional] 
-**Filters** | **Object** |  | [optional] 
+**Granularity** | **string** | day, week or month | [optional] 
+**Filters** | [**MetricsFiltersEcho**](MetricsFiltersEcho.md) |  | [optional] 
 **Series** | **Dictionary&lt;string, List&lt;TimeseriesSeries&gt;&gt;** |  | [optional] 
 **RequestId** | **string** |  | [optional] 
 

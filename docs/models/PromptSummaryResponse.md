@@ -7,7 +7,7 @@ Name | Type | Description | Notes
 **ProjectId** | **int** |  | [optional] 
 **From** | **DateTime** |  | [optional] 
 **To** | **DateTime** |  | [optional] 
-**Filters** | **Object** |  | [optional] 
+**Filters** | [**MetricsFiltersEcho**](MetricsFiltersEcho.md) |  | [optional] 
 **Breakdown** | **string** |  | [optional] 
 **Sort** | **string** |  | [optional] 
 **SortDir** | **string** |  | [optional] 

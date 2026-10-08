@@ -47,7 +47,7 @@ void (empty response body)
 
 <a id="listsentimentrecords"></a>
 # **ListSentimentRecords**
-> void ListSentimentRecords (int projectId, int competitorId = null, bool brandOnly = null, string analysis = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, DateTime from = null, DateTime to = null, int page = null, int perPage = null)
+> SentimentsResponse ListSentimentRecords (int projectId, int competitorId = null, bool brandOnly = null, string analysis = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, DateTime from = null, DateTime to = null, int page = null, int perPage = null)
 
 List sentiment records (Growth plan or above)
 
@@ -73,7 +73,7 @@ Requires the Growth plan; lower tiers receive ERR_PLAN_REQUIRED.
 
 ### Return type
 
-void (empty response body)
+[**SentimentsResponse**](SentimentsResponse.md)
 
 ### Authorization
 

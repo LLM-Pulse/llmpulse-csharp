@@ -13,6 +13,7 @@ Name | Type | Description | Notes
 **ExecutedAt** | **DateTime** |  | [optional] 
 **DurationMs** | **decimal** | Milliseconds, rounded to one decimal place | [optional] 
 **Success** | **bool** | Null while the answer is still pending | [optional] 
+**NoResult** | **bool** | True for a sentinel non-answer (the provider returned nothing after retries); excluded from platform metrics | [optional] 
 **FanOutQueries** | **List&lt;string&gt;** |  | [optional] 
 **Mentions** | **List&lt;Object&gt;** |  | [optional] 
 **Citations** | **List&lt;Object&gt;** |  | [optional] 
@@ -25,6 +26,7 @@ Name | Type | Description | Notes
 **LocalBusinesses** | **List&lt;Object&gt;** |  | [optional] 
 **Locale** | [**AnswerDetailsLocale**](AnswerDetailsLocale.md) |  | [optional] 
 **AppUrl** | **string** | Opens this answer in the app. The link names its project, so it opens there for any user with access to that project | [optional] 
+**RequestId** | **string** |  | [optional] 
 
 [[Back to Model list]](../../README.md#documentation-for-models) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to README]](../../README.md)
 

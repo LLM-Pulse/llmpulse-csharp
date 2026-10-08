@@ -13,7 +13,7 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 
 <a id="assignprompttags"></a>
 # **AssignPromptTags**
-> void AssignPromptTags (AssignPromptTagsRequest assignPromptTagsRequest)
+> PromptTagsAssignResponse AssignPromptTags (AssignPromptTagsRequest assignPromptTagsRequest)
 
 Bulk-attach tags to prompts
 
@@ -28,7 +28,7 @@ Idempotent bulk assignment of tags (Collections) to existing prompts. Tags can b
 
 ### Return type
 
-void (empty response body)
+[**PromptTagsAssignResponse**](PromptTagsAssignResponse.md)
 
 ### Authorization
 
@@ -51,7 +51,7 @@ void (empty response body)
 
 <a id="createcollection"></a>
 # **CreateCollection**
-> void CreateCollection (CreateCollectionRequest createCollectionRequest)
+> CollectionCreateResponse CreateCollection (CreateCollectionRequest createCollectionRequest)
 
 Create a tag
 
@@ -66,7 +66,7 @@ Creates a tag (Collection) in a project. Optional `prompt_ids` attaches existing
 
 ### Return type
 
-void (empty response body)
+[**CollectionCreateResponse**](CollectionCreateResponse.md)
 
 ### Authorization
 
@@ -128,7 +128,7 @@ void (empty response body)
 
 <a id="listcollections"></a>
 # **ListCollections**
-> void ListCollections (int projectId, string output = null)
+> CollectionsResponse ListCollections (int projectId, string output = null)
 
 List tags/collections
 
@@ -142,7 +142,7 @@ List tags/collections
 
 ### Return type
 
-void (empty response body)
+[**CollectionsResponse**](CollectionsResponse.md)
 
 ### Authorization
 
@@ -151,7 +151,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details
@@ -163,7 +163,7 @@ void (empty response body)
 
 <a id="listtags"></a>
 # **ListTags**
-> void ListTags (int projectId, string output = null)
+> CollectionsResponse ListTags (int projectId, string output = null)
 
 List tags (alias for /collections)
 
@@ -177,7 +177,7 @@ List tags (alias for /collections)
 
 ### Return type
 
-void (empty response body)
+[**CollectionsResponse**](CollectionsResponse.md)
 
 ### Authorization
 
@@ -186,7 +186,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details
