@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.56.0
+  version: 1.57.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -5491,6 +5491,200 @@ paths:
       x-mcp-tool: get_ai_traffic
       x-mcp-plan: growth
       x-plan: scale
+  /web_analytics/schema:
+    get:
+      description: "How to query the web analytics provider connected to the project,\
+        \ live: the provider, the property every query runs on, the native query format\
+        \ it accepts, the allowed top-level fields, the rules the bridge enforces\
+        \ (the connected property is always used, only reads run, row limits), a worked\
+        \ example and, where the provider offers it, its live field list. Cached for\
+        \ an hour. Supported providers: Google Analytics 4, Adobe Analytics or Customer\
+        \ Journey Analytics, Matomo, PostHog, Plausible and Piano, connected on the\
+        \ AI Traffic page. Requires the Growth plan or above; otherwise ERR_PLAN_REQUIRED.\
+        \ Without a connected provider returns ERR_WEB_ANALYTICS_NOT_CONNECTED (404);\
+        \ a provider that refuses the stored credentials returns ERR_WEB_ANALYTICS_ACCESS_REVOKED\
+        \ (403); an unavailable provider, an exhausted provider quota, more than 20\
+        \ uncached queries a minute or too many running at once for the project returns\
+        \ ERR_WEB_ANALYTICS_UPSTREAM (503): wait for the number of seconds in Retry-After\
+        \ before retrying."
+      operationId: getWebAnalyticsSchema
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebAnalyticsSchemaResponse"
+          description: Query format for the connected provider
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_REVOKED_API_KEY
+                  message: revoked_api_key
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Access forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "503":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_UPSTREAM
+                  message: Google Search Console is temporarily unavailable. Retry
+                    in a few minutes.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Upstream provider unavailable, retry after the number of seconds\
+            \ in the Retry-After header"
+          headers:
+            Retry-After:
+              description: "Seconds to wait before retrying: Google's own value when\
+                \ it sent one, otherwise 900 after a quota error and 60 after an outage"
+              explode: false
+              schema:
+                type: integer
+              style: simple
+      summary: Web analytics query format (Growth+)
+      tags:
+      - AI & Agent Traffic
+      x-llms-description: "How to query the connected web analytics provider live:\
+        \ its native query format, enforced rules, an example and its live field list\
+        \ (Growth+)."
+      x-mcp-tool: get_web_analytics_schema
+      x-plan: growth
+  /web_analytics/query:
+    post:
+      description: "Runs a read-only query, written in the connected provider's native\
+        \ format, against the project's property and returns columns and rows: a GA4\
+        \ Data API runReport body, an Adobe Analytics or Customer Journey Analytics\
+        \ report request, Matomo Reporting API parameters (get methods only), PostHog\
+        \ HogQL, a Plausible Stats API v2 query or a Piano getData body. The connected\
+        \ property, site, report suite or project is always used and any property\
+        \ field in the query is ignored. Rows default to 100 and are capped at 5,000.\
+        \ Identical queries are answered from a 10-minute cache (cached: true). A\
+        \ query the provider rejects returns ERR_WEB_ANALYTICS_INVALID_QUERY (422)\
+        \ with the provider's own validation message. Each uncached query spends the\
+        \ customer's provider API quota. A read: no writable key is needed. Supported\
+        \ providers: Google Analytics 4, Adobe Analytics or Customer Journey Analytics,\
+        \ Matomo, PostHog, Plausible and Piano, connected on the AI Traffic page.\
+        \ Requires the Growth plan or above; otherwise ERR_PLAN_REQUIRED. Without\
+        \ a connected provider returns ERR_WEB_ANALYTICS_NOT_CONNECTED (404); a provider\
+        \ that refuses the stored credentials returns ERR_WEB_ANALYTICS_ACCESS_REVOKED\
+        \ (403); an unavailable provider, an exhausted provider quota, more than 20\
+        \ uncached queries a minute or too many running at once for the project returns\
+        \ ERR_WEB_ANALYTICS_UPSTREAM (503): wait for the number of seconds in Retry-After\
+        \ before retrying."
+      operationId: queryWebAnalytics
+      requestBody:
+        content:
+          application/json:
+            example:
+              project_id: 123
+              query:
+                dateRanges:
+                - startDate: 28daysAgo
+                  endDate: yesterday
+                dimensions:
+                - name: sessionDefaultChannelGroup
+                metrics:
+                - name: sessions
+                - name: keyEvents
+                limit: 20
+            schema:
+              $ref: "#/components/schemas/queryWebAnalytics_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WebAnalyticsQueryResponse"
+          description: Query result as columns and rows
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_REVOKED_API_KEY
+                  message: revoked_api_key
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Access forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+        "503":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_UPSTREAM
+                  message: Google Search Console is temporarily unavailable. Retry
+                    in a few minutes.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Upstream provider unavailable, retry after the number of seconds\
+            \ in the Retry-After header"
+          headers:
+            Retry-After:
+              description: "Seconds to wait before retrying: Google's own value when\
+                \ it sent one, otherwise 900 after a quota error and 60 after an outage"
+              explode: false
+              schema:
+                type: integer
+              style: simple
+      summary: Live web analytics query (Growth+)
+      tags:
+      - AI & Agent Traffic
+      x-llms-description: "Live, read-only query in the provider's native format (GA4\
+        \ runReport, Adobe report, Matomo API, PostHog HogQL, Plausible v2, Piano\
+        \ getData) on the connected property; columns and rows (Growth+)."
+      x-mcp-tool: query_web_analytics
+      x-plan: growth
   /dimensions/agent_bots:
     get:
       description: "Static catalog of AI bots that Agent Analytics can identify. Useful\
@@ -7153,7 +7347,12 @@ paths:
       description: "Google Search Console headline totals (impressions, clicks, ctr\
         \ as a 0..1 fraction, average position) for the project over a date range.\
         \ Pass dimension=country, device, page, query or searchAppearance to also\
-        \ receive the breakdown aggregated over the range, capped by limit. Requires\
+        \ receive the breakdown aggregated over the range, capped by limit. With filters\
+        \ and no dimension, totals are the complete figure Google reports for that\
+        \ filter. Breakdown rows are capped by limit and by Google's 25,000-row maximum;\
+        \ breakdown_truncated: true means rows were left out. Query rows exclude anonymized\
+        \ queries, and page and searchAppearance rows are counted per page rather\
+        \ than per property, so breakdown rows can differ from the totals. Requires\
         \ the project to have a connected Search Console property and the Growth plan\
         \ or above; otherwise returns ERR_SEARCH_CONSOLE_NOT_CONNECTED or ERR_PLAN_REQUIRED.\
         \ X-Search-Console-Backend identifies stored or live reads. Stored reads use\
@@ -7216,7 +7415,7 @@ paths:
         style: form
       - description: "Maximum breakdown rows, sorted by impressions descending. Default\
           \ and maximum 1000. Use /search_console/queries or /search_console/pages\
-          \ to page through a full list."
+          \ to page through up to 25,000 rows."
         explode: true
         in: query
         name: limit
@@ -7329,21 +7528,23 @@ paths:
       tags:
       - Search Console
       x-llms-description: "Google Search Console headline totals (impressions, clicks,\
-        \ CTR, average position) for a date range, with optional country/device breakdown.\
-        \ Requires a connected GSC property (Growth+)."
+        \ CTR, average position) for a date range, with an optional country, device,\
+        \ page, query or searchAppearance breakdown. With filters and no dimension\
+        \ the totals are the complete filtered figure; breakdown rows are capped and\
+        \ can differ from the totals. Requires a connected GSC property (Growth+)."
       x-mcp-tool: get_search_console_summary
       x-plan: growth
   /search_console/timeseries:
     get:
-      description: "Google Search Console property-wide series (impressions, clicks,\
-        \ ctr, position) bucketed by day, week or month. Requires a connected Search\
-        \ Console property (Growth+). X-Search-Console-Backend identifies stored or\
-        \ live reads. Stored reads use synced data without contacting Google. Live\
-        \ reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked Google\
-        \ access; reconnect the property in Preferences > Project Settings > Data\
-        \ Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search\
-        \ Console is unavailable or over quota; wait for the number of seconds in\
-        \ Retry-After before retrying."
+      description: "Google Search Console series (impressions, clicks, ctr, position)\
+        \ bucketed by day, week or month, property-wide unless filters narrows it.\
+        \ Requires a connected Search Console property (Growth+). X-Search-Console-Backend\
+        \ identifies stored or live reads. Stored reads use synced data without contacting\
+        \ Google. Live reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked\
+        \ Google access; reconnect the property in Preferences > Project Settings\
+        \ > Data Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google\
+        \ Search Console is unavailable or over quota; wait for the number of seconds\
+        \ in Retry-After before retrying."
       operationId: getSearchConsoleTimeseries
       parameters:
       - description: Project ID
@@ -7507,8 +7708,9 @@ paths:
       summary: Search Console time series (Growth+)
       tags:
       - Search Console
-      x-llms-description: "Google Search Console property-wide series (impressions,\
-        \ clicks, CTR, position) bucketed by day/week/month (Growth+)."
+      x-llms-description: "Google Search Console series (impressions, clicks, CTR,\
+        \ position) bucketed by day/week/month, property-wide unless filters narrows\
+        \ it (Growth+)."
       x-mcp-tool: get_search_console_timeseries
       x-plan: growth
   /search_console/queries:
@@ -7522,11 +7724,10 @@ paths:
         \ access; reconnect the property in Preferences > Project Settings > Data\
         \ Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search\
         \ Console is unavailable or over quota; wait for the number of seconds in\
-        \ Retry-After before retrying. total counts distinct keys available for the\
-        \ range: keys from synced daily rows for stored reads, or up to 25,000 rows\
-        \ from one Google request for live reads. Live responses include truncated:\
-        \ true when that limit is reached. Sorting and pagination apply to the available\
-        \ set."
+        \ Retry-After before retrying. total counts the rows returned by one Google\
+        \ request, up to 25,000; truncated: true means that limit was reached, so\
+        \ the rows add up to less than the totals. Sorting and pagination apply to\
+        \ the available set. Stored reads cannot answer this endpoint and return ERR_INVALID_PARAM."
       operationId: getSearchConsoleQueries
       parameters:
       - description: Project ID
@@ -7712,7 +7913,8 @@ paths:
       tags:
       - Search Console
       x-llms-description: "Top Google Search Console search queries for a date range,\
-        \ ranked by impressions/clicks/CTR/position, paginated (Growth+)."
+        \ ranked by impressions/clicks/CTR/position, paginated; at most 25,000 rows,\
+        \ anonymized queries excluded (Growth+)."
       x-mcp-tool: get_search_console_queries
       x-plan: growth
   /search_console/pages:
@@ -7725,11 +7927,11 @@ paths:
         \ access; reconnect the property in Preferences > Project Settings > Data\
         \ Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search\
         \ Console is unavailable or over quota; wait for the number of seconds in\
-        \ Retry-After before retrying. total counts distinct keys available for the\
-        \ range: keys from synced daily rows for stored reads, or up to 25,000 rows\
-        \ from one Google request for live reads. Live responses include truncated:\
-        \ true when that limit is reached. Sorting and pagination apply to the available\
-        \ set."
+        \ Retry-After before retrying. total counts the rows returned by one Google\
+        \ request, up to 25,000; truncated: true means that limit was reached. Page\
+        \ rows are counted per page rather than per property, so they can differ from\
+        \ the totals. Sorting and pagination apply to the available set. Stored reads\
+        \ cannot answer this endpoint and return ERR_INVALID_PARAM."
       operationId: getSearchConsolePages
       parameters:
       - description: Project ID
@@ -7915,7 +8117,8 @@ paths:
       tags:
       - Search Console
       x-llms-description: "Top Google Search Console landing pages for a date range,\
-        \ ranked by impressions/clicks/CTR/position, paginated (Growth+)."
+        \ ranked by impressions/clicks/CTR/position, paginated; at most 25,000 rows\
+        \ (Growth+)."
       x-mcp-tool: get_search_console_pages
       x-plan: growth
   /recommendations:
@@ -12188,6 +12391,176 @@ components:
           type: boolean
         query:
           description: Only present when a query filter was given
+          type: string
+      type: object
+    WebAnalyticsSchemaResponse:
+      example:
+        project_id: 0
+        provider: google_analytics
+        property: property
+        query_language: query_language
+        docs_url: docs_url
+        allowed_fields:
+        - allowed_fields
+        - allowed_fields
+        rules:
+        - rules
+        - rules
+        example:
+          key: ""
+        fields:
+          key: ""
+        fields_unavailable: fields_unavailable
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        provider:
+          description: The connected web analytics provider.
+          enum:
+          - google_analytics
+          - adobe_analytics
+          - matomo
+          - posthog
+          - plausible
+          - piano
+          type: string
+        property:
+          description: "The property, site, report suite (rsid:...), data view (dataview:...)\
+            \ or project every query runs on."
+          type: string
+        query_language:
+          description: The native query format the provider accepts.
+          type: string
+        docs_url:
+          description: The provider's reference for that format.
+          type: string
+        allowed_fields:
+          description: Top-level query fields that are forwarded.
+          items:
+            type: string
+          type: array
+        rules:
+          description: What the bridge enforces and the provider's main constraints.
+          items:
+            type: string
+          type: array
+        example:
+          additionalProperties: true
+          description: A worked query to adapt.
+          type: object
+        fields:
+          additionalProperties: true
+          description: "The provider's live field list where it offers one: GA4 dimensions\
+            \ and metrics with custom definitions, Adobe ids, Matomo report methods,\
+            \ PostHog event names, the Plausible catalog. Null when the provider did\
+            \ not return it."
+          nullable: true
+          type: object
+        fields_unavailable:
+          description: Present when the field list could not be read; the format and
+            example still apply.
+          type: string
+        request_id:
+          type: string
+      type: object
+    WebAnalyticsQueryResponse:
+      example:
+        project_id: 0
+        provider: google_analytics
+        property: property
+        columns:
+        - name: name
+          kind: kind
+          type: type
+          label: label
+        - name: name
+          kind: kind
+          type: type
+          label: label
+        rows:
+        - - ""
+          - ""
+        - - ""
+          - ""
+        row_count: 6
+        total_rows: 1
+        truncated: true
+        totals:
+          key: ""
+        notes:
+        - notes
+        - notes
+        meta:
+          key: ""
+        fetched_at: 2000-01-23T04:56:07.000+00:00
+        cached: true
+        query:
+          key: ""
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        provider:
+          enum:
+          - google_analytics
+          - adobe_analytics
+          - matomo
+          - posthog
+          - plausible
+          - piano
+          type: string
+        property:
+          type: string
+        columns:
+          items:
+            $ref: "#/components/schemas/WebAnalyticsQueryResponse_columns_inner"
+          type: array
+        rows:
+          description: "One array per row, values in column order: strings, numbers\
+            \ or null."
+          items:
+            items: {}
+            type: array
+          type: array
+        row_count:
+          description: "Rows in this response (at most 5,000)."
+          type: integer
+        total_rows:
+          description: "Rows the provider has for the query, when it reports it."
+          type: integer
+        truncated:
+          description: True when the provider has more rows than returned; page with
+            its own offset or page field.
+          type: boolean
+        totals:
+          additionalProperties: true
+          description: "Metric totals by metric name, when the query asked for them."
+          type: object
+        notes:
+          description: "Provider caveats: sampling, thresholds, more rows available."
+          items:
+            type: string
+          type: array
+        meta:
+          additionalProperties: true
+          description: "Provider metadata such as GA4 time zone, currency and remaining\
+            \ property quota."
+          type: object
+        fetched_at:
+          description: When the provider answered.
+          format: date-time
+          type: string
+        cached:
+          description: True when the answer came from the 10-minute cache instead
+            of the provider.
+          type: boolean
+        query:
+          additionalProperties: true
+          description: "The request as sent to the provider, with the connected property\
+            \ forced and limits applied."
+          type: object
+        request_id:
           type: string
       type: object
     AgentTrafficResponse:
@@ -16573,6 +16946,19 @@ components:
       required:
       - project_id
       type: object
+    queryWebAnalytics_request:
+      properties:
+        project_id:
+          type: integer
+        query:
+          description: "The query in the provider's native format (see GET /web_analytics/schema):\
+            \ a JSON object for GA4, Adobe, Matomo, Plausible and Piano; for PostHog,\
+            \ {\"query\": \"<HogQL>\"} or the HogQL string. Deliberately untyped so\
+            \ generated clients accept either shape."
+      required:
+      - project_id
+      - query
+      type: object
     launchRecommendations_request:
       properties:
         project_id:
@@ -17168,6 +17554,25 @@ components:
           type: number
         avg_mention_rate:
           type: number
+      type: object
+    WebAnalyticsQueryResponse_columns_inner:
+      example:
+        name: name
+        kind: kind
+        type: type
+        label: label
+      properties:
+        name:
+          type: string
+        kind:
+          description: "dimension or metric, when the provider says."
+          type: string
+        type:
+          description: "The provider's column type, when it says (PostHog)."
+          type: string
+        label:
+          description: "The provider's display label, when it sends one (Piano)."
+          type: string
       type: object
     AnswerDetails_locale:
       example:
@@ -17831,6 +18236,10 @@ components:
           - ERR_SEARCH_CONSOLE_ACCESS_REVOKED
           - ERR_SEARCH_CONSOLE_UPSTREAM
           - ERR_AI_TRAFFIC_NOT_CONNECTED
+          - ERR_WEB_ANALYTICS_NOT_CONNECTED
+          - ERR_WEB_ANALYTICS_INVALID_QUERY
+          - ERR_WEB_ANALYTICS_ACCESS_REVOKED
+          - ERR_WEB_ANALYTICS_UPSTREAM
           - ERR_AGENT_TRAFFIC_NOT_CONNECTED
           - ERR_INVALID_PARAM
           - ERR_INVALID_RANGE
