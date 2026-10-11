@@ -1,0 +1,29 @@
+# Publishes this SDK when its release tag is pushed. Switched off until the
+# registry's trusted publisher is configured: set the repository variable
+# REGISTRY_PUBLISH=true then. A version already on the registry is skipped.
+name: Publish
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  nuget:
+    if: vars.REGISTRY_PUBLISH == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+      - run: dotnet pack src/LLMPulse.SDK/LLMPulse.SDK.csproj -c Release -o out
+      - uses: NuGet/login@v1
+        id: login
+        with:
+          user: ${{ vars.NUGET_USER }}
+      - run: dotnet nuget push "out/*.nupkg" --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" --source https://api.nuget.org/v3/index.json --skip-duplicate
