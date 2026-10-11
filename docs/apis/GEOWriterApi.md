@@ -167,7 +167,7 @@ Discards every manual edit on the task and restores the output exactly as it was
 
 Edit GEO Writer task content
 
-Edits the text of a completed task in place. `edits` maps dotted paths into result_data (for example `title` or `sections.0.content`) to replacement text. Only string fields that already exist can change: a path that does not resolve to text, a blank `title`, a value over 20,000 characters or an empty `edits` object is rejected with ERR_INVALID_PARAM and nothing is written. Values identical to the stored text are ignored, and the response lists the paths that actually changed. The first edit keeps a copy of the generated output so POST /intelligence_tasks/{id}/revert can restore it; regenerating the task replaces the edited content. Requires a `read_write` scope API key and, for team members, update permission on GEO Writer.
+Edits the text of a completed task in place. `edits` maps dotted paths into result_data (for example `title` or `sections.0.content`) to replacement text. Only string fields that already exist can change: a path that does not resolve to text, a blank `title`, a value over 20,000 characters or an empty `edits` object is rejected with ERR_INVALID_PARAM and nothing is written. Send the `result_version` you last read with the edits: when the task was regenerated since, the request is refused with ERR_STALE_CONTENT (409), nothing is written and `error.meta.result_version` holds the current token. Without `result_version` the edits apply to whatever the task holds now. Values identical to the stored text are ignored, and the response lists the paths that actually changed. The first edit keeps a copy of the generated output so POST /intelligence_tasks/{id}/revert can restore it; regenerating the task replaces the edited content. Requires a `read_write` scope API key and, for team members, update permission on GEO Writer.
 
 
 ### Parameters
@@ -197,6 +197,7 @@ Edits the text of a completed task in place. `edits` maps dotted paths into resu
 | **200** | Updated task with the paths that changed |  -  |
 | **403** | API key lacks write permission |  -  |
 | **404** | Resource not found |  -  |
+| **409** | The task was regenerated since the result_version in the request was read (ERR_STALE_CONTENT). Nothing was written; error.meta.result_version holds the current token. Read the task again and resend the edits |  -  |
 | **422** | Invalid parameters |  -  |
 
 [[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)

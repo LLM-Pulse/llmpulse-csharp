@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.57.0
+  version: 1.59.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -95,6 +95,11 @@ tags:
 - description: "Mark a date on the project timeline (a campaign launch, a site migration)\
     \ so charts show what happened when."
   name: Annotations
+- description: "The account team: list members and pending invitations, invite someone\
+    \ by email with their projects and access, revoke an invitation or remove a member,\
+    \ with the same rules as the Team Members settings page. Not available to a key\
+    \ limited to some projects."
+  name: Team
 - description: "The endpoints behind the LLM Pulse app for Shopify: match a store\
     \ to its project, push the orders AI assistants referred to the store and read\
     \ them back, and turn catalog products into buyer prompts to track. They need\
@@ -1117,9 +1122,13 @@ paths:
     get:
       description: "Paginated per-prompt aggregated metrics. Returns responses, mentions,\
         \ citations, mention_rate, citation_rate, avg_mention_position and avg_position\
-        \ per prompt. Citations and citation rate include visible citations and background\
-        \ source references; avg_position uses visible citations only. Pass `breakdown=model`\
-        \ to split each prompt by model."
+        \ per prompt, plus the brand sentiment of its responses (sentiment_responses,\
+        \ the five sentiment percentages and net_sentiment, computed like the sentiment\
+        \ timeseries) and the prompt's classification (country_code, language_code,\
+        \ prompt_type, brand_kind and tags, as in /dimensions/prompts). Citations\
+        \ and citation rate include visible citations and background source references;\
+        \ avg_position uses visible citations only. Pass `breakdown=model` to split\
+        \ each prompt by model."
       operationId: getPromptSummary
       parameters:
       - description: Project ID
@@ -1334,7 +1343,8 @@ paths:
       tags:
       - Metrics
       x-llms-description: "Paginated per-prompt metrics (responses, mentions, citations,\
-        \ mention_rate, citation_rate, avg position)."
+        \ mention_rate, citation_rate, avg position, brand sentiment) with each prompt's\
+        \ country, language, type, brand focus and tags."
       x-mcp-tool: get_prompt_summary
   /metrics/sov:
     get:
@@ -5292,7 +5302,8 @@ paths:
       description: "Aggregated AI bot traffic hitting the project's origin server\
         \ (GPTBot, PerplexityBot, ClaudeBot, OAI-SearchBot, Google-Extended, etc.).\
         \ Sourced from Cloudflare or CSV uploads. Requires the Scale plan; lower tiers\
-        \ receive ERR_PLAN_REQUIRED."
+        \ receive ERR_PLAN_REQUIRED. A range below 1, or a window whose from is later\
+        \ than its to, returns ERR_INVALID_PARAM."
       operationId: getAgentTraffic
       parameters:
       - description: Project ID
@@ -5385,6 +5396,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Endpoint requires a higher plan tier
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
       summary: "AI bot crawler traffic (Scale plan or above, Beta)"
       tags:
       - AI & Agent Traffic
@@ -5400,7 +5422,8 @@ paths:
         \ PostHog, Plausible, Matomo or Piano). Returns per-source users, sessions\
         \ and conversions with totals and a conversion rate. Requires a connected\
         \ provider and the Scale plan; otherwise returns ERR_AI_TRAFFIC_NOT_CONNECTED\
-        \ or ERR_PLAN_REQUIRED."
+        \ or ERR_PLAN_REQUIRED. A range below 1, or a window whose from is later than\
+        \ its to, returns ERR_INVALID_PARAM."
       operationId: getAiTraffic
       parameters:
       - description: Project ID
@@ -5482,6 +5505,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
       summary: AI referral traffic (Scale plan or above)
       tags:
       - AI & Agent Traffic
@@ -7371,30 +7405,35 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back, today included (alternative to\
+          \ from/to). At most 487, Google's retention."
         explode: true
         in: query
         name: range
         required: false
         schema:
+          maximum: 487
+          minimum: 1
           type: integer
         style: form
-      - explode: true
+      - description: Start date (YYYY-MM-DD). Defaults to 30 days ago.
+        explode: true
         in: query
         name: from
         required: false
         schema:
-          format: date-time
+          format: date
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End date (YYYY-MM-DD), inclusive. Defaults to today. Google\
+          \ publishes data with a 2-3 day lag, so data_through in the response says\
+          \ how far it reaches."
         explode: true
         in: query
         name: to
         required: false
         schema:
-          format: date-time
+          format: date
           type: string
         style: form
       - description: "Optional breakdown aggregated over the range. country and device\
@@ -7475,9 +7514,39 @@ paths:
           - all
           type: string
         style: form
+      - description: "How Google counts impressions. auto (default) is what Search\
+          \ Console shows (by page when page is grouped or filtered, else by property).\
+          \ Google rejects byProperty with a page dimension or filter."
+        explode: true
+        in: query
+        name: aggregation_type
+        required: false
+        schema:
+          default: auto
+          enum:
+          - auto
+          - byPage
+          - byProperty
+          type: string
+        style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchConsoleSummaryResponse"
           description: Search Console summary
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
         "403":
           content:
             application/json:
@@ -7503,6 +7572,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
         "503":
           content:
             application/json:
@@ -7555,30 +7635,35 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back, today included (alternative to\
+          \ from/to). At most 487, Google's retention."
         explode: true
         in: query
         name: range
         required: false
         schema:
+          maximum: 487
+          minimum: 1
           type: integer
         style: form
-      - explode: true
+      - description: Start date (YYYY-MM-DD). Defaults to 30 days ago.
+        explode: true
         in: query
         name: from
         required: false
         schema:
-          format: date-time
+          format: date
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End date (YYYY-MM-DD), inclusive. Defaults to today. Google\
+          \ publishes data with a 2-3 day lag, so data_through in the response says\
+          \ how far it reaches."
         explode: true
         in: query
         name: to
         required: false
         schema:
-          format: date-time
+          format: date
           type: string
         style: form
       - explode: true
@@ -7656,9 +7741,39 @@ paths:
           - all
           type: string
         style: form
+      - description: "How Google counts impressions. auto (default) is what Search\
+          \ Console shows (by page when page is grouped or filtered, else by property).\
+          \ Google rejects byProperty with a page dimension or filter."
+        explode: true
+        in: query
+        name: aggregation_type
+        required: false
+        schema:
+          default: auto
+          enum:
+          - auto
+          - byPage
+          - byProperty
+          type: string
+        style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchConsoleTimeseriesResponse"
           description: Search Console time series
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
         "403":
           content:
             application/json:
@@ -7684,6 +7799,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
         "503":
           content:
             application/json:
@@ -7726,8 +7852,9 @@ paths:
         \ Console is unavailable or over quota; wait for the number of seconds in\
         \ Retry-After before retrying. total counts the rows returned by one Google\
         \ request, up to 25,000; truncated: true means that limit was reached, so\
-        \ the rows add up to less than the totals. Sorting and pagination apply to\
-        \ the available set. Stored reads cannot answer this endpoint and return ERR_INVALID_PARAM."
+        \ the rows add up to less than the totals, and start_row reads the next block.\
+        \ Sorting and pagination apply to the available set. Stored reads cannot answer\
+        \ this endpoint and return ERR_INVALID_PARAM."
       operationId: getSearchConsoleQueries
       parameters:
       - description: Project ID
@@ -7738,30 +7865,35 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back, today included (alternative to\
+          \ from/to). At most 487, Google's retention."
         explode: true
         in: query
         name: range
         required: false
         schema:
+          maximum: 487
+          minimum: 1
           type: integer
         style: form
-      - explode: true
+      - description: Start date (YYYY-MM-DD). Defaults to 30 days ago.
+        explode: true
         in: query
         name: from
         required: false
         schema:
-          format: date-time
+          format: date
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End date (YYYY-MM-DD), inclusive. Defaults to today. Google\
+          \ publishes data with a 2-3 day lag, so data_through in the response says\
+          \ how far it reaches."
         explode: true
         in: query
         name: to
         required: false
         schema:
-          format: date-time
+          format: date
           type: string
         style: form
       - explode: true
@@ -7794,6 +7926,18 @@ paths:
           default: 20
           maximum: 100
           minimum: 1
+          type: integer
+        style: form
+      - description: "Google ranks rows by clicks and returns at most 25,000 per request.\
+          \ start_row moves that window down the ranking (e.g. 25000 for the next\
+          \ block); sort and pagination apply within the window."
+        explode: true
+        in: query
+        name: start_row
+        required: false
+        schema:
+          default: 0
+          minimum: 0
           type: integer
         style: form
       - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
@@ -7860,9 +8004,39 @@ paths:
           - all
           type: string
         style: form
+      - description: "How Google counts impressions. auto (default) is what Search\
+          \ Console shows (by page when page is grouped or filtered, else by property).\
+          \ Google rejects byProperty with a page dimension or filter."
+        explode: true
+        in: query
+        name: aggregation_type
+        required: false
+        schema:
+          default: auto
+          enum:
+          - auto
+          - byPage
+          - byProperty
+          type: string
+        style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchConsoleListResponse"
           description: Top queries
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
         "403":
           content:
             application/json:
@@ -7888,6 +8062,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
         "503":
           content:
             application/json:
@@ -7928,10 +8113,11 @@ paths:
         \ Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search\
         \ Console is unavailable or over quota; wait for the number of seconds in\
         \ Retry-After before retrying. total counts the rows returned by one Google\
-        \ request, up to 25,000; truncated: true means that limit was reached. Page\
-        \ rows are counted per page rather than per property, so they can differ from\
-        \ the totals. Sorting and pagination apply to the available set. Stored reads\
-        \ cannot answer this endpoint and return ERR_INVALID_PARAM."
+        \ request, up to 25,000; truncated: true means that limit was reached, and\
+        \ start_row reads the next block. Page rows are counted per page rather than\
+        \ per property, so they can differ from the totals. Sorting and pagination\
+        \ apply to the available set. Stored reads cannot answer this endpoint and\
+        \ return ERR_INVALID_PARAM."
       operationId: getSearchConsolePages
       parameters:
       - description: Project ID
@@ -7942,30 +8128,35 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back, today included (alternative to\
+          \ from/to). At most 487, Google's retention."
         explode: true
         in: query
         name: range
         required: false
         schema:
+          maximum: 487
+          minimum: 1
           type: integer
         style: form
-      - explode: true
+      - description: Start date (YYYY-MM-DD). Defaults to 30 days ago.
+        explode: true
         in: query
         name: from
         required: false
         schema:
-          format: date-time
+          format: date
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End date (YYYY-MM-DD), inclusive. Defaults to today. Google\
+          \ publishes data with a 2-3 day lag, so data_through in the response says\
+          \ how far it reaches."
         explode: true
         in: query
         name: to
         required: false
         schema:
-          format: date-time
+          format: date
           type: string
         style: form
       - explode: true
@@ -7998,6 +8189,18 @@ paths:
           default: 20
           maximum: 100
           minimum: 1
+          type: integer
+        style: form
+      - description: "Google ranks rows by clicks and returns at most 25,000 per request.\
+          \ start_row moves that window down the ranking (e.g. 25000 for the next\
+          \ block); sort and pagination apply within the window."
+        explode: true
+        in: query
+        name: start_row
+        required: false
+        schema:
+          default: 0
+          minimum: 0
           type: integer
         style: form
       - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
@@ -8064,9 +8267,39 @@ paths:
           - all
           type: string
         style: form
+      - description: "How Google counts impressions. auto (default) is what Search\
+          \ Console shows (by page when page is grouped or filtered, else by property).\
+          \ Google rejects byProperty with a page dimension or filter."
+        explode: true
+        in: query
+        name: aggregation_type
+        required: false
+        schema:
+          default: auto
+          enum:
+          - auto
+          - byPage
+          - byProperty
+          type: string
+        style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchConsoleListResponse"
           description: Top pages
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
         "403":
           content:
             application/json:
@@ -8092,6 +8325,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
         "503":
           content:
             application/json:
@@ -8120,6 +8364,280 @@ paths:
         \ ranked by impressions/clicks/CTR/position, paginated; at most 25,000 rows\
         \ (Growth+)."
       x-mcp-tool: get_search_console_pages
+      x-plan: growth
+  /search_console/rows:
+    get:
+      description: "Google Search Console rows grouped by 1 to 3 dimensions (date,\
+        \ country, device, page, query, searchAppearance) over a date range, each\
+        \ row carrying its dimension values as fields plus impressions, clicks, ctr\
+        \ (0..1) and position, ranked by impressions, clicks, ctr or position, paginated.\
+        \ Google ranks rows by clicks and returns at most 25,000 per request (truncated:\
+        \ true when reached); start_row moves that window. Query rows exclude anonymized\
+        \ queries, so rows add up to less than the summary totals. Requires a connected\
+        \ Search Console property (Growth+) and live reads: stored reads return ERR_INVALID_PARAM.\
+        \ Live reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked Google\
+        \ access and ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search Console\
+        \ is unavailable or over quota; wait for the number of seconds in Retry-After\
+        \ before retrying. A combination Google refuses comes back as ERR_INVALID_PARAM\
+        \ with its reason."
+      operationId: getSearchConsoleRows
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: "Comma-separated dimensions to group by, 1 to 3 of date, country,\
+          \ device, page, query, searchAppearance. Each becomes a field of every row;\
+          \ country and device values are lowercase."
+        example: "page,query"
+        explode: true
+        in: query
+        name: dimensions
+        required: true
+        schema:
+          type: string
+        style: form
+      - description: "Number of days to look back, today included (alternative to\
+          \ from/to). At most 487, Google's retention."
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          maximum: 487
+          minimum: 1
+          type: integer
+        style: form
+      - description: Start date (YYYY-MM-DD). Defaults to 30 days ago.
+        explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: "End date (YYYY-MM-DD), inclusive. Defaults to today. Google\
+          \ publishes data with a 2-3 day lag, so data_through in the response says\
+          \ how far it reaches."
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: sort
+        required: false
+        schema:
+          default: impressions
+          enum:
+          - impressions
+          - clicks
+          - ctr
+          - position
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Google ranks rows by clicks and returns at most 25,000 per request.\
+          \ start_row moves that window down the ranking (e.g. 25000 for the next\
+          \ block); sort and pagination apply within the window."
+        explode: true
+        in: query
+        name: start_row
+        required: false
+        schema:
+          default: 0
+          minimum: 0
+          type: integer
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      - description: "Which search surface to measure. Defaults to web. discover and\
+          \ googleNews carry no query dimension, so Google rejects /search_console/queries\
+          \ for them."
+        explode: true
+        in: query
+        name: search_type
+        required: false
+        schema:
+          default: web
+          enum:
+          - web
+          - image
+          - video
+          - news
+          - discover
+          - googleNews
+          type: string
+        style: form
+      - description: "Narrow the query; every entry must match (AND). Send the whole\
+          \ list as one JSON value: filters=[{\"dimension\":\"page\",\"operator\"\
+          :\"contains\",\"expression\":\"/blog/\"}] (URL-encoded). An array of objects\
+          \ has no query-parameter form a generated client can produce, so the string\
+          \ is what the official SDKs send; see the SearchConsoleFilters schema for\
+          \ the shape it encodes. includingRegex and excludingRegex take RE2 syntax.\
+          \ At most 10 entries, expression at most 500 characters. The bracket form\
+          \ filters[][dimension]=page&filters[][operator]=contains&filters[][expression]=/blog/\
+          \ is also accepted."
+        example: "[{\"dimension\":\"page\",\"operator\":\"contains\",\"expression\"\
+          :\"/blog/\"}]"
+        explode: true
+        in: query
+        name: filters
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "final (default) counts only rows Google has finalized. all also\
+          \ counts the most recent days, which are still being filled in and will\
+          \ change."
+        explode: true
+        in: query
+        name: data_state
+        required: false
+        schema:
+          default: final
+          enum:
+          - final
+          - all
+          type: string
+        style: form
+      - description: "How Google counts impressions. auto (default) is what Search\
+          \ Console shows (by page when page is grouped or filtered, else by property).\
+          \ Google rejects byProperty with a page dimension or filter."
+        explode: true
+        in: query
+        name: aggregation_type
+        required: false
+        schema:
+          default: auto
+          enum:
+          - auto
+          - byPage
+          - byProperty
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchConsoleRowsResponse"
+          description: Search Console rows
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+                  message: Google Search Console access was revoked. Reconnect the
+                    property in Preferences > Project Settings > Data Connections.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Plan below Growth (ERR_PLAN_REQUIRED), or Google revoked the\
+            \ project's Search Console access (ERR_SEARCH_CONSOLE_ACCESS_REVOKED):\
+            \ reconnect the property"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+        "503":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_UPSTREAM
+                  message: Google Search Console is temporarily unavailable. Retry
+                    in a few minutes.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Upstream provider unavailable, retry after the number of seconds\
+            \ in the Retry-After header"
+          headers:
+            Retry-After:
+              description: "Seconds to wait before retrying: Google's own value when\
+                \ it sent one, otherwise 900 after a quota error and 60 after an outage"
+              explode: false
+              schema:
+                type: integer
+              style: simple
+      summary: Search Console rows by several dimensions (Growth+)
+      tags:
+      - Search Console
+      x-llms-description: "Google Search Console rows grouped by up to 3 dimensions\
+        \ (e.g. page and query, or date and page), ranked by impressions/clicks/CTR/position,\
+        \ paginated; at most 25,000 rows per request, start_row reads the next block\
+        \ (Growth+)."
+      x-mcp-tool: get_search_console_rows
       x-plan: growth
   /recommendations:
     get:
@@ -8450,11 +8968,15 @@ paths:
         \ replacement text. Only string fields that already exist can change: a path\
         \ that does not resolve to text, a blank `title`, a value over 20,000 characters\
         \ or an empty `edits` object is rejected with ERR_INVALID_PARAM and nothing\
-        \ is written. Values identical to the stored text are ignored, and the response\
-        \ lists the paths that actually changed. The first edit keeps a copy of the\
-        \ generated output so POST /intelligence_tasks/{id}/revert can restore it;\
-        \ regenerating the task replaces the edited content. Requires a `read_write`\
-        \ scope API key and, for team members, update permission on GEO Writer."
+        \ is written. Send the `result_version` you last read with the edits: when\
+        \ the task was regenerated since, the request is refused with ERR_STALE_CONTENT\
+        \ (409), nothing is written and `error.meta.result_version` holds the current\
+        \ token. Without `result_version` the edits apply to whatever the task holds\
+        \ now. Values identical to the stored text are ignored, and the response lists\
+        \ the paths that actually changed. The first edit keeps a copy of the generated\
+        \ output so POST /intelligence_tasks/{id}/revert can restore it; regenerating\
+        \ the task replaces the edited content. Requires a `read_write` scope API\
+        \ key and, for team members, update permission on GEO Writer."
       operationId: updateIntelligenceTaskContent
       parameters:
       - description: Numeric task ID or public_id string token
@@ -8500,6 +9022,25 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Resource not found
+        "409":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_STALE_CONTENT
+                  message: The task was regenerated since it was read; its current
+                    result_version is 1775642580. Read it again and resend your edits.
+                  meta:
+                    message: The task was regenerated since it was read; its current
+                      result_version is 1775642580. Read it again and resend your
+                      edits.
+                    result_version: "1775642580"
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: The task was regenerated since the result_version in the request
+            was read (ERR_STALE_CONTENT). Nothing was written; error.meta.result_version
+            holds the current token. Read the task again and resend the edits
         "422":
           content:
             application/json:
@@ -10054,6 +10595,359 @@ paths:
         \ color, category). Available on every plan."
       x-mcp-tool: update_annotation
       x-write: true
+  /team_members:
+    get:
+      description: "Lists the account owner first, then every team member who joined,\
+        \ with their access level (permission_role, account role and the resulting\
+        \ permissions), co-owner and billing flags, project access, status (active\
+        \ or blocked) and last sign-in. Pending invitations are listed by GET /team_invitations;\
+        \ GET /account limits.team_members.used counts both. Available to the account\
+        \ owner, co-owners and team members with the Team Members permission. A key\
+        \ limited to some projects answers ERR_KEY_PROJECT_SCOPED: the team belongs\
+        \ to the whole account."
+      operationId: listTeamMembers
+      parameters:
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: "Default 20, max 100"
+        explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listTeamMembers_200_response"
+          description: OK
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_PERMISSION
+                  message: insufficient_team_member_permission
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "A key limited to some projects answers ERR_KEY_PROJECT_SCOPED,\
+            \ since the team belongs to the whole account. A team member without the\
+            \ Team Members permission, or asking for something only the owner or a\
+            \ co-owner can do, answers ERR_INSUFFICIENT_PERMISSION, and a write with\
+            \ a read-only key ERR_INSUFFICIENT_SCOPE, with the same status"
+      summary: List team members
+      tags:
+      - Team
+      x-llms-description: "The account team, owner first, with each member's access\
+        \ level, project access, status and last sign-in."
+      x-mcp-tool: list_team_members
+  /team_invitations:
+    get:
+      description: "Lists invitations that have not been accepted yet: the address,\
+        \ the access and projects the person will get, when the invitation was sent\
+        \ and when its link expires. An accepted invitation keeps its id and moves\
+        \ to GET /team_members. Same access rules as GET /team_members."
+      operationId: listTeamInvitations
+      parameters:
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: "Default 20, max 100"
+        explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listTeamInvitations_200_response"
+          description: OK
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_PERMISSION
+                  message: insufficient_team_member_permission
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "A key limited to some projects answers ERR_KEY_PROJECT_SCOPED,\
+            \ since the team belongs to the whole account. A team member without the\
+            \ Team Members permission, or asking for something only the owner or a\
+            \ co-owner can do, answers ERR_INSUFFICIENT_PERMISSION, and a write with\
+            \ a read-only key ERR_INSUFFICIENT_SCOPE, with the same status"
+      summary: List pending team invitations
+      tags:
+      - Team
+      x-llms-description: "Pending team invitations with the access they grant, when\
+        \ they were sent and when they expire."
+      x-mcp-tool: list_team_invitations
+    post:
+      description: "Invites someone to the account team with the same rules as the\
+        \ Team Members settings page, and sends them the invitation email (email_sent\
+        \ is false when the email provider refused it; the invitation still exists,\
+        \ so revoke it and invite again once the address is fixed). Send project_ids,\
+        \ or all_projects: true for every project (for a team member inviting, every\
+        \ project they can access). The account owner and co-owners choose the access\
+        \ with permission_role: full_access (default), view_only, custom (with permissions,\
+        \ feature key to verbs) or account_role (with account_role_id). A team member\
+        \ with permission to invite cannot choose access: leave those fields out and\
+        \ the invitation copies their own permissions. Only the account owner can\
+        \ set account_admin (co-owner) or billing_access. An address already registered\
+        \ on the platform, or with an invitation pending, is refused with ERR_INVALID_PARAM\
+        \ (revoke the pending one first). An account that cannot add more team members,\
+        \ or that reached its daily limit of invitations sent through the API and\
+        \ MCP (revoked ones count), answers ERR_LIMIT_REACHED; the message says which.\
+        \ Requires a `read_write` scope API key."
+      operationId: createTeamInvitation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createTeamInvitation_request"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/createTeamInvitation_201_response"
+          description: "Created. The invitation, as GET /team_invitations lists it,\
+            \ and whether the email went out."
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_PERMISSION
+                  message: insufficient_team_member_permission
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "A key limited to some projects answers ERR_KEY_PROJECT_SCOPED,\
+            \ since the team belongs to the whole account. A team member without the\
+            \ Team Members permission, or asking for something only the owner or a\
+            \ co-owner can do, answers ERR_INSUFFICIENT_PERMISSION, and a write with\
+            \ a read-only key ERR_INSUFFICIENT_SCOPE, with the same status"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Invite a team member
+      tags:
+      - Team
+      x-llms-description: "Invite someone to the team by email, choosing their projects\
+        \ and access; they receive the invitation email."
+      x-mcp-tool: invite_team_member
+      x-write: true
+  /team_invitations/{id}:
+    delete:
+      description: "Revokes a pending invitation: its link stops working immediately.\
+        \ Account owner or co-owner only, and a co-owner cannot revoke an invitation\
+        \ that makes someone a co-owner. Members who already joined are removed with\
+        \ DELETE /team_members/{id}; an id that is not a pending invitation of the\
+        \ account answers ERR_NOT_FOUND. Requires a `read_write` scope API key."
+      operationId: revokeTeamInvitation
+      parameters:
+      - description: The invitation id from GET /team_invitations
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/revokeTeamInvitation_200_response"
+          description: OK
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_PERMISSION
+                  message: insufficient_team_member_permission
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "A key limited to some projects answers ERR_KEY_PROJECT_SCOPED,\
+            \ since the team belongs to the whole account. A team member without the\
+            \ Team Members permission, or asking for something only the owner or a\
+            \ co-owner can do, answers ERR_INSUFFICIENT_PERMISSION, and a write with\
+            \ a read-only key ERR_INSUFFICIENT_SCOPE, with the same status"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+      summary: Revoke a pending team invitation
+      tags:
+      - Team
+      x-llms-description: Revoke a pending team invitation; its link stops working
+        immediately.
+      x-mcp-tool: revoke_team_invitation
+      x-write: true
+  /team_members/{id}:
+    delete:
+      description: "Removes a member from the team, as the settings page does: their\
+        \ sessions and API keys stop working at once and their user account is deleted\
+        \ in the background shortly after. Account owner or co-owner only; a co-owner\
+        \ cannot remove the owner, another co-owner or themselves. The owner cannot\
+        \ be removed. Pending invitations are revoked with DELETE /team_invitations/{id};\
+        \ an id that is not a member of the account answers ERR_NOT_FOUND. Requires\
+        \ a `read_write` scope API key."
+      operationId: removeTeamMember
+      parameters:
+      - description: The member id from GET /team_members
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/removeTeamMember_200_response"
+          description: OK
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_PERMISSION
+                  message: insufficient_team_member_permission
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "A key limited to some projects answers ERR_KEY_PROJECT_SCOPED,\
+            \ since the team belongs to the whole account. A team member without the\
+            \ Team Members permission, or asking for something only the owner or a\
+            \ co-owner can do, answers ERR_INSUFFICIENT_PERMISSION, and a write with\
+            \ a read-only key ERR_INSUFFICIENT_SCOPE, with the same status"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+      summary: Remove a team member
+      tags:
+      - Team
+      x-llms-description: Remove a team member; their sessions and API keys stop working
+        at once and the account is deleted shortly after.
+      x-mcp-tool: remove_team_member
+      x-write: true
   /store_connection:
     get:
       description: "Tells a store app whether the API key's account can use it and\
@@ -10664,8 +11558,10 @@ paths:
         \ header (HMAC-SHA256 of the raw body computed with the subscription secret).\
         \ Failed deliveries receive up to 5 attempts in total, including the first,\
         \ with backoff; subscriptions auto-disable after 20 consecutive failed deliveries.\
-        \ Idempotent for the same project + event + URL. Requires a `read_write` scope\
-        \ API key and the Scale plan or above."
+        \ Idempotent for the same project + event + URL: re-posting returns the existing\
+        \ subscription, unless the API key or OAuth connection that created it was\
+        \ revoked; then it is replaced by a new subscription with a new secret. Requires\
+        \ a `read_write` scope API key and the Scale plan or above."
       operationId: createWebhook
       requestBody:
         content:
@@ -11023,6 +11919,69 @@ components:
       schema:
         type: string
       style: form
+    GscFrom:
+      description: Start date (YYYY-MM-DD). Defaults to 30 days ago.
+      explode: true
+      in: query
+      name: from
+      required: false
+      schema:
+        format: date
+        type: string
+      style: form
+    GscTo:
+      description: "End date (YYYY-MM-DD), inclusive. Defaults to today. Google publishes\
+        \ data with a 2-3 day lag, so data_through in the response says how far it\
+        \ reaches."
+      explode: true
+      in: query
+      name: to
+      required: false
+      schema:
+        format: date
+        type: string
+      style: form
+    GscRange:
+      description: "Number of days to look back, today included (alternative to from/to).\
+        \ At most 487, Google's retention."
+      explode: true
+      in: query
+      name: range
+      required: false
+      schema:
+        maximum: 487
+        minimum: 1
+        type: integer
+      style: form
+    GscAggregationType:
+      description: "How Google counts impressions. auto (default) is what Search Console\
+        \ shows (by page when page is grouped or filtered, else by property). Google\
+        \ rejects byProperty with a page dimension or filter."
+      explode: true
+      in: query
+      name: aggregation_type
+      required: false
+      schema:
+        default: auto
+        enum:
+        - auto
+        - byPage
+        - byProperty
+        type: string
+      style: form
+    GscStartRow:
+      description: "Google ranks rows by clicks and returns at most 25,000 per request.\
+        \ start_row moves that window down the ranking (e.g. 25000 for the next block);\
+        \ sort and pagination apply within the window."
+      explode: true
+      in: query
+      name: start_row
+      required: false
+      schema:
+        default: 0
+        minimum: 0
+        type: integer
+      style: form
     GscDataState:
       description: "final (default) counts only rows Google has finalized. all also\
         \ counts the most recent days, which are still being filled in and will change."
@@ -11330,6 +12289,21 @@ components:
             $ref: "#/components/schemas/ApiError"
       description: API key belongs to a team member whose permission matrix does not
         grant this feature
+    TeamForbidden:
+      content:
+        application/json:
+          example:
+            error:
+              code: ERR_INSUFFICIENT_PERMISSION
+              message: insufficient_team_member_permission
+            request_id: abc-123
+          schema:
+            $ref: "#/components/schemas/ApiError"
+      description: "A key limited to some projects answers ERR_KEY_PROJECT_SCOPED,\
+        \ since the team belongs to the whole account. A team member without the Team\
+        \ Members permission, or asking for something only the owner or a co-owner\
+        \ can do, answers ERR_INSUFFICIENT_PERMISSION, and a write with a read-only\
+        \ key ERR_INSUFFICIENT_SCOPE, with the same status"
     IntegrationUnavailable:
       content:
         application/json:
@@ -11510,6 +12484,8 @@ components:
             $ref: "#/components/schemas/ProjectDetails_allOf_stats"
           data_coverage:
             $ref: "#/components/schemas/ProjectDetails_allOf_data_coverage"
+          search_console:
+            $ref: "#/components/schemas/ProjectDetails_allOf_search_console"
           request_id:
             type: string
         type: object
@@ -11555,6 +12531,9 @@ components:
           languages:
           - languages
           - languages
+        search_console:
+          status: connected
+          property: property
         request_id: request_id
     Competitor:
       example:
@@ -11943,6 +12922,22 @@ components:
         avg_mention_position: 7.386281948385884
         avg_position: 1.2315135367772556
         app_url: https://openapi-generator.tech
+        country_code: country_code
+        language_code: language_code
+        prompt_type: prompt_type
+        brand_kind: brand_kind
+        tags:
+        - id: 1
+          name: name
+        - id: 1
+          name: name
+        sentiment_responses: 1
+        sentiment_very_positive: 6.84685269835264
+        sentiment_positive: 7.457744773683766
+        sentiment_neutral: 1.1730742509559433
+        sentiment_negative: 4.965218492984954
+        sentiment_very_negative: 5.025004791520295
+        net_sentiment: 9.965781217890562
       properties:
         prompt_id:
           type: integer
@@ -11974,6 +12969,64 @@ components:
             \ so it opens there for any user with access to that project"
           format: uri
           type: string
+        country_code:
+          description: "Country of the prompt, as in /dimensions/prompts"
+          nullable: true
+          type: string
+        language_code:
+          description: "Language of the prompt, as in /dimensions/prompts"
+          nullable: true
+          type: string
+        prompt_type:
+          description: "Search intent: informational, navigational, commercial or\
+            \ transactional. Null until the prompt is classified"
+          nullable: true
+          type: string
+        brand_kind:
+          description: "Brand focus: brand, brand_other or non_brand. Null until the\
+            \ prompt is classified"
+          nullable: true
+          type: string
+        tags:
+          description: Every tag the prompt belongs to
+          items:
+            $ref: "#/components/schemas/TagRef"
+          type: array
+        sentiment_responses:
+          description: "Responses in the window with a sentiment verdict for the brand,\
+            \ the base of the sentiment percentages (deduplicated like the sentiment\
+            \ timeseries)"
+          type: integer
+        sentiment_very_positive:
+          description: Percentage (0-100) of sentiment_responses whose brand verdict
+            is very positive; null when sentiment_responses is 0
+          nullable: true
+          type: number
+        sentiment_positive:
+          description: Percentage (0-100) of sentiment_responses whose brand verdict
+            is positive; null when sentiment_responses is 0
+          nullable: true
+          type: number
+        sentiment_neutral:
+          description: Percentage (0-100) of sentiment_responses whose brand verdict
+            is neutral; null when sentiment_responses is 0
+          nullable: true
+          type: number
+        sentiment_negative:
+          description: Percentage (0-100) of sentiment_responses whose brand verdict
+            is negative; null when sentiment_responses is 0
+          nullable: true
+          type: number
+        sentiment_very_negative:
+          description: Percentage (0-100) of sentiment_responses whose brand verdict
+            is very negative; null when sentiment_responses is 0
+          nullable: true
+          type: number
+        net_sentiment:
+          description: "Positive minus negative percentages (-100 to 100), neutral\
+            \ counted in the base; null when sentiment_responses is 0"
+          nullable: true
+          type: number
       type: object
     PromptSummaryResponse:
       example:
@@ -12022,6 +13075,22 @@ components:
           avg_mention_position: 7.386281948385884
           avg_position: 1.2315135367772556
           app_url: https://openapi-generator.tech
+          country_code: country_code
+          language_code: language_code
+          prompt_type: prompt_type
+          brand_kind: brand_kind
+          tags:
+          - id: 1
+            name: name
+          - id: 1
+            name: name
+          sentiment_responses: 1
+          sentiment_very_positive: 6.84685269835264
+          sentiment_positive: 7.457744773683766
+          sentiment_neutral: 1.1730742509559433
+          sentiment_negative: 4.965218492984954
+          sentiment_very_negative: 5.025004791520295
+          net_sentiment: 9.965781217890562
         - prompt_id: 5
           prompt_text: prompt_text
           model: model
@@ -12034,6 +13103,22 @@ components:
           avg_mention_position: 7.386281948385884
           avg_position: 1.2315135367772556
           app_url: https://openapi-generator.tech
+          country_code: country_code
+          language_code: language_code
+          prompt_type: prompt_type
+          brand_kind: brand_kind
+          tags:
+          - id: 1
+            name: name
+          - id: 1
+            name: name
+          sentiment_responses: 1
+          sentiment_very_positive: 6.84685269835264
+          sentiment_positive: 7.457744773683766
+          sentiment_neutral: 1.1730742509559433
+          sentiment_negative: 4.965218492984954
+          sentiment_very_negative: 5.025004791520295
+          net_sentiment: 9.965781217890562
         request_id: request_id
       properties:
         project_id:
@@ -13846,6 +14931,7 @@ components:
           title: How to measure AI visibility in 2026
           sections.0.content: AI visibility is the share of AI answers that mention
             your brand.
+        result_version: "1775642580"
       properties:
         project_id:
           type: integer
@@ -13860,6 +14946,14 @@ components:
             sections.0.content: AI visibility is the share of AI answers that mention
               your brand.
           type: object
+        result_version:
+          description: "Optional. The result_version of the task as last read. When\
+            \ sent, the edit is refused with ERR_STALE_CONTENT (409) and nothing is\
+            \ written if the task was regenerated since. Omitted, null or empty, the\
+            \ edits apply to whatever the task holds now"
+          example: "1775642580"
+          nullable: true
+          type: string
       required:
       - edits
       - project_id
@@ -13886,6 +14980,7 @@ components:
         processed_at: 2000-01-23T04:56:07.000+00:00
         manually_edited_at: 2000-01-23T04:56:07.000+00:00
         edited_by_user_id: 5
+        result_version: "1775642580"
         request_id: request_id
       properties:
         id:
@@ -13952,6 +15047,15 @@ components:
             or an edit made from an embedded portal
           nullable: true
           type: integer
+        result_version:
+          description: "Concurrency token for content edits: send it back as result_version\
+            \ on PATCH /intelligence_tasks/{id} so an edit composed before a regeneration\
+            \ is refused with ERR_STALE_CONTENT (409). It is \"0\" until the task\
+            \ first completes, then changes each time a generation or regeneration\
+            \ replaces result_data, never on a manual edit or a revert. Treat it as\
+            \ opaque text"
+          example: "1775642580"
+          type: string
         request_id:
           type: string
       type: object
@@ -13987,6 +15091,7 @@ components:
         processed_at: 2000-01-23T04:56:07.000+00:00
         manually_edited_at: 2000-01-23T04:56:07.000+00:00
         edited_by_user_id: 5
+        result_version: "1775642580"
         request_id: request_id
         changed_paths:
         - changed_paths
@@ -15386,7 +16491,7 @@ components:
       type: object
     TagRef:
       example:
-        id: 9
+        id: 1
         name: name
       properties:
         id:
@@ -15603,9 +16708,9 @@ components:
         - 7
         - 7
         tags:
-        - id: 9
+        - id: 1
           name: name
-        - id: 9
+        - id: 1
           name: name
         country_code: country_code
         language_code: language_code
@@ -15695,9 +16800,9 @@ components:
           - 7
           - 7
           tags:
-          - id: 9
+          - id: 1
             name: name
-          - id: 9
+          - id: 1
             name: name
           country_code: country_code
           language_code: language_code
@@ -15712,9 +16817,9 @@ components:
           - 7
           - 7
           tags:
-          - id: 9
+          - id: 1
             name: name
-          - id: 9
+          - id: 1
             name: name
           country_code: country_code
           language_code: language_code
@@ -15857,9 +16962,9 @@ components:
       example:
         project_id: 0
         collections:
-        - id: 9
+        - id: 1
           name: name
-        - id: 9
+        - id: 1
           name: name
         request_id: request_id
       properties:
@@ -15955,6 +17060,7 @@ components:
         manually_edited_at: 2000-01-23T04:56:07.000+00:00
         created_at: 2000-01-23T04:56:07.000+00:00
         processed_at: 2000-01-23T04:56:07.000+00:00
+        result_version: "1775642580"
       properties:
         id:
           type: integer
@@ -15988,6 +17094,15 @@ components:
           format: date-time
           nullable: true
           type: string
+        result_version:
+          description: "Concurrency token for content edits: send it back as result_version\
+            \ on PATCH /intelligence_tasks/{id} so an edit composed before a regeneration\
+            \ is refused with ERR_STALE_CONTENT (409). It is \"0\" until the task\
+            \ first completes, then changes each time a generation or regeneration\
+            \ replaces result_data, never on a manual edit or a revert. Treat it as\
+            \ opaque text"
+          example: "1775642580"
+          type: string
       required:
       - created_at
       - id
@@ -15996,6 +17111,7 @@ components:
       - prompt_id
       - prompt_text
       - public_id
+      - result_version
       - status
       - task_type
       - title
@@ -16030,6 +17146,7 @@ components:
           manually_edited_at: 2000-01-23T04:56:07.000+00:00
           created_at: 2000-01-23T04:56:07.000+00:00
           processed_at: 2000-01-23T04:56:07.000+00:00
+          result_version: "1775642580"
         - id: 5
           public_id: public_id
           task_type: task_type
@@ -16041,6 +17158,7 @@ components:
           manually_edited_at: 2000-01-23T04:56:07.000+00:00
           created_at: 2000-01-23T04:56:07.000+00:00
           processed_at: 2000-01-23T04:56:07.000+00:00
+          result_version: "1775642580"
     RecommendationSummary:
       example:
         id: 5
@@ -16397,9 +17515,9 @@ components:
         project_id: 0
         prompts_targeted: 6
         tags_attached:
-        - id: 9
+        - id: 1
           name: name
-        - id: 9
+        - id: 1
           name: name
         new_links_created: 1
         skipped_already_linked: 5
@@ -16445,6 +17563,511 @@ components:
       - request_id
       - skipped_already_linked
       - tags_attached
+      type: object
+    SearchConsoleProperty:
+      example:
+        id: id
+        name: name
+      properties:
+        id:
+          description: "Property id, e.g. sc-domain:example.com"
+          type: string
+        name:
+          type: string
+      type: object
+    SearchConsoleMetrics:
+      example:
+        impressions: 6
+        clicks: 1
+        ctr: 5.962133916683182
+        position: 5.637376656633329
+      properties:
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        ctr:
+          description: 0..1 fraction
+          type: number
+        position:
+          description: Impression-weighted average position
+          type: number
+      type: object
+    SearchConsoleSummaryResponse:
+      example:
+        project_id: 0
+        property:
+          id: id
+          name: name
+        from: 2000-01-23
+        to: 2000-01-23
+        data_through: 2000-01-23
+        totals:
+          impressions: 6
+          clicks: 1
+          ctr: 5.962133916683182
+          position: 5.637376656633329
+        dimension: dimension
+        breakdown:
+        - value: value
+          impressions: 2
+          clicks: 7
+          ctr: 9.301444243932576
+          position: 3.616076749251911
+        - value: value
+          impressions: 2
+          clicks: 7
+          ctr: 9.301444243932576
+          position: 3.616076749251911
+        breakdown_truncated: true
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        property:
+          $ref: "#/components/schemas/SearchConsoleProperty"
+        from:
+          format: date
+          type: string
+        to:
+          format: date
+          type: string
+        data_through:
+          description: "Latest date Google has published for the property (it lags\
+            \ 2-3 days). Later days are missing, not zero."
+          format: date
+          nullable: true
+          type: string
+        totals:
+          $ref: "#/components/schemas/SearchConsoleMetrics"
+        dimension:
+          description: Present when a breakdown was requested
+          type: string
+        breakdown:
+          description: "Present when a breakdown was requested, sorted by impressions\
+            \ descending"
+          items:
+            $ref: "#/components/schemas/SearchConsoleSummaryResponse_breakdown_inner"
+          type: array
+        breakdown_truncated:
+          description: "Present (true) when limit or Google's 25,000-row maximum left\
+            \ breakdown rows out, so they add up to less than totals"
+          type: boolean
+        request_id:
+          type: string
+      type: object
+    SearchConsoleTimeseriesResponse:
+      example:
+        project_id: 0
+        property:
+          id: id
+          name: name
+        from: 2000-01-23
+        to: 2000-01-23
+        data_through: 2000-01-23
+        granularity: granularity
+        data:
+        - date: 2000-01-23
+          impressions: 6
+          clicks: 1
+          ctr: 5.962133916683182
+          position: 5.637376656633329
+        - date: 2000-01-23
+          impressions: 6
+          clicks: 1
+          ctr: 5.962133916683182
+          position: 5.637376656633329
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        property:
+          $ref: "#/components/schemas/SearchConsoleProperty"
+        from:
+          format: date
+          type: string
+        to:
+          format: date
+          type: string
+        data_through:
+          description: "Latest date Google has published for the property (it lags\
+            \ 2-3 days). Later days are missing, not zero."
+          format: date
+          nullable: true
+          type: string
+        granularity:
+          type: string
+        data:
+          items:
+            $ref: "#/components/schemas/SearchConsoleTimeseriesResponse_data_inner"
+          type: array
+        request_id:
+          type: string
+      type: object
+    SearchConsoleListResponse:
+      example:
+        project_id: 0
+        property:
+          id: id
+          name: name
+        from: 2000-01-23
+        to: 2000-01-23
+        data_through: 2000-01-23
+        page: 6
+        per_page: 1
+        total: 5
+        sort: sort
+        start_row: 5
+        truncated: true
+        data:
+        - key: key
+          impressions: 2
+          clicks: 7
+          ctr: 9.301444243932576
+          position: 3.616076749251911
+        - key: key
+          impressions: 2
+          clicks: 7
+          ctr: 9.301444243932576
+          position: 3.616076749251911
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        property:
+          $ref: "#/components/schemas/SearchConsoleProperty"
+        from:
+          format: date
+          type: string
+        to:
+          format: date
+          type: string
+        data_through:
+          description: "Latest date Google has published for the property (it lags\
+            \ 2-3 days). Later days are missing, not zero."
+          format: date
+          nullable: true
+          type: string
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          description: "Rows in this window (one Google request, at most 25,000)"
+          type: integer
+        sort:
+          type: string
+        start_row:
+          description: Present when start_row was set
+          type: integer
+        truncated:
+          description: "Present (true) when Google returned 25,000 rows, so more rows\
+            \ exist past this window"
+          type: boolean
+        data:
+          items:
+            $ref: "#/components/schemas/SearchConsoleListResponse_data_inner"
+          type: array
+        request_id:
+          type: string
+      type: object
+    SearchConsoleRowsResponse:
+      example:
+        project_id: 0
+        property:
+          id: id
+          name: name
+        from: 2000-01-23
+        to: 2000-01-23
+        data_through: 2000-01-23
+        page: 6
+        per_page: 1
+        total: 5
+        sort: sort
+        start_row: 5
+        truncated: true
+        dimensions:
+        - dimensions
+        - dimensions
+        data:
+        - date: 2000-01-23
+          country: country
+          device: device
+          page: page
+          query: query
+          searchAppearance: searchAppearance
+          impressions: 2
+          clicks: 7
+          ctr: 9.301444243932576
+          position: 3.616076749251911
+        - date: 2000-01-23
+          country: country
+          device: device
+          page: page
+          query: query
+          searchAppearance: searchAppearance
+          impressions: 2
+          clicks: 7
+          ctr: 9.301444243932576
+          position: 3.616076749251911
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        property:
+          $ref: "#/components/schemas/SearchConsoleProperty"
+        from:
+          format: date
+          type: string
+        to:
+          format: date
+          type: string
+        data_through:
+          description: "Latest date Google has published for the property (it lags\
+            \ 2-3 days). Later days are missing, not zero."
+          format: date
+          nullable: true
+          type: string
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          description: "Rows in this window (one Google request, at most 25,000)"
+          type: integer
+        sort:
+          type: string
+        start_row:
+          description: Present when start_row was set
+          type: integer
+        truncated:
+          description: "Present (true) when Google returned 25,000 rows, so more rows\
+            \ exist past this window"
+          type: boolean
+        dimensions:
+          items:
+            type: string
+          type: array
+        data:
+          description: One row per combination; only the requested dimensions are
+            present
+          items:
+            $ref: "#/components/schemas/SearchConsoleRowsResponse_data_inner"
+          type: array
+        request_id:
+          type: string
+      type: object
+    TeamPermissions:
+      additionalProperties:
+        items:
+          type: string
+        type: array
+      description: "What the person can do, feature key to the verbs granted (read,\
+        \ create, update, delete), resolved from their role. Null for the account\
+        \ owner, who can do everything."
+      nullable: true
+      type: object
+    TeamAccountRole:
+      description: "The account role the person follows, when permission_role is account_role;\
+        \ null otherwise."
+      example:
+        id: 5
+        name: name
+      nullable: true
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      required:
+      - id
+      - name
+      type: object
+    TeamMember:
+      example:
+        id: 5
+        email: email
+        name: name
+        role: owner
+        status: active
+        permission_role: permission_role
+        account_role:
+          id: 5
+          name: name
+        permissions:
+          key:
+          - permissions
+          - permissions
+        account_admin: true
+        billing_access: true
+        all_projects: true
+        project_ids:
+        - 2
+        - 2
+        last_sign_in_at: 2000-01-23T04:56:07.000+00:00
+        joined_at: 2000-01-23T04:56:07.000+00:00
+        created_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        email:
+          type: string
+        name:
+          nullable: true
+          type: string
+        role:
+          description: The account owner is listed first; everyone else who joined
+            is a member.
+          enum:
+          - owner
+          - member
+          type: string
+        status:
+          description: A blocked member cannot sign in or use the API until unblocked
+            in the app.
+          enum:
+          - active
+          - blocked
+          type: string
+        permission_role:
+          description: "Access level of a member: full_access, view_only, custom or\
+            \ account_role. Null for the owner."
+          nullable: true
+          type: string
+        account_role:
+          $ref: "#/components/schemas/TeamAccountRole"
+        permissions:
+          additionalProperties:
+            items:
+              type: string
+            type: array
+          description: "What the person can do, feature key to the verbs granted (read,\
+            \ create, update, delete), resolved from their role. Null for the account\
+            \ owner, who can do everything."
+          nullable: true
+          type: object
+        account_admin:
+          description: "A co-owner, who can manage the team."
+          type: boolean
+        billing_access:
+          description: Can open Billing and Plans (always true for the owner).
+          type: boolean
+        all_projects:
+          description: "Has access to every project of the account, including future\
+            \ ones."
+          type: boolean
+        project_ids:
+          description: The projects a member is limited to; empty when all_projects
+            is true.
+          items:
+            type: integer
+          type: array
+        last_sign_in_at:
+          format: date-time
+          nullable: true
+          type: string
+        joined_at:
+          description: When the member accepted the invitation; null for the owner
+            and for members added without one.
+          format: date-time
+          nullable: true
+          type: string
+        created_at:
+          format: date-time
+          type: string
+      required:
+      - account_admin
+      - account_role
+      - all_projects
+      - billing_access
+      - email
+      - id
+      - permission_role
+      - permissions
+      - project_ids
+      - role
+      - status
+      type: object
+    TeamInvitation:
+      example:
+        id: 5
+        email: email
+        permission_role: full_access
+        account_role:
+          id: 5
+          name: name
+        permissions:
+          key:
+          - permissions
+          - permissions
+        account_admin: true
+        billing_access: true
+        all_projects: true
+        project_ids:
+        - 5
+        - 5
+        invited_at: 2000-01-23T04:56:07.000+00:00
+        expires_at: 2000-01-23T04:56:07.000+00:00
+        created_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          description: "Kept by the member once they accept, when they move to GET\
+            \ /team_members."
+          type: integer
+        email:
+          type: string
+        permission_role:
+          enum:
+          - full_access
+          - view_only
+          - custom
+          - account_role
+          type: string
+        account_role:
+          $ref: "#/components/schemas/TeamAccountRole"
+        permissions:
+          additionalProperties:
+            items:
+              type: string
+            type: array
+          description: "What the person can do, feature key to the verbs granted (read,\
+            \ create, update, delete), resolved from their role. Null for the account\
+            \ owner, who can do everything."
+          nullable: true
+          type: object
+        account_admin:
+          type: boolean
+        billing_access:
+          type: boolean
+        all_projects:
+          type: boolean
+        project_ids:
+          items:
+            type: integer
+          type: array
+        invited_at:
+          description: When the invitation email was last sent.
+          format: date-time
+          nullable: true
+          type: string
+        expires_at:
+          description: When the invitation link stops working.
+          format: date-time
+          nullable: true
+          type: string
+        created_at:
+          format: date-time
+          type: string
+      required:
+      - account_admin
+      - account_role
+      - all_projects
+      - billing_access
+      - email
+      - id
+      - permission_role
+      - permissions
+      - project_ids
       type: object
     ApiError:
       example:
@@ -17033,6 +18656,231 @@ components:
       required:
       - project_id
       type: object
+    listTeamMembers_200_response:
+      example:
+        page: 0
+        per_page: 6
+        total: 1
+        data:
+        - id: 5
+          email: email
+          name: name
+          role: owner
+          status: active
+          permission_role: permission_role
+          account_role:
+            id: 5
+            name: name
+          permissions:
+            key:
+            - permissions
+            - permissions
+          account_admin: true
+          billing_access: true
+          all_projects: true
+          project_ids:
+          - 2
+          - 2
+          last_sign_in_at: 2000-01-23T04:56:07.000+00:00
+          joined_at: 2000-01-23T04:56:07.000+00:00
+          created_at: 2000-01-23T04:56:07.000+00:00
+        - id: 5
+          email: email
+          name: name
+          role: owner
+          status: active
+          permission_role: permission_role
+          account_role:
+            id: 5
+            name: name
+          permissions:
+            key:
+            - permissions
+            - permissions
+          account_admin: true
+          billing_access: true
+          all_projects: true
+          project_ids:
+          - 2
+          - 2
+          last_sign_in_at: 2000-01-23T04:56:07.000+00:00
+          joined_at: 2000-01-23T04:56:07.000+00:00
+          created_at: 2000-01-23T04:56:07.000+00:00
+        request_id: request_id
+      properties:
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        data:
+          items:
+            $ref: "#/components/schemas/TeamMember"
+          type: array
+        request_id:
+          type: string
+      type: object
+    listTeamInvitations_200_response:
+      example:
+        page: 0
+        per_page: 6
+        total: 1
+        data:
+        - id: 5
+          email: email
+          permission_role: full_access
+          account_role:
+            id: 5
+            name: name
+          permissions:
+            key:
+            - permissions
+            - permissions
+          account_admin: true
+          billing_access: true
+          all_projects: true
+          project_ids:
+          - 5
+          - 5
+          invited_at: 2000-01-23T04:56:07.000+00:00
+          expires_at: 2000-01-23T04:56:07.000+00:00
+          created_at: 2000-01-23T04:56:07.000+00:00
+        - id: 5
+          email: email
+          permission_role: full_access
+          account_role:
+            id: 5
+            name: name
+          permissions:
+            key:
+            - permissions
+            - permissions
+          account_admin: true
+          billing_access: true
+          all_projects: true
+          project_ids:
+          - 5
+          - 5
+          invited_at: 2000-01-23T04:56:07.000+00:00
+          expires_at: 2000-01-23T04:56:07.000+00:00
+          created_at: 2000-01-23T04:56:07.000+00:00
+        request_id: request_id
+      properties:
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        data:
+          items:
+            $ref: "#/components/schemas/TeamInvitation"
+          type: array
+        request_id:
+          type: string
+      type: object
+    createTeamInvitation_request:
+      properties:
+        email:
+          type: string
+        project_ids:
+          description: Projects the member can access. Send this or all_projects true.
+          items:
+            type: integer
+          type: array
+        all_projects:
+          description: "Access to every project, including future ones"
+          type: boolean
+        permission_role:
+          description: Default full_access. Owner and co-owners only.
+          enum:
+          - full_access
+          - view_only
+          - custom
+          - account_role
+          type: string
+        account_role_id:
+          description: "One of the account's roles, with permission_role account_role"
+          type: integer
+        permissions:
+          additionalProperties:
+            items:
+              type: string
+            type: array
+          description: "With permission_role custom: feature key to the verbs granted\
+            \ (read, create, update, delete), for example {\"overview\": [\"read\"\
+            ], \"prompts\": [\"read\", \"create\"]}"
+          type: object
+        account_admin:
+          description: Make the member a co-owner. Account owner only.
+          type: boolean
+        billing_access:
+          description: Access to Billing and Plans. Account owner only.
+          type: boolean
+      required:
+      - email
+      type: object
+    createTeamInvitation_201_response:
+      allOf:
+      - $ref: "#/components/schemas/TeamInvitation"
+      - properties:
+          email_sent:
+            description: False when the email provider refused the invitation email
+            type: boolean
+          request_id:
+            type: string
+        required:
+        - email_sent
+        type: object
+      example:
+        id: 0
+        email: email
+        permission_role: full_access
+        account_role:
+          id: 5
+          name: name
+        permissions:
+          key:
+          - permissions
+          - permissions
+        account_admin: true
+        billing_access: true
+        all_projects: true
+        project_ids:
+        - 6
+        - 6
+        invited_at: 2000-01-23T04:56:07.000+00:00
+        expires_at: 2000-01-23T04:56:07.000+00:00
+        created_at: 2000-01-23T04:56:07.000+00:00
+        email_sent: true
+        request_id: request_id
+    revokeTeamInvitation_200_response:
+      example:
+        revoked: true
+        id: 0
+        request_id: request_id
+      properties:
+        revoked:
+          type: boolean
+        id:
+          type: integer
+        request_id:
+          type: string
+      type: object
+    removeTeamMember_200_response:
+      example:
+        removed: true
+        id: 0
+        request_id: request_id
+      properties:
+        removed:
+          type: boolean
+        id:
+          type: integer
+        request_id:
+          type: string
+      type: object
     listWebhooks_200_response_data_inner:
       example:
         id: 5
@@ -17343,6 +19191,27 @@ components:
           items:
             type: string
           type: array
+      type: object
+    ProjectDetails_allOf_search_console:
+      description: Google Search Console connection of the project. connected means
+        the Search Console endpoints can answer; reconnect_required means Google refused
+        the stored access and the property must be reconnected in Preferences > Project
+        Settings > Data Connections.
+      example:
+        status: connected
+        property: property
+      properties:
+        status:
+          enum:
+          - connected
+          - reconnect_required
+          - not_connected
+          type: string
+        property:
+          description: "The connected property (e.g. sc-domain:example.com), null\
+            \ when not connected"
+          nullable: true
+          type: string
       type: object
     SummaryResponse_allOf_position_distribution_percentages:
       type: object
@@ -18210,6 +20079,108 @@ components:
       - id
       - matching_names
       type: object
+    SearchConsoleSummaryResponse_breakdown_inner:
+      example:
+        value: value
+        impressions: 2
+        clicks: 7
+        ctr: 9.301444243932576
+        position: 3.616076749251911
+      properties:
+        value:
+          type: string
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        ctr:
+          description: 0..1 fraction
+          type: number
+        position:
+          description: Impression-weighted average position
+          type: number
+      type: object
+    SearchConsoleTimeseriesResponse_data_inner:
+      example:
+        date: 2000-01-23
+        impressions: 6
+        clicks: 1
+        ctr: 5.962133916683182
+        position: 5.637376656633329
+      properties:
+        date:
+          format: date
+          type: string
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        ctr:
+          description: 0..1 fraction
+          type: number
+        position:
+          description: Impression-weighted average position
+          type: number
+      type: object
+    SearchConsoleListResponse_data_inner:
+      example:
+        key: key
+        impressions: 2
+        clicks: 7
+        ctr: 9.301444243932576
+        position: 3.616076749251911
+      properties:
+        key:
+          description: The query or page URL
+          type: string
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        ctr:
+          description: 0..1 fraction
+          type: number
+        position:
+          description: Impression-weighted average position
+          type: number
+      type: object
+    SearchConsoleRowsResponse_data_inner:
+      example:
+        date: 2000-01-23
+        country: country
+        device: device
+        page: page
+        query: query
+        searchAppearance: searchAppearance
+        impressions: 2
+        clicks: 7
+        ctr: 9.301444243932576
+        position: 3.616076749251911
+      properties:
+        date:
+          format: date
+          type: string
+        country:
+          type: string
+        device:
+          type: string
+        page:
+          type: string
+        query:
+          type: string
+        searchAppearance:
+          type: string
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        ctr:
+          description: 0..1 fraction
+          type: number
+        position:
+          description: Impression-weighted average position
+          type: number
+      type: object
     ApiError_error:
       example:
         code: ERR_MISSING_AUTH
@@ -18245,6 +20216,7 @@ components:
           - ERR_INVALID_RANGE
           - ERR_LIMIT_REACHED
           - ERR_QUOTA_EXCEEDED
+          - ERR_STALE_CONTENT
           - ERR_RATE_LIMITED
           type: string
         message:
