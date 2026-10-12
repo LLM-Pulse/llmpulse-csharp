@@ -154,6 +154,8 @@ docs/models/ProjectDetailsAllOfDataCoverage.md
 docs/models/ProjectDetailsAllOfSearchConsole.md
 docs/models/ProjectDetailsAllOfStats.md
 docs/models/ProjectDetailsAllOfStatsPromptsByBrandKind.md
+docs/models/ProjectProfile.md
+docs/models/ProjectUpdateResponse.md
 docs/models/PromptExecutionRecord.md
 docs/models/PromptExecutionsResponse.md
 docs/models/PromptRecord.md
@@ -399,6 +401,8 @@ src/LLMPulse.SDK/Model/ProjectDetailsAllOfDataCoverage.cs
 src/LLMPulse.SDK/Model/ProjectDetailsAllOfSearchConsole.cs
 src/LLMPulse.SDK/Model/ProjectDetailsAllOfStats.cs
 src/LLMPulse.SDK/Model/ProjectDetailsAllOfStatsPromptsByBrandKind.cs
+src/LLMPulse.SDK/Model/ProjectProfile.cs
+src/LLMPulse.SDK/Model/ProjectUpdateResponse.cs
 src/LLMPulse.SDK/Model/PromptExecutionRecord.cs
 src/LLMPulse.SDK/Model/PromptExecutionsResponse.cs
 src/LLMPulse.SDK/Model/PromptRecord.cs

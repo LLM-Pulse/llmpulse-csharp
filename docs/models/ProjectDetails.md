@@ -10,6 +10,7 @@ Name | Type | Description | Notes
 **Url** | **string** |  | [optional] 
 **Description** | **string** |  | [optional] 
 **MatchingNames** | **List&lt;string&gt;** |  | [optional] 
+**AdditionalOwnedDomains** | **List&lt;string&gt;** | Other domains the brand owns (at most 10, each a website&#39;s own domain covering its subdomains), whose citations count as owned like the project website. Empty when none | [optional] 
 **Industry** | **Object** | Industry as stored: one key as a string (e.g. SAAS), or an array of key strings when the project was created with a list or the in-app multi-select. Deliberately untyped so generated clients decode either shape | [optional] 
 **BusinessModel** | **string** |  | [optional] 
 **BusinessModelOther** | **string** | Set only when business_model is OTHER | [optional] 
