@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.61.0
+  version: 1.62.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -3144,9 +3144,10 @@ paths:
         schema:
           type: string
         style: form
-      - description: "Filter sentinel non-answers (provider returned nothing after\
-          \ retries; excluded from platform metrics). false = only real answers, true\
-          \ = only sentinels, omit = both. Every item carries its own no_result flag."
+      - description: "Filter sentinel non-answers (the provider returned nothing after\
+          \ all retries, or the model declined to answer, today only Gemini; excluded\
+          \ from platform metrics). false = only real answers, true = only sentinels,\
+          \ omit = both. Every item carries its own no_result flag."
         explode: true
         in: query
         name: no_result
@@ -4438,7 +4439,17 @@ paths:
         \ successful response or observed 404/410; other crawl failures and error_message\
         \ are hidden. last_crawled_at dates the saved copy. Domain/host crawled_urls_count\
         \ counts usable copies; brand_mentioned_urls_count and competitor_mentioned_urls_count\
-        \ count only URLs analyzed for the project and are null when none is."
+        \ count only URLs analyzed for the project and are null when none is. Pass\
+        \ key to read one group; brand_kind filters by the brand focus of the prompts,\
+        \ like the source page. citation_series (with include_series=true) holds the\
+        \ answers citing the URL, domain or host under the same filters: granularity\
+        \ (day, week or month, from the account tracking cadence, with weeks when\
+        \ a daily account spans more than 60 days, starting on Monday), total (equal\
+        \ to total_responses), by_model (answers per AI model, largest first, which\
+        \ can include enabled models outside the seven the model filter accepts) and\
+        \ data, one { date, value } point per period that holds a filtered answer,\
+        \ so a zero means answers ran and none cited it. Periods date each answer\
+        \ by its executed_at in Europe/Madrid time, the column from and to filter."
       operationId: listCitationGroups
       parameters:
       - description: Project ID
@@ -4568,6 +4579,22 @@ paths:
         schema:
           type: integer
         style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
       - explode: true
         in: query
         name: from
@@ -4585,6 +4612,29 @@ paths:
         schema:
           format: date-time
           type: string
+        style: form
+      - description: "Return only this group of the chosen view: a domain (view=domain),\
+          \ a host (view=host) or a cited URL exactly as listed (view=url). Domains\
+          \ and hosts match case-insensitively, without www. A view=url key is one\
+          \ raw URL, so its variants (a tracking parameter, a trailing slash) stay\
+          \ separate rows; GET /citation_intelligence/urls/{url_sha256} merges them,\
+          \ as the app does. No match returns an empty list (total 0), not an error."
+        explode: true
+        in: query
+        name: key
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Requires key, else 422 ERR_INVALID_PARAM. Adds citation_series\
+          \ to the group's row."
+        explode: true
+        in: query
+        name: include_series
+        required: false
+        schema:
+          default: false
+          type: boolean
         style: form
       - explode: true
         in: query
@@ -4648,7 +4698,8 @@ paths:
       tags:
       - Sources & Citation Intelligence
       x-llms-description: Grouped citation intelligence by URL / domain / host with
-        filters and per-model breakdown.
+        filters and per-model breakdown; key reads one group and include_series adds
+        its citations per period.
       x-mcp-tool: list_citation_groups
   /citation_intelligence/mentions_by_domain:
     get:
@@ -4810,7 +4861,16 @@ paths:
         \ successful response or observed 404/410; other crawl failures and error_message\
         \ are hidden. last_crawled_at dates the saved copy. Domain/host crawled_urls_count\
         \ counts usable copies; brand_mentioned_urls_count and competitor_mentioned_urls_count\
-        \ count only URLs analyzed for the project and are null when none is."
+        \ count only URLs analyzed for the project and are null when none is. The\
+        \ filters narrow stats and citation_series alike. citation_series (with include_series=true)\
+        \ holds the answers citing the URL under the same filters: granularity (day,\
+        \ week or month, from the account tracking cadence, with weeks when a daily\
+        \ account spans more than 60 days, starting on Monday), total (equal to total_responses),\
+        \ by_model (answers per AI model, largest first, which can include enabled\
+        \ models outside the seven the model filter accepts) and data, one { date,\
+        \ value } point per period that holds a filtered answer, so a zero means answers\
+        \ ran and none cited it. Periods date each answer by its executed_at in Europe/Madrid\
+        \ time, the column from and to filter."
       operationId: getCitedUrlDetail
       parameters:
       - description: Project ID
@@ -4830,6 +4890,149 @@ paths:
           pattern: "^[a-f0-9]{64}$"
           type: string
         style: simple
+      - description: "Filter by one AI model. Only chatgpt, ai_overview, ai_mode,\
+          \ perplexity, gemini, naver_ai and baidu_ai are accepted: any other value,\
+          \ including another model enabled for the API key's user, returns 422 ERR_INVALID_PARAM\
+          \ (invalid model). One of those seven that the user has not enabled also\
+          \ returns 422 ERR_INVALID_PARAM, with the valid values in the message."
+        explode: true
+        in: query
+        name: model
+        required: false
+        schema:
+          enum:
+          - chatgpt
+          - perplexity
+          - ai_mode
+          - ai_overview
+          - gemini
+          - copilot
+          - amazon_rufus
+          - claude
+          - grok
+          - deepseek
+          - naver_ai
+          - baidu_ai
+          - meta_ai
+          type: string
+        style: form
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
+        explode: true
+        in: query
+        name: collection_id
+        required: false
+        schema:
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
+        style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Filter by prompt ID
+        explode: true
+        in: query
+        name: prompt
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: source_type
+        required: false
+        schema:
+          enum:
+          - owned
+          - competitor
+          - third_party
+          - social_media
+          - own_domain
+          - ugc
+          - background
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: sentiment
+        required: false
+        schema:
+          enum:
+          - negative
+          type: string
+        style: form
+      - description: "mentioned: the cited page mentions your brand. gap: it mentions\
+          \ a competitor but not your brand. Only pages with usable content whose\
+          \ mention analysis has completed for this project match."
+        explode: true
+        in: query
+        name: content_gap
+        required: false
+        schema:
+          enum:
+          - mentioned
+          - gap
+          type: string
+        style: form
+      - description: Adds citation_series. Without it the response is unchanged.
+        explode: true
+        in: query
+        name: include_series
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
       responses:
         "200":
           description: URL-level intelligence
@@ -4848,7 +5051,8 @@ paths:
       tags:
       - Sources & Citation Intelligence
       x-llms-description: "Per-URL detail: counts, citation rate, page-cache metadata,\
-        \ page mention evidence."
+        \ page mention evidence; include_series=true adds citations by AI model and\
+        \ per period."
       x-mcp-tool: get_cited_url_details
   /citation_intelligence/urls/{url_sha256}/occurrences:
     get:
@@ -9060,7 +9264,11 @@ paths:
         \ the paths that actually changed. The first edit keeps a copy of the generated\
         \ output so POST /intelligence_tasks/{id}/revert can restore it; regenerating\
         \ the task replaces the edited content. Requires a `read_write` scope API\
-        \ key and, for team members, update permission on GEO Writer."
+        \ key and, for team members, update permission on GEO Writer. On a product_listing\
+        \ task, description_html keeps only p, ul, ol, li, strong, em, h3 and br,\
+        \ with no attributes: other markup is stripped, not refused, so read the stored\
+        \ value from the response. A revert restores the generated description cleaned\
+        \ the same way."
       operationId: updateIntelligenceTaskContent
       parameters:
       - description: Numeric task ID or public_id string token
@@ -9147,9 +9355,11 @@ paths:
   /intelligence_tasks/{id}/revert:
     post:
       description: "Discards every manual edit on the task and restores the output\
-        \ exactly as it was generated. Returns ERR_INVALID_PARAM when the task has\
-        \ no manual edits. Requires a `read_write` scope API key and, for team members,\
-        \ update permission on GEO Writer."
+        \ as it was generated. On a product_listing task, description_html comes back\
+        \ with only p, ul, ol, li, strong, em, h3 and br and no attributes, cleaned\
+        \ like an edit. Returns ERR_INVALID_PARAM when the task has no manual edits.\
+        \ Requires a `read_write` scope API key and, for team members, update permission\
+        \ on GEO Writer."
       operationId: revertIntelligenceTaskContent
       parameters:
       - description: Project ID
@@ -14106,8 +14316,9 @@ components:
           nullable: true
           type: boolean
         no_result:
-          description: True for a sentinel non-answer (the provider returned nothing
-            after retries); excluded from platform metrics
+          description: "True for a sentinel non-answer (the provider returned nothing\
+            \ after all retries, or the model declined to answer, today only Gemini);\
+            \ excluded from platform metrics"
           type: boolean
         fan_out_queries:
           items:
