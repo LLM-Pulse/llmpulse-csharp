@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.62.0
+  version: 1.63.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -68,7 +68,8 @@ tags:
   name: Shopping & Ads
 - description: "Which of your own channels and which community conversations AI answers\
     \ cite: YouTube, Instagram, Facebook, TikTok, LinkedIn, app-store listings and\
-    \ Reddit. Growth plan and above."
+    \ Reddit, with each tab's summary, the answers behind one cited item, and the\
+    \ profiles a project claims. Growth plan and above."
   name: Owned Media & Communities
 - description: "Multi-model analyst reports: the monthly reputation scoring of your\
     \ brand against its competitors, and the custom AI studies you define over any\
@@ -78,8 +79,13 @@ tags:
     \ average position) for projects with a connected GSC property: headline totals,\
     \ time series, top queries and top pages. Growth plan and above."
   name: Search Console
-- description: "Recommendation runs that power the in-app Recommendations page, plus\
-    \ the endpoint that launches a new one."
+- description: "The custom reports built under Reports > Custom Reports: list them,\
+    \ read one with the data of every widget as its page shows it, and email it to\
+    \ its recipients now. Scale plan and above."
+  name: Custom Reports
+- description: "Recommendation runs that power the in-app Recommendations page, the\
+    \ endpoint that launches a new one, and the one that completes, archives or restores\
+    \ an item."
   name: Recommendations
 - description: "AI-powered GEO Writer tasks (formerly Content Intelligence). Tasks\
     \ are processed asynchronously, so create one and poll it until it completes."
@@ -1818,6 +1824,102 @@ paths:
       x-llms-description: "Detailed info for one competitor: matching names, app store\
         \ IDs, color."
       x-mcp-tool: get_competitor_details
+  /competitors/suggestions:
+    get:
+      description: "The two lists of the Suggested tab of the Competitors page. `basis=brands`\
+        \ (default) returns the competing brands the AI discovery proposed that are\
+        \ not tracked or rejected yet, with the names it would match and, when counted,\
+        \ how many answers name it (`mentions`). `basis=citations` returns the domains\
+        \ AI answers cite most that are not your own or tracked yet, with how many\
+        \ answers cite each (`citations`). `discovery` tells whether a discovery run\
+        \ is still loading. Read-only: it never starts a discovery run, which the\
+        \ page starts from its Discover button. Add a suggestion with POST /competitors."
+      operationId: listCompetitorSuggestions
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: basis
+        required: false
+        schema:
+          default: brands
+          enum:
+          - brands
+          - citations
+          type: string
+        style: form
+      - description: Only suggestions whose brand name or domain contains this text
+        explode: true
+        in: query
+        name: query
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompetitorSuggestionsResponse"
+          description: Paginated suggestions
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: List competitor suggestions
+      tags:
+      - Competitors
+      x-llms-description: "The Competitors page's Suggested tab, competing brands\
+        \ the AI discovery proposed or the most cited domains not tracked yet."
+      x-mcp-tool: list_competitor_suggestions
   /competitors:
     post:
       description: Adds a competitor with its own citation URL matching rule. Honours
@@ -2579,6 +2681,184 @@ paths:
       x-llms-description: "Query fan-out: the sub-queries models issued behind your\
         \ prompts, per distinct sub-query (view=query) or per prompt (view=prompt)."
       x-mcp-tool: list_query_fan_outs
+  /suggested_prompts:
+    get:
+      description: "Lists the project's Suggested prompts queue, the same list the\
+        \ app's Suggested Prompts tab shows, oldest first. It holds the suggestions\
+        \ of every generator (website, magic for keyword runs, topic, reddit, paa,\
+        \ reputational, translate, gsc for Search Console, catalog). Pending suggestions\
+        \ by default; status=all also returns accepted (with the prompt they became)\
+        \ and rejected ones. Team members need create access to Prompts, like the\
+        \ app's tab."
+      operationId: listSuggestedPrompts
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: Only suggestions from this generator
+        explode: true
+        in: query
+        name: source
+        required: false
+        schema:
+          enum:
+          - website
+          - magic
+          - paa
+          - topic
+          - reddit
+          - reputational
+          - gsc
+          - translate
+          - catalog
+          type: string
+        style: form
+      - description: Only suggestions in this status
+        explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          default: pending
+          enum:
+          - pending
+          - accepted
+          - rejected
+          - all
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 50
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuggestedPromptsResponse"
+          description: Paginated suggestions
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_PERMISSION
+                  message: insufficient_team_member_permission
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key belongs to a team member whose permission matrix does
+            not grant this feature
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: List suggested prompts
+      tags:
+      - Prompts
+      x-llms-description: "List the project's Suggested prompts queue (every generator),\
+        \ filterable by source and status."
+      x-mcp-tool: list_suggested_prompts
+  /prompt_generations/{id}:
+    get:
+      description: "Returns a run started with POST /prompt_generations: processing\
+        \ while the generator works, then completed with the suggestions it saved\
+        \ to the Suggested prompts queue, or failed with an error code and message.\
+        \ Poll every few seconds; most runs finish within a minute. Runs are kept\
+        \ for 24 hours, their suggestions stay in the queue."
+      operationId: getPromptGeneration
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          format: uuid
+          type: string
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromptGenerationResponse"
+          description: The run
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_PERMISSION
+                  message: insufficient_team_member_permission
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key belongs to a team member whose permission matrix does
+            not grant this feature
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+      summary: Get a prompt generation run
+      tags:
+      - Prompts
+      x-llms-description: Poll a prompt suggestion run until it completes; returns
+        the suggestions it saved.
+      x-mcp-tool: get_prompt_generation
   /prompts:
     post:
       description: Add prompts to a project in bulk (up to 100 per request). Validates
@@ -2626,6 +2906,271 @@ paths:
       x-llms-description: Bulk-create prompts (up to 100 per request); skips duplicates
         and validates the account prompt quota.
       x-mcp-tool: create_prompts
+      x-write: true
+  /prompts/import:
+    post:
+      description: "The app's CSV import as JSON: up to 500 rows, each with its own\
+        \ prompt, country_code, language_code (codes or names; both default to the\
+        \ project's) and tags, created when missing. Duplicates are skipped and existing\
+        \ prompts still get the row's tags. The prompt limits are checked before anything\
+        \ is written: when the new prompts would exceed the plan the call returns\
+        \ ERR_LIMIT_REACHED and imports nothing. Rows with an unknown country or language\
+        \ come back in row_errors. Responds 201 when it created prompts, 200 otherwise.\
+        \ Requires a `read_write` scope API key and, for team members, create access\
+        \ to Prompts."
+      operationId: importPrompts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PromptsImportRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromptsImportResponse"
+          description: Nothing new was created (every row was a duplicate)
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromptsImportResponse"
+          description: Prompts imported
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Import prompts
+      tags:
+      - Prompts
+      x-llms-description: "Import up to 500 prompts, each row with its own country,\
+        \ language and tags (the app's CSV import as JSON)."
+      x-mcp-tool: import_prompts
+      x-write: true
+  /prompt_generations:
+    post:
+      description: "Starts a suggestion run with one of the generators behind the\
+        \ app's Add prompts wizards and answers 202 with the run. website writes suggestions\
+        \ from the scraped website (80% non-brand, 20% brand), keyword from a keyword\
+        \ or the project profile (optionally around a competitor), topic from a topic,\
+        \ reddit from Reddit discussions of a topic or brand, paa from Google People\
+        \ Also Ask (up to 5 keywords, counted against the account's 24-hour lookup\
+        \ allowance), reputational from brand reputation questions, translate from\
+        \ the project's prompts of another locale, search_console from the connected\
+        \ property's top queries of the last 28 days (Growth plan or above, ERR_PLAN_REQUIRED).\
+        \ The suggestions land in the Suggested prompts queue; poll GET /prompt_generations/{id},\
+        \ then accept the ones you want with POST /suggested_prompts/accept. Nothing\
+        \ is tracked until accepted. The request is validated before the run starts,\
+        \ and refused with ERR_LIMIT_REACHED when the plan has no prompt slot left.\
+        \ Requires a `read_write` scope API key and, for team members, create access\
+        \ to Prompts."
+      operationId: createPromptGeneration
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PromptGenerationRequest"
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromptGenerationResponse"
+          description: "The run, status processing"
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Generate prompt suggestions
+      tags:
+      - Prompts
+      x-llms-description: "Start a prompt suggestion run with one of the Add prompts\
+        \ generators (website, keyword, topic, reddit, paa, reputational, translate,\
+        \ search_console)."
+      x-mcp-tool: generate_prompt_suggestions
+      x-write: true
+  /suggested_prompts/accept:
+    post:
+      description: "Starts tracking up to 100 pending suggestions: each becomes a\
+        \ prompt in its own country and language, optionally put in one tag (tag_ids\
+        \ or tag_names; create_missing creates a missing name when the team member\
+        \ may create tags). Suggestions that are no longer pending come back in skipped.\
+        \ When the new prompts would exceed the plan the call returns ERR_LIMIT_REACHED\
+        \ and accepts nothing. Requires a `read_write` scope API key and, for team\
+        \ members, create access to Prompts."
+      operationId: acceptSuggestedPrompts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SuggestedPromptsAcceptRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuggestedPromptsAcceptResponse"
+          description: Accepted and skipped suggestions
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Accept suggested prompts
+      tags:
+      - Prompts
+      x-llms-description: "Track up to 100 pending suggestions as prompts, each in\
+        \ its own locale, optionally in one tag."
+      x-mcp-tool: accept_suggested_prompts
+      x-write: true
+  /suggested_prompts/reject:
+    post:
+      description: "Marks up to 100 pending suggestions as rejected, so they leave\
+        \ the pending list; suggestions that are no longer pending stay as they are.\
+        \ Tracks and deletes nothing. Requires a `read_write` scope API key and, for\
+        \ team members, create access to Prompts."
+      operationId: rejectSuggestedPrompts
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SuggestedPromptIdsRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SuggestedPromptsRejectResponse"
+          description: The suggestions rejected
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Reject suggested prompts
+      tags:
+      - Prompts
+      x-llms-description: Mark up to 100 pending suggestions as rejected.
+      x-mcp-tool: reject_suggested_prompts
       x-write: true
   /prompts/{id}:
     delete:
@@ -2681,6 +3226,80 @@ paths:
       x-llms-description: Delete a prompt (irreversible; frees a prompt slot; history
         purged in the background).
       x-mcp-tool: delete_prompt
+      x-write: true
+    patch:
+      description: "Manual categorization, exactly like editing the intent and brand\
+        \ badges on the prompt page: send `prompt_type`, `brand_kind` or both. The\
+        \ prompt is marked as manually categorized (`categorization_source` becomes\
+        \ `manual`), so automatic categorization no longer changes it; the prompt\
+        \ page can revert it to automatic. Any other field returns ERR_INVALID_PARAM.\
+        \ Not available from a white-label portal (ERR_INTEGRATION_UNAVAILABLE), where\
+        \ the page hides the editor. Requires a `read_write` scope API key and, for\
+        \ team members, update permission on Prompts."
+      operationId: updatePrompt
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updatePrompt_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromptCategorizationResponse"
+          description: The prompt with its new categorization
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Writes with a read-only key answer ERR_INSUFFICIENT_SCOPE,\
+            \ a team member without the permission ERR_INSUFFICIENT_PERMISSION, and\
+            \ a request made on a white-label portal host, where the app does not\
+            \ offer this action, ERR_INTEGRATION_UNAVAILABLE, with the same status"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Edit a prompt's categorization
+      tags:
+      - Prompts
+      x-llms-description: "Set a prompt's search intent (prompt_type) and/or brand\
+        \ focus (brand_kind) by hand, like editing its badges on the prompt page."
+      x-mcp-tool: update_prompt_categorization
       x-write: true
   /dimensions/collections:
     get:
@@ -2806,6 +3425,56 @@ paths:
       x-llms-description: "Bulk-attach tags to existing prompts (resolve by id or\
         \ name, optional create-on-the-fly). Idempotent."
       x-mcp-tool: assign_prompt_tags
+      x-write: true
+  /prompts/remove_tags:
+    post:
+      description: "Idempotent bulk removal of tags (Collections) from existing prompts:\
+        \ up to 500 prompt_ids and 50 tags, resolved by id or by name (case-insensitive).\
+        \ Only the prompt-tag links are removed; tags and prompts stay. Links that\
+        \ did not exist are counted in skipped_not_linked. Requires a `read_write`\
+        \ scope API key and, for team members, update access to Prompts."
+      operationId: removePromptTags
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/removePromptTags_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromptTagsRemoveResponse"
+          description: Tags detached
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Bulk-detach tags from prompts
+      tags:
+      - Collections & Tags
+      x-llms-description: Bulk-detach tags from existing prompts (resolve by id or
+        name). Never deletes tags or prompts. Idempotent.
+      x-mcp-tool: remove_prompt_tags
       x-write: true
   /collections:
     post:
@@ -4225,6 +4894,500 @@ paths:
       x-llms-description: "Paginated sentiment analysis records with comments, topics,\
         \ scores; filterable by analysis level and brand_only."
       x-mcp-tool: list_detailed_sentiments
+      x-plan: growth
+  /reports/sentiment/topics:
+    get:
+      description: "One row per topic AI answers associate with the brand (topics\
+        \ are matched case-insensitively), with its analyzed mentions, the positive\
+        \ (very positive included), neutral and negative counts, their shares on a\
+        \ 0-100 scale and the net sentiment score ((positive - negative) / mentions\
+        \ x 100). The same rows and filters as the Topics tab of the Sentiment page:\
+        \ the window defaults to the last 28 days, `brand` empty counts your own brand,\
+        \ `all` every brand and a competitor id that competitor. Requires the Growth\
+        \ plan; lower tiers receive ERR_PLAN_REQUIRED."
+      operationId: getSentimentTopics
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: "Number of days to look back, today included (default 28, like\
+          \ the Sentiment page). Ignored when from or to is given."
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: "Filter by one AI model. It must be a model enabled for the API\
+          \ key's user: an unknown value, or a model the user has not enabled, returns\
+          \ 422 ERR_INVALID_PARAM with the valid values in the message."
+        explode: true
+        in: query
+        name: model
+        required: false
+        schema:
+          enum:
+          - chatgpt
+          - perplexity
+          - ai_mode
+          - ai_overview
+          - gemini
+          - copilot
+          - amazon_rufus
+          - claude
+          - grok
+          - deepseek
+          - naver_ai
+          - baidu_ai
+          - meta_ai
+          type: string
+        style: form
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
+        explode: true
+        in: query
+        name: collection_id
+        required: false
+        schema:
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
+        style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - description: "One sentiment level or a comma-separated list: very_positive,\
+          \ positive, neutral, negative, very_negative"
+        explode: true
+        in: query
+        name: analysis
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Only sentiments tagged with this topic (case-insensitive)
+        explode: true
+        in: query
+        name: topic
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Only sentiments whose answer or prompt text contains this text
+        explode: true
+        in: query
+        name: query
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Whose sentiment to count. Empty or omitted for your own brand,\
+          \ all for every brand, or a competitor id (an unknown id returns ERR_INVALID_PARAM)."
+        explode: true
+        in: query
+        name: brand
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Sort column: mentions, name (the topic or tag), positive, negative\
+          \ or neutral (their shares) or net_score. Ties sort by name."
+        explode: true
+        in: query
+        name: sort
+        required: false
+        schema:
+          default: mentions
+          enum:
+          - mentions
+          - name
+          - positive
+          - negative
+          - neutral
+          - net_score
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: sort_dir
+        required: false
+        schema:
+          default: desc
+          enum:
+          - desc
+          - asc
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SentimentTopicsResponse"
+          description: Paginated topic rows
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Growth plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Endpoint requires the Growth plan or above
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Sentiment by topic (Growth plan or above)
+      tags:
+      - Sentiments
+      x-llms-description: "The Sentiment page's Topics table: analyzed mentions per\
+        \ topic with positive, neutral and negative counts, shares and net sentiment,\
+        \ under the page filters."
+      x-mcp-tool: get_sentiment_topics
+      x-plan: growth
+  /reports/sentiment/tags:
+    get:
+      description: "One row per tag of the project with at least one analyzed mention,\
+        \ with the positive (very positive included), neutral and negative counts,\
+        \ their shares on a 0-100 scale and the net sentiment score. A mention counts\
+        \ once for every tag its prompt carries, as on the Sentiment page. Same filters\
+        \ as GET /reports/sentiment/topics. Requires the Growth plan; lower tiers\
+        \ receive ERR_PLAN_REQUIRED."
+      operationId: getSentimentTags
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: "Number of days to look back, today included (default 28, like\
+          \ the Sentiment page). Ignored when from or to is given."
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: "Filter by one AI model. It must be a model enabled for the API\
+          \ key's user: an unknown value, or a model the user has not enabled, returns\
+          \ 422 ERR_INVALID_PARAM with the valid values in the message."
+        explode: true
+        in: query
+        name: model
+        required: false
+        schema:
+          enum:
+          - chatgpt
+          - perplexity
+          - ai_mode
+          - ai_overview
+          - gemini
+          - copilot
+          - amazon_rufus
+          - claude
+          - grok
+          - deepseek
+          - naver_ai
+          - baidu_ai
+          - meta_ai
+          type: string
+        style: form
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
+        explode: true
+        in: query
+        name: collection_id
+        required: false
+        schema:
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
+        style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - description: "One sentiment level or a comma-separated list: very_positive,\
+          \ positive, neutral, negative, very_negative"
+        explode: true
+        in: query
+        name: analysis
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Only sentiments tagged with this topic (case-insensitive)
+        explode: true
+        in: query
+        name: topic
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: Only sentiments whose answer or prompt text contains this text
+        explode: true
+        in: query
+        name: query
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Whose sentiment to count. Empty or omitted for your own brand,\
+          \ all for every brand, or a competitor id (an unknown id returns ERR_INVALID_PARAM)."
+        explode: true
+        in: query
+        name: brand
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Sort column: mentions, name (the topic or tag), positive, negative\
+          \ or neutral (their shares) or net_score. Ties sort by name."
+        explode: true
+        in: query
+        name: sort
+        required: false
+        schema:
+          default: mentions
+          enum:
+          - mentions
+          - name
+          - positive
+          - negative
+          - neutral
+          - net_score
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: sort_dir
+        required: false
+        schema:
+          default: desc
+          enum:
+          - desc
+          - asc
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SentimentTagsResponse"
+          description: Paginated tag rows
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Growth plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Endpoint requires the Growth plan or above
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Sentiment by tag (Growth plan or above)
+      tags:
+      - Sentiments
+      x-llms-description: "The Sentiment page's Tags table: analyzed mentions per\
+        \ tag with positive, neutral and negative counts, shares and net sentiment,\
+        \ under the page filters."
+      x-mcp-tool: get_sentiment_tags
       x-plan: growth
   /dimensions/sources:
     get:
@@ -6788,7 +7951,11 @@ paths:
     get:
       description: "Which owned-media content AI answers cite, by platform. `provider`\
         \ is required. Each row carries a `yours` flag so you can compare your own\
-        \ presence against everyone else cited on the same platform. view=own_citations\
+        \ presence against everyone else cited on the same platform. Video, post,\
+        \ channel and profile rows also carry their image (thumbnail_url or avatar_url,\
+        \ our cached copy where one exists), their average position in the answers\
+        \ and, on YouTube, the video id, the channel handle and URL, and the channel\
+        \ key that /dimensions/owned_media/citing_prompts accepts. view=own_citations\
         \ returns the raw citations of the connected profile only and stays empty\
         \ until a profile is connected. For Reddit use /dimensions/reddit. Requires\
         \ the Growth plan or above."
@@ -6982,6 +8149,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OwnedMediaListResponse"
           description: Paginated owned-media rows
         "422":
           content:
@@ -7001,6 +8172,514 @@ paths:
         \ facebook, tiktok, linkedin, mobile_apps): cited videos, posts, profiles,\
         \ channels and app-store listings, each flagged as yours or not (Growth+)."
       x-mcp-tool: list_owned_media
+      x-plan: growth
+  /dimensions/owned_media/summary:
+    get:
+      description: "The numbers behind one Owned Media tab. kpis gives the platform\
+        \ citations (total), yours (your profiles and their content), your_profile\
+        \ and your_content apart, and share_pct; previous gives the same KPIs for\
+        \ the period of the same length that ends just before from, and changes the\
+        \ difference (percent for counts, percentage points for share_pct, null when\
+        \ there is nothing to compare). weekly is the citations per week, yours against\
+        \ everyone else. by_model and by_country split every citation of the platform;\
+        \ content_types (reel, post, tv, pulse, or regular, shorts and live on YouTube)\
+        \ and age_buckets cover posts and videos. provider=mobile_apps adds stores,\
+        \ the per-store totals, and has no content type or age; provider=overview\
+        \ returns platforms, one rollup per platform the caller can read, and no breakdowns.\
+        \ A team member also needs the YouTube Intelligence permission for provider=youtube.\
+        \ Defaults to the last 30 days. Requires the Growth plan or above."
+      operationId: getOwnedMediaSummary
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: "The platform to summarize, or overview for every platform at\
+          \ once"
+        explode: true
+        in: query
+        name: provider
+        required: true
+        schema:
+          enum:
+          - youtube
+          - instagram
+          - facebook
+          - tiktok
+          - linkedin
+          - mobile_apps
+          - overview
+          type: string
+        style: form
+      - description: "Filter by one AI model. It must be a model enabled for the API\
+          \ key's user: an unknown value, or a model the user has not enabled, returns\
+          \ 422 ERR_INVALID_PARAM with the valid values in the message."
+        explode: true
+        in: query
+        name: model
+        required: false
+        schema:
+          enum:
+          - chatgpt
+          - perplexity
+          - ai_mode
+          - ai_overview
+          - gemini
+          - copilot
+          - amazon_rufus
+          - claude
+          - grok
+          - deepseek
+          - naver_ai
+          - baidu_ai
+          - meta_ai
+          type: string
+        style: form
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
+        explode: true
+        in: query
+        name: collection_id
+        required: false
+        schema:
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
+        style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - description: Number of days to look back (alternative to from/to)
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+                project_id: 123
+                provider: instagram
+                from: 2026-09-15T00:00:00.000+02:00
+                to: 2026-10-14T23:59:59.999+02:00
+                connected: true
+                kpis:
+                  total: 48
+                  yours: 12
+                  your_profile: 4
+                  your_content: 8
+                  share_pct: 25.0
+                previous:
+                  from: 2026-08-16T00:00:00.000+02:00
+                  to: 2026-09-14T23:59:59.000+02:00
+                  kpis:
+                    total: 40
+                    yours: 8
+                    your_profile: 3
+                    your_content: 5
+                    share_pct: 20.0
+                changes:
+                  total: 20.0
+                  yours: 50.0
+                  your_profile: 33.3
+                  your_content: 60.0
+                  share_pct: 5.0
+                weekly:
+                - week: 2026-09-14
+                  citations: 9
+                  yours: 2
+                  other: 7
+                by_model:
+                - model: chatgpt
+                  citations: 30
+                  share_pct: 62.5
+                by_country:
+                - country_code: US
+                  citations: 48
+                  share_pct: 100.0
+                content_types:
+                - content_type: reel
+                  citations: 20
+                  share_pct: 66.67
+                age_buckets:
+                - bucket: m1_6
+                  citations: 18
+                  share_pct: 60.0
+                stores: null
+                platforms: null
+                request_id: 4f7c2a1e-0d2b-4c1a-9e55-1b2c3d4e5f60
+              schema:
+                $ref: "#/components/schemas/OwnedMediaSummaryResponse"
+          description: "The KPI cards, comparison, weekly series and breakdowns"
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Growth plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "A plan below Growth answers ERR_PLAN_REQUIRED. A team member\
+            \ whose permissions do not grant Owned Media (or YouTube Intelligence\
+            \ for provider=youtube) answers ERR_INSUFFICIENT_PERMISSION, with the\
+            \ same status"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Get an owned-media summary
+      tags:
+      - Owned Media & Communities
+      x-llms-description: "The summary of one Owned Media tab (provider=youtube, instagram,\
+        \ facebook, tiktok, linkedin, mobile_apps) or of the cross-platform overview:\
+        \ KPI cards with the previous period and change, weekly series, breakdowns\
+        \ by model, country, content type and age (Growth+)."
+      x-mcp-tool: get_owned_media_summary
+      x-plan: growth
+  /dimensions/owned_media/citing_prompts:
+    get:
+      description: "The drill-down behind one row of an Owned Media or YouTube Intelligence\
+        \ table. Pass exactly one of url (a post or video URL, any variant of it)\
+        \ or profile (a handle with or without @, a profile or channel URL, or the\
+        \ channel key the YouTube channels rows return). item describes it (title,\
+        \ image, owner, whether it is yours and its stats), citation_count and prompt_count\
+        \ count its citations in the window, and data lists the citing answers newest\
+        \ first, each with its prompt, answer id, model, country, language, execution\
+        \ date, a plain-text excerpt and its link in the app. It shows prompt and\
+        \ answer text, so a team member also needs the Prompts permission, and YouTube\
+        \ Intelligence for provider=youtube. Defaults to the last 30 days. Requires\
+        \ the Growth plan or above."
+      operationId: listOwnedMediaCitingPrompts
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: The platform the item belongs to
+        explode: true
+        in: query
+        name: provider
+        required: true
+        schema:
+          enum:
+          - youtube
+          - instagram
+          - facebook
+          - tiktok
+          - linkedin
+          type: string
+        style: form
+      - description: "A post or video URL, or a profile or channel URL. Exclusive\
+          \ with profile"
+        explode: true
+        in: query
+        name: url
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "A handle (with or without @), a profile or channel URL, or a\
+          \ YouTube channel key (handle:..., channel:... or name:...). Exclusive with\
+          \ url"
+        explode: true
+        in: query
+        name: profile
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by one AI model. It must be a model enabled for the API\
+          \ key's user: an unknown value, or a model the user has not enabled, returns\
+          \ 422 ERR_INVALID_PARAM with the valid values in the message."
+        explode: true
+        in: query
+        name: model
+        required: false
+        schema:
+          enum:
+          - chatgpt
+          - perplexity
+          - ai_mode
+          - ai_overview
+          - gemini
+          - copilot
+          - amazon_rufus
+          - claude
+          - grok
+          - deepseek
+          - naver_ai
+          - baidu_ai
+          - meta_ai
+          type: string
+        style: form
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
+        explode: true
+        in: query
+        name: collection_id
+        required: false
+        schema:
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
+        style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - description: Number of days to look back (alternative to from/to)
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+                project_id: 123
+                provider: youtube
+                from: 2026-09-15T00:00:00.000+02:00
+                to: 2026-10-14T23:59:59.999+02:00
+                item:
+                  kind: post
+                  title: Best CRM tools in 2026
+                  subtitle: Acme
+                  url: https://www.youtube.com/watch?v=abc123
+                  image_url: https://i.ytimg.com/vi/abc123/hqdefault.jpg
+                  yours: true
+                  date: 2026-05-02T10:00:00Z
+                  stats:
+                    citations: 14
+                    views: 92000
+                citation_count: 14
+                prompt_count: 6
+                page: 1
+                per_page: 20
+                total: 9
+                data:
+                - answer_id: 987654
+                  prompt_id: 4321
+                  prompt_text: best crm for startups
+                  model: chatgpt
+                  country_code: US
+                  language_code: en
+                  executed_at: 2026-10-12T00:14:03.000+02:00
+                  excerpt: "For a startup, the strongest options are..."
+                  app_url: https://llmpulse.ai/app/prompts/4321/prompt_executions/987654?project_id=123
+                request_id: 4f7c2a1e-0d2b-4c1a-9e55-1b2c3d4e5f60
+              schema:
+                $ref: "#/components/schemas/OwnedMediaCitingPromptsResponse"
+          description: The item and a page of the answers that cited it
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_PERMISSION
+                  message: "Your team-member permissions do not include prompts, which\
+                    \ this answer list shows."
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "A plan below Growth answers ERR_PLAN_REQUIRED. A team member\
+            \ whose permissions do not grant Owned Media and Prompts (and YouTube\
+            \ Intelligence for provider=youtube) answers ERR_INSUFFICIENT_PERMISSION,\
+            \ with the same status"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: List the answers citing an owned-media item
+      tags:
+      - Owned Media & Communities
+      x-llms-description: "One YouTube video or channel, or one Instagram, Facebook,\
+        \ TikTok or LinkedIn post or profile, with the AI answers that cited it: prompt,\
+        \ answer id, model, date and an excerpt (Growth+)."
+      x-mcp-tool: list_owned_media_citing_prompts
       x-plan: growth
   /dimensions/reddit:
     get:
@@ -7258,6 +8937,193 @@ paths:
         \ and engagement (Growth+)."
       x-mcp-tool: list_reddit_citations
       x-plan: growth
+  /projects/{id}/owned_media:
+    get:
+      description: "The profiles whose citations count as yours in the Owned Media\
+        \ and YouTube Intelligence reports, as Project Settings > Owned Media shows\
+        \ them. platforms holds one entry per platform with whether it is connected,\
+        \ how many extra profiles it accepts and its profiles: the main one, the extra\
+        \ ones, and on Reddit the claimed subreddits and usernames, each with its\
+        \ URL, handle, store (for apps), name, avatar and the state of the scrape\
+        \ that reads them. settings holds the current value of every field PATCH accepts,\
+        \ ready to edit and send back. Requires the Growth plan or above."
+      operationId: getOwnedMediaProfiles
+      parameters:
+      - description: Project ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              example:
+                project_id: 123
+                platforms:
+                - platform: youtube
+                  connected: true
+                  max_extra_profiles: 10
+                  profiles:
+                  - url: https://www.youtube.com/@acme
+                    handle: acme
+                    kind: profile
+                    main: true
+                    store: null
+                    name: Acme
+                    avatar_url: https://llmpulse.ai/rails/active_storage/blobs/redirect/abc/avatar.jpg
+                    scrape_status: ready
+                - platform: reddit
+                  connected: true
+                  max_extra_profiles: null
+                  profiles:
+                  - url: https://www.reddit.com/r/acme
+                    handle: acme
+                    kind: subreddit
+                    main: false
+                    store: null
+                    name: null
+                    avatar_url: null
+                    scrape_status: null
+                settings:
+                  youtube_channel_url: https://www.youtube.com/@acme
+                  app_store_url: null
+                  google_play_url: null
+                  instagram_profile_url: null
+                  facebook_page_url: null
+                  tiktok_profile_url: null
+                  linkedin_company_url: null
+                  youtube_extra_profile_urls: []
+                  mobile_apps_extra_profile_urls: []
+                  instagram_extra_profile_urls: []
+                  facebook_extra_profile_urls: []
+                  tiktok_extra_profile_urls: []
+                  linkedin_extra_profile_urls: []
+                  reddit_subreddits:
+                  - acme
+                  reddit_usernames: []
+                request_id: 4f7c2a1e-0d2b-4c1a-9e55-1b2c3d4e5f60
+              schema:
+                $ref: "#/components/schemas/OwnedMediaProfilesResponse"
+          description: Profiles per platform and the editable settings
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Growth plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "A plan below Growth answers ERR_PLAN_REQUIRED, and a team\
+            \ member whose permissions do not grant Owned Media ERR_INSUFFICIENT_PERMISSION,\
+            \ with the same status"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+      summary: Get a project's owned-media profiles
+      tags:
+      - Owned Media & Communities
+      x-llms-description: "The owned-media profiles a project claims per platform\
+        \ (YouTube, app stores, Instagram, Facebook, TikTok, LinkedIn, Reddit), with\
+        \ name, avatar and scrape status, plus the current value of every editable\
+        \ field (Growth+)."
+      x-mcp-tool: get_owned_media_profiles
+      x-plan: growth
+    patch:
+      description: "Sets the profiles whose citations count as yours, like Project\
+        \ Settings > Owned Media. Send only the fields to change: a URL field takes\
+        \ a URL, or an empty string or null to clear it, and every list REPLACES the\
+        \ stored one ([] clears it). URLs are normalized like the app (a profile URL\
+        \ is stored in its canonical form, a Google Play package name becomes its\
+        \ listing URL), and anything the app would refuse (a URL from another platform,\
+        \ an extra profile equal to the main one, more than 10 extra profiles, a malformed\
+        \ subreddit) is rejected with ERR_INVALID_PARAM and nothing is applied. A\
+        \ new main or extra profile is scraped in the background for its name and\
+        \ avatar, listed in profile_scrapes_queued. The response is the GET payload\
+        \ after the change. A team member needs the Owned Media create permission,\
+        \ and YouTube Intelligence create to change the YouTube channel. Requires\
+        \ the Growth plan or above and a `read_write` scope API key."
+      operationId: updateOwnedMediaProfiles
+      parameters:
+      - description: Project ID
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updateOwnedMediaProfiles_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OwnedMediaProfilesUpdateResponse"
+          description: The profiles after the change
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "A plan below Growth answers ERR_PLAN_REQUIRED, a read-only\
+            \ key ERR_INSUFFICIENT_SCOPE, and a team member without the Owned Media\
+            \ create permission (or YouTube Intelligence create for the YouTube channel)\
+            \ ERR_INSUFFICIENT_PERMISSION, with the same status"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Update a project's owned-media profiles
+      tags:
+      - Owned Media & Communities
+      x-llms-description: "Set or clear the main and extra owned-media profiles of\
+        \ a project and its claimed subreddits and Reddit usernames; a new profile\
+        \ is scraped for its name and avatar (Growth+, read_write key)."
+      x-mcp-tool: update_owned_media_profiles
+      x-plan: growth
+      x-write: true
   /reputation/reports:
     get:
       description: "The monthly multi-model analyst reports scoring the tracked brand\
@@ -8927,6 +10793,239 @@ paths:
         \ (Growth+)."
       x-mcp-tool: get_search_console_rows
       x-plan: growth
+  /custom_reports:
+    get:
+      description: "The custom reports of the project, newest first, as the Reports\
+        \ > Custom Reports list shows them. Recipient addresses, the shared-link token\
+        \ and the password are never returned. Requires the Scale plan or above."
+      operationId: listCustomReports
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomReportsResponse"
+          description: Paginated custom reports
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Scale plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Endpoint requires a higher plan tier
+      summary: List custom reports
+      tags:
+      - Custom Reports
+      x-llms-description: "List a project's custom reports with their date range,\
+        \ delivery schedule, recipient count, shared-link state and widgets."
+      x-mcp-tool: list_custom_reports
+      x-plan: scale
+  /custom_reports/{id}:
+    get:
+      description: "The configuration of one custom report (date range, filters, schedule,\
+        \ layout) and the data of every widget computed for today, the same numbers\
+        \ the report page, its shared link and its PDF show. Each widget carries its\
+        \ `kind` and a `data` object shaped by it: `series` for `timeseries`, `slices`\
+        \ for `donut`, `bars` for `bar`, `values` and `changes` for `kpi_grid`, `rows`\
+        \ for `table`. A widget whose data source is not connected has `available:\
+        \ false` and `data: null`. Nothing is saved or sent. Requires the Scale plan\
+        \ or above."
+      operationId: getCustomReport
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: "Custom report id, from GET /custom_reports"
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomReportDetailResponse"
+          description: Report configuration and widget data
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Scale plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Endpoint requires a higher plan tier
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+      summary: Get a custom report with its widget data
+      tags:
+      - Custom Reports
+      x-llms-description: "One custom report's configuration and the data of every\
+        \ widget, computed as its page shows it now (read-only)."
+      x-mcp-tool: get_custom_report
+      x-plan: scale
+  /custom_reports/{id}/send:
+    post:
+      description: "Queues the report's PDF for its recipients, like the Send now\
+        \ button on the report page: the report must be published and have at least\
+        \ one recipient (ERR_INVALID_PARAM otherwise), and each report can be sent\
+        \ once every 10 minutes (429 ERR_RATE_LIMITED with Retry-After). Not available\
+        \ from a white-label portal or for a report made inside one (ERR_INTEGRATION_UNAVAILABLE).\
+        \ Requires the Scale plan or above, a `read_write` scope API key and, for\
+        \ team members, update permission on Custom Reports."
+      operationId: sendCustomReport
+      parameters:
+      - description: "Custom report id, from GET /custom_reports"
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/sendCustomReport_request"
+        required: true
+      responses:
+        "202":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CustomReportSendResponse"
+          description: The report is queued for its recipients
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Writes with a read-only key answer ERR_INSUFFICIENT_SCOPE,\
+            \ a team member without the permission ERR_INSUFFICIENT_PERMISSION, and\
+            \ a request made on a white-label portal host, where the app does not\
+            \ offer this action, ERR_INTEGRATION_UNAVAILABLE, with the same status"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+        "429":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_RATE_LIMITED
+                  message: This report was just sent; try again in 540 seconds
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: The report was sent less than 10 minutes ago; retry after the
+            number of seconds in the Retry-After header
+          headers:
+            Retry-After:
+              description: Seconds until the report can be sent again
+              explode: false
+              schema:
+                type: integer
+              style: simple
+      summary: Send a custom report now
+      tags:
+      - Custom Reports
+      x-llms-description: "Email a custom report to its recipients now, like the report\
+        \ page's Send now button (published reports with recipients, once every 10\
+        \ minutes)."
+      x-mcp-tool: send_custom_report
+      x-plan: scale
+      x-write: true
   /recommendations:
     get:
       operationId: listRecommendations
@@ -9099,6 +11198,85 @@ paths:
       x-llms-description: "Detailed recommendation run with items, action steps, priorities,\
         \ and resolved source references."
       x-mcp-tool: get_recommendation
+  /recommendations/{id}/items/{item_id}:
+    patch:
+      description: "Moves one item of a recommendation run between `active`, `completed`\
+        \ and `archived`, exactly like the complete, archive and restore buttons on\
+        \ the Recommendations page, and stamps `status_changed_at`. Returns the item\
+        \ in the shape `GET /recommendations/{id}` lists items. Requires a `read_write`\
+        \ scope API key and, for team members, create permission on Recommendations\
+        \ (the permission the page uses for these buttons)."
+      operationId: updateRecommendationItem
+      parameters:
+      - description: Recommendation run id
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      - description: "Item id, from the items of GET /recommendations/{id}"
+        explode: false
+        in: path
+        name: item_id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/updateRecommendationItem_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationItemUpdateResponse"
+          description: The updated item
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: "Complete, archive or restore a recommendation item"
+      tags:
+      - Recommendations
+      x-llms-description: "Mark one recommendation item as completed, archive it,\
+        \ or move it back to active, like the buttons on the Recommendations page."
+      x-mcp-tool: update_recommendation_item
+      x-write: true
   /intelligence_tasks:
     get:
       operationId: listIntelligenceTasks
@@ -12716,6 +14894,39 @@ components:
           schema:
             type: integer
           style: simple
+    PortalWriteForbidden:
+      content:
+        application/json:
+          example:
+            error:
+              code: ERR_INSUFFICIENT_SCOPE
+              message: insufficient_scope_write_required
+            request_id: abc-123
+          schema:
+            $ref: "#/components/schemas/ApiError"
+      description: "Writes with a read-only key answer ERR_INSUFFICIENT_SCOPE, a team\
+        \ member without the permission ERR_INSUFFICIENT_PERMISSION, and a request\
+        \ made on a white-label portal host, where the app does not offer this action,\
+        \ ERR_INTEGRATION_UNAVAILABLE, with the same status"
+    ReportSendCooldown:
+      content:
+        application/json:
+          example:
+            error:
+              code: ERR_RATE_LIMITED
+              message: This report was just sent; try again in 540 seconds
+            request_id: abc-123
+          schema:
+            $ref: "#/components/schemas/ApiError"
+      description: The report was sent less than 10 minutes ago; retry after the number
+        of seconds in the Retry-After header
+      headers:
+        Retry-After:
+          description: Seconds until the report can be sent again
+          explode: false
+          schema:
+            type: integer
+          style: simple
   schemas:
     SearchConsoleFilters:
       description: "The value of the filters query parameter, JSON-encoded into a\
@@ -15255,7 +17466,7 @@ components:
           reason: reason
         - suggestion_id: 5
           reason: reason
-        prompts_available: 2
+        prompts_available: 5
         request_id: request_id
       properties:
         project_id:
@@ -15914,6 +18125,1150 @@ components:
         request_id:
           type: string
       type: object
+    OwnedMediaRow:
+      description: "One row of /dimensions/owned_media. Fields depend on provider\
+        \ and view: videos (title, url, channel_name, channel_handle, channel_url,\
+        \ video_id, thumbnail_url, views, published_at), channels (key, name, handle,\
+        \ url, avatar_url, unique_videos), posts (url, caption, owner_handle, thumbnail_url,\
+        \ content_type, likes, comments, views, posted_at), profiles (handle, name,\
+        \ url, avatar_url, followers, unique_posts), own_citations (url, citation_date,\
+        \ position, model) and apps (domain, total_responses, rank, global_rank).\
+        \ Every view but own_citations carries citations and yours; videos, channels,\
+        \ posts and profiles carry avg_position."
+      example:
+        title: title
+        url: url
+        channel_name: channel_name
+        channel_handle: channel_handle
+        channel_url: channel_url
+        video_id: video_id
+        key: key
+        name: name
+        handle: handle
+        caption: caption
+        owner_handle: owner_handle
+        thumbnail_url: thumbnail_url
+        avatar_url: avatar_url
+        content_type: content_type
+        citations: 5
+        unique_videos: 2
+        unique_posts: 7
+        followers: 9
+        likes: 3
+        comments: 2
+        views: ""
+        published_at: published_at
+        posted_at: posted_at
+        avg_position: 4.145608029883936
+        yours: true
+        citation_date: 2000-01-23T04:56:07.000+00:00
+        position: 7
+        model: model
+        domain: domain
+        total_responses: 1
+        rank: 1
+        global_rank: 1
+      properties:
+        title:
+          nullable: true
+          type: string
+        url:
+          nullable: true
+          type: string
+        channel_name:
+          nullable: true
+          type: string
+        channel_handle:
+          description: "The video's channel handle, without the @"
+          nullable: true
+          type: string
+        channel_url:
+          nullable: true
+          type: string
+        video_id:
+          nullable: true
+          type: string
+        key:
+          description: "The channel key (handle:..., channel:... or name:...), accepted\
+            \ as profile by /dimensions/owned_media/citing_prompts"
+          type: string
+        name:
+          nullable: true
+          type: string
+        handle:
+          nullable: true
+          type: string
+        caption:
+          nullable: true
+          type: string
+        owner_handle:
+          nullable: true
+          type: string
+        thumbnail_url:
+          description: "The post or video image. Our cached copy where one exists,\
+            \ so the link does not expire"
+          nullable: true
+          type: string
+        avatar_url:
+          description: The profile or channel image. Our cached copy where one exists
+          nullable: true
+          type: string
+        content_type:
+          description: "The post format on its platform: reel, post or tv on Instagram,\
+            \ post or pulse on LinkedIn, post elsewhere"
+          nullable: true
+          type: string
+        citations:
+          type: integer
+        unique_videos:
+          type: integer
+        unique_posts:
+          type: integer
+        followers:
+          nullable: true
+          type: integer
+        likes:
+          nullable: true
+          type: integer
+        comments:
+          nullable: true
+          type: integer
+        views:
+          description: "View count as the platform reports it, a number or a numeric\
+            \ string, or null when unknown"
+        published_at:
+          description: Publication date as the platform reports it
+          nullable: true
+          type: string
+        posted_at:
+          description: "Publication date as the platform reports it (ISO 8601, or\
+            \ Unix seconds on TikTok)"
+          nullable: true
+          type: string
+        avg_position:
+          description: Average position of the citation in the answers (1 = first);
+            null when unknown
+          nullable: true
+          type: number
+        yours:
+          type: boolean
+        citation_date:
+          format: date-time
+          nullable: true
+          type: string
+        position:
+          nullable: true
+          type: integer
+        model:
+          nullable: true
+          type: string
+        domain:
+          description: The app's store listing URL (provider=mobile_apps)
+          type: string
+        total_responses:
+          type: integer
+        rank:
+          type: integer
+        global_rank:
+          nullable: true
+          type: integer
+      type: object
+    OwnedMediaListResponse:
+      example:
+        project_id: 0
+        provider: provider
+        view: view
+        store: store
+        from: 2000-01-23T04:56:07.000+00:00
+        to: 2000-01-23T04:56:07.000+00:00
+        page: 6
+        per_page: 1
+        total: 5
+        data:
+        - title: title
+          url: url
+          channel_name: channel_name
+          channel_handle: channel_handle
+          channel_url: channel_url
+          video_id: video_id
+          key: key
+          name: name
+          handle: handle
+          caption: caption
+          owner_handle: owner_handle
+          thumbnail_url: thumbnail_url
+          avatar_url: avatar_url
+          content_type: content_type
+          citations: 5
+          unique_videos: 2
+          unique_posts: 7
+          followers: 9
+          likes: 3
+          comments: 2
+          views: ""
+          published_at: published_at
+          posted_at: posted_at
+          avg_position: 4.145608029883936
+          yours: true
+          citation_date: 2000-01-23T04:56:07.000+00:00
+          position: 7
+          model: model
+          domain: domain
+          total_responses: 1
+          rank: 1
+          global_rank: 1
+        - title: title
+          url: url
+          channel_name: channel_name
+          channel_handle: channel_handle
+          channel_url: channel_url
+          video_id: video_id
+          key: key
+          name: name
+          handle: handle
+          caption: caption
+          owner_handle: owner_handle
+          thumbnail_url: thumbnail_url
+          avatar_url: avatar_url
+          content_type: content_type
+          citations: 5
+          unique_videos: 2
+          unique_posts: 7
+          followers: 9
+          likes: 3
+          comments: 2
+          views: ""
+          published_at: published_at
+          posted_at: posted_at
+          avg_position: 4.145608029883936
+          yours: true
+          citation_date: 2000-01-23T04:56:07.000+00:00
+          position: 7
+          model: model
+          domain: domain
+          total_responses: 1
+          rank: 1
+          global_rank: 1
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        provider:
+          type: string
+        view:
+          type: string
+        store:
+          description: provider=mobile_apps only
+          type: string
+        from:
+          format: date-time
+          type: string
+        to:
+          format: date-time
+          type: string
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        data:
+          items:
+            $ref: "#/components/schemas/OwnedMediaRow"
+          type: array
+        request_id:
+          type: string
+      type: object
+    OwnedMediaKpis:
+      example:
+        total: 6
+        yours: 1
+        your_profile: 5
+        your_content: 5
+        share_pct: 2.3021358869347655
+      properties:
+        total:
+          description: "Citations of the platform in the window, yours and everyone\
+            \ else's"
+          type: integer
+        yours:
+          description: Citations of your own profiles and their content
+          type: integer
+        your_profile:
+          description: Citations of your profile or channel pages. Null for mobile_apps
+            and overview
+          nullable: true
+          type: integer
+        your_content:
+          description: Citations of your posts or videos. Null for mobile_apps and
+            overview
+          nullable: true
+          type: integer
+        share_pct:
+          description: yours as a percentage of total (0-100)
+          type: number
+      type: object
+    OwnedMediaKpiChanges:
+      description: "Change against the previous period. Counts in percent, share_pct\
+        \ in percentage points; null when the previous period has nothing to compare\
+        \ with"
+      example:
+        total: 7.061401241503109
+        yours: 9.301444243932576
+        your_profile: 3.616076749251911
+        your_content: 2.027123023002322
+        share_pct: 4.145608029883936
+      properties:
+        total:
+          nullable: true
+          type: number
+        yours:
+          nullable: true
+          type: number
+        your_profile:
+          nullable: true
+          type: number
+        your_content:
+          nullable: true
+          type: number
+        share_pct:
+          nullable: true
+          type: number
+      type: object
+    OwnedMediaWeek:
+      example:
+        week: 2000-01-23
+        citations: 7
+        yours: 1
+        other: 1
+      properties:
+        week:
+          description: The Monday that starts the week
+          format: date
+          type: string
+        citations:
+          type: integer
+        yours:
+          description: "Null for provider=overview, whose rollups have no weekly split"
+          nullable: true
+          type: integer
+        other:
+          nullable: true
+          type: integer
+      type: object
+    OwnedMediaModelShare:
+      example:
+        model: model
+        citations: 1
+        share_pct: 6.84685269835264
+      properties:
+        model:
+          type: string
+        citations:
+          type: integer
+        share_pct:
+          type: number
+      type: object
+    OwnedMediaCountryShare:
+      example:
+        country_code: country_code
+        citations: 7
+        share_pct: 1.1730742509559433
+      properties:
+        country_code:
+          type: string
+        citations:
+          type: integer
+        share_pct:
+          type: number
+      type: object
+    OwnedMediaContentTypeShare:
+      example:
+        content_type: content_type
+        citations: 4
+        share_pct: 5.025004791520295
+      properties:
+        content_type:
+          description: "reel, post or tv on Instagram, post or pulse on LinkedIn,\
+            \ regular, shorts or live on YouTube"
+          type: string
+        citations:
+          type: integer
+        share_pct:
+          type: number
+      type: object
+    OwnedMediaAgeBucketShare:
+      example:
+        bucket: under_1m
+        citations: 9
+        share_pct: 9.369310271410669
+      properties:
+        bucket:
+          description: Age of the cited post or video when the summary is read
+          enum:
+          - under_1m
+          - m1_6
+          - m6_12
+          - over_1y
+          type: string
+        citations:
+          type: integer
+        share_pct:
+          type: number
+      type: object
+    OwnedMediaStoreTotals:
+      example:
+        store: google_play
+        total: 6
+        yours: 8
+        share_pct: 9.018348186070783
+      properties:
+        store:
+          enum:
+          - google_play
+          - app_store
+          type: string
+        total:
+          type: integer
+        yours:
+          type: integer
+        share_pct:
+          type: number
+      type: object
+    OwnedMediaPlatformRollup:
+      example:
+        provider: youtube
+        connected: true
+        total: 6
+        yours: 3
+        share_pct: 6.965117697638846
+        weekly:
+        - week: 2000-01-23
+          citations: 1
+        - week: 2000-01-23
+          citations: 1
+      properties:
+        provider:
+          enum:
+          - youtube
+          - mobile_apps
+          - instagram
+          - facebook
+          - tiktok
+          - linkedin
+          - reddit
+          type: string
+        connected:
+          type: boolean
+        total:
+          type: integer
+        yours:
+          type: integer
+        share_pct:
+          type: number
+        weekly:
+          items:
+            $ref: "#/components/schemas/OwnedMediaPlatformRollup_weekly_inner"
+          type: array
+      type: object
+    OwnedMediaSummaryResponse:
+      example:
+        project_id: 0
+        provider: provider
+        from: 2000-01-23T04:56:07.000+00:00
+        to: 2000-01-23T04:56:07.000+00:00
+        connected: true
+        kpis:
+          total: 6
+          yours: 1
+          your_profile: 5
+          your_content: 5
+          share_pct: 2.3021358869347655
+        previous:
+          from: 2000-01-23T04:56:07.000+00:00
+          to: 2000-01-23T04:56:07.000+00:00
+          kpis:
+            total: 6
+            yours: 1
+            your_profile: 5
+            your_content: 5
+            share_pct: 2.3021358869347655
+        changes:
+          total: 7.061401241503109
+          yours: 9.301444243932576
+          your_profile: 3.616076749251911
+          your_content: 2.027123023002322
+          share_pct: 4.145608029883936
+        weekly:
+        - week: 2000-01-23
+          citations: 7
+          yours: 1
+          other: 1
+        - week: 2000-01-23
+          citations: 7
+          yours: 1
+          other: 1
+        by_model:
+        - model: model
+          citations: 1
+          share_pct: 6.84685269835264
+        - model: model
+          citations: 1
+          share_pct: 6.84685269835264
+        by_country:
+        - country_code: country_code
+          citations: 7
+          share_pct: 1.1730742509559433
+        - country_code: country_code
+          citations: 7
+          share_pct: 1.1730742509559433
+        content_types:
+        - content_type: content_type
+          citations: 4
+          share_pct: 5.025004791520295
+        - content_type: content_type
+          citations: 4
+          share_pct: 5.025004791520295
+        age_buckets:
+        - bucket: under_1m
+          citations: 9
+          share_pct: 9.369310271410669
+        - bucket: under_1m
+          citations: 9
+          share_pct: 9.369310271410669
+        stores:
+        - store: google_play
+          total: 6
+          yours: 8
+          share_pct: 9.018348186070783
+        - store: google_play
+          total: 6
+          yours: 8
+          share_pct: 9.018348186070783
+        platforms:
+        - provider: youtube
+          connected: true
+          total: 6
+          yours: 3
+          share_pct: 6.965117697638846
+          weekly:
+          - week: 2000-01-23
+            citations: 1
+          - week: 2000-01-23
+            citations: 1
+        - provider: youtube
+          connected: true
+          total: 6
+          yours: 3
+          share_pct: 6.965117697638846
+          weekly:
+          - week: 2000-01-23
+            citations: 1
+          - week: 2000-01-23
+            citations: 1
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        provider:
+          type: string
+        from:
+          format: date-time
+          type: string
+        to:
+          format: date-time
+          type: string
+        connected:
+          description: "Whether a profile is claimed on the platform (on overview,\
+            \ on any platform)"
+          type: boolean
+        kpis:
+          $ref: "#/components/schemas/OwnedMediaKpis"
+        previous:
+          $ref: "#/components/schemas/OwnedMediaSummaryResponse_previous"
+        changes:
+          $ref: "#/components/schemas/OwnedMediaKpiChanges"
+        weekly:
+          items:
+            $ref: "#/components/schemas/OwnedMediaWeek"
+          type: array
+        by_model:
+          description: Null for provider=overview
+          items:
+            $ref: "#/components/schemas/OwnedMediaModelShare"
+          nullable: true
+          type: array
+        by_country:
+          description: Null for provider=overview
+          items:
+            $ref: "#/components/schemas/OwnedMediaCountryShare"
+          nullable: true
+          type: array
+        content_types:
+          description: Social and YouTube providers only
+          items:
+            $ref: "#/components/schemas/OwnedMediaContentTypeShare"
+          nullable: true
+          type: array
+        age_buckets:
+          description: Social and YouTube providers only. Posts or videos without
+            a known publication date are left out
+          items:
+            $ref: "#/components/schemas/OwnedMediaAgeBucketShare"
+          nullable: true
+          type: array
+        stores:
+          description: provider=mobile_apps only
+          items:
+            $ref: "#/components/schemas/OwnedMediaStoreTotals"
+          nullable: true
+          type: array
+        platforms:
+          description: "provider=overview only, one row per platform the caller can\
+            \ read"
+          items:
+            $ref: "#/components/schemas/OwnedMediaPlatformRollup"
+          nullable: true
+          type: array
+        request_id:
+          type: string
+      type: object
+    OwnedMediaCitedItem:
+      description: "The post, video, profile or channel. Null when nothing in the\
+        \ window matches it"
+      example:
+        kind: post
+        title: title
+        subtitle: subtitle
+        url: url
+        image_url: image_url
+        yours: true
+        date: 2000-01-23T04:56:07.000+00:00
+        stats:
+          citations: 6
+          likes: 1
+          comments: 5
+          views: 5
+          followers: 2
+          unique_posts: 7
+          unique_videos: 9
+      nullable: true
+      properties:
+        kind:
+          description: "post covers posts and videos, profile covers profiles and\
+            \ channels"
+          enum:
+          - post
+          - profile
+          type: string
+        title:
+          nullable: true
+          type: string
+        subtitle:
+          nullable: true
+          type: string
+        url:
+          nullable: true
+          type: string
+        image_url:
+          nullable: true
+          type: string
+        yours:
+          type: boolean
+        date:
+          description: Publication date of a post or video
+          format: date-time
+          nullable: true
+          type: string
+        stats:
+          $ref: "#/components/schemas/OwnedMediaCitedItem_stats"
+      type: object
+    OwnedMediaCitingAnswer:
+      example:
+        answer_id: 1
+        prompt_id: 1
+        prompt_text: prompt_text
+        model: model
+        country_code: country_code
+        language_code: language_code
+        executed_at: 2000-01-23T04:56:07.000+00:00
+        excerpt: excerpt
+        app_url: app_url
+      properties:
+        answer_id:
+          description: "The answer (prompt execution) id, readable with GET /answers/{id}"
+          type: integer
+        prompt_id:
+          type: integer
+        prompt_text:
+          type: string
+        model:
+          type: string
+        country_code:
+          nullable: true
+          type: string
+        language_code:
+          nullable: true
+          type: string
+        executed_at:
+          format: date-time
+          nullable: true
+          type: string
+        excerpt:
+          description: The start of the answer as plain text (at most 300 characters)
+          nullable: true
+          type: string
+        app_url:
+          description: The answer in the app
+          type: string
+      type: object
+    OwnedMediaCitingPromptsResponse:
+      example:
+        project_id: 0
+        provider: provider
+        from: 2000-01-23T04:56:07.000+00:00
+        to: 2000-01-23T04:56:07.000+00:00
+        item:
+          kind: post
+          title: title
+          subtitle: subtitle
+          url: url
+          image_url: image_url
+          yours: true
+          date: 2000-01-23T04:56:07.000+00:00
+          stats:
+            citations: 6
+            likes: 1
+            comments: 5
+            views: 5
+            followers: 2
+            unique_posts: 7
+            unique_videos: 9
+        citation_count: 3
+        prompt_count: 2
+        page: 4
+        per_page: 7
+        total: 1
+        data:
+        - answer_id: 1
+          prompt_id: 1
+          prompt_text: prompt_text
+          model: model
+          country_code: country_code
+          language_code: language_code
+          executed_at: 2000-01-23T04:56:07.000+00:00
+          excerpt: excerpt
+          app_url: app_url
+        - answer_id: 1
+          prompt_id: 1
+          prompt_text: prompt_text
+          model: model
+          country_code: country_code
+          language_code: language_code
+          executed_at: 2000-01-23T04:56:07.000+00:00
+          excerpt: excerpt
+          app_url: app_url
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        provider:
+          type: string
+        from:
+          format: date-time
+          type: string
+        to:
+          format: date-time
+          type: string
+        item:
+          $ref: "#/components/schemas/OwnedMediaCitedItem"
+        citation_count:
+          description: Citations of the item in the window
+          type: integer
+        prompt_count:
+          description: Distinct prompts whose answers cited it
+          type: integer
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          description: Citing answers
+          type: integer
+        data:
+          items:
+            $ref: "#/components/schemas/OwnedMediaCitingAnswer"
+          type: array
+        request_id:
+          type: string
+      type: object
+    OwnedMediaProfile:
+      example:
+        url: url
+        handle: handle
+        kind: profile
+        main: true
+        store: store
+        name: name
+        avatar_url: avatar_url
+        scrape_status: scrape_status
+      properties:
+        url:
+          type: string
+        handle:
+          description: "The handle, page id, store app id, subreddit or username"
+          nullable: true
+          type: string
+        kind:
+          enum:
+          - profile
+          - app
+          - subreddit
+          - username
+          type: string
+        main:
+          description: "True for the main profile of its platform (or store), false\
+            \ for an extra one"
+          type: boolean
+        store:
+          description: google_play or app_store for an app; null elsewhere
+          nullable: true
+          type: string
+        name:
+          nullable: true
+          type: string
+        avatar_url:
+          nullable: true
+          type: string
+        scrape_status:
+          description: "State of the profile scrape that reads its name and avatar:\
+            \ pending, running, ready, failed or skipped; null when none has started\
+            \ or the platform has none"
+          nullable: true
+          type: string
+      type: object
+    OwnedMediaPlatformProfiles:
+      example:
+        platform: youtube
+        connected: true
+        max_extra_profiles: 6
+        profiles:
+        - url: url
+          handle: handle
+          kind: profile
+          main: true
+          store: store
+          name: name
+          avatar_url: avatar_url
+          scrape_status: scrape_status
+        - url: url
+          handle: handle
+          kind: profile
+          main: true
+          store: store
+          name: name
+          avatar_url: avatar_url
+          scrape_status: scrape_status
+      properties:
+        platform:
+          enum:
+          - youtube
+          - mobile_apps
+          - instagram
+          - facebook
+          - tiktok
+          - linkedin
+          - reddit
+          type: string
+        connected:
+          type: boolean
+        max_extra_profiles:
+          description: How many extra profiles the platform accepts; null where it
+            takes none
+          nullable: true
+          type: integer
+        profiles:
+          items:
+            $ref: "#/components/schemas/OwnedMediaProfile"
+          type: array
+      type: object
+    OwnedMediaProfileSettings:
+      description: "The current value of every field PATCH /projects/{id}/owned_media\
+        \ accepts"
+      example:
+        youtube_channel_url: youtube_channel_url
+        app_store_url: app_store_url
+        google_play_url: google_play_url
+        instagram_profile_url: instagram_profile_url
+        facebook_page_url: facebook_page_url
+        tiktok_profile_url: tiktok_profile_url
+        linkedin_company_url: linkedin_company_url
+        youtube_extra_profile_urls:
+        - youtube_extra_profile_urls
+        - youtube_extra_profile_urls
+        mobile_apps_extra_profile_urls:
+        - mobile_apps_extra_profile_urls
+        - mobile_apps_extra_profile_urls
+        instagram_extra_profile_urls:
+        - instagram_extra_profile_urls
+        - instagram_extra_profile_urls
+        facebook_extra_profile_urls:
+        - facebook_extra_profile_urls
+        - facebook_extra_profile_urls
+        tiktok_extra_profile_urls:
+        - tiktok_extra_profile_urls
+        - tiktok_extra_profile_urls
+        linkedin_extra_profile_urls:
+        - linkedin_extra_profile_urls
+        - linkedin_extra_profile_urls
+        reddit_subreddits:
+        - reddit_subreddits
+        - reddit_subreddits
+        reddit_usernames:
+        - reddit_usernames
+        - reddit_usernames
+      properties:
+        youtube_channel_url:
+          nullable: true
+          type: string
+        app_store_url:
+          nullable: true
+          type: string
+        google_play_url:
+          nullable: true
+          type: string
+        instagram_profile_url:
+          nullable: true
+          type: string
+        facebook_page_url:
+          nullable: true
+          type: string
+        tiktok_profile_url:
+          nullable: true
+          type: string
+        linkedin_company_url:
+          nullable: true
+          type: string
+        youtube_extra_profile_urls:
+          items:
+            type: string
+          type: array
+        mobile_apps_extra_profile_urls:
+          items:
+            type: string
+          type: array
+        instagram_extra_profile_urls:
+          items:
+            type: string
+          type: array
+        facebook_extra_profile_urls:
+          items:
+            type: string
+          type: array
+        tiktok_extra_profile_urls:
+          items:
+            type: string
+          type: array
+        linkedin_extra_profile_urls:
+          items:
+            type: string
+          type: array
+        reddit_subreddits:
+          items:
+            type: string
+          type: array
+        reddit_usernames:
+          items:
+            type: string
+          type: array
+      type: object
+    OwnedMediaProfilesResponse:
+      example:
+        project_id: 0
+        platforms:
+        - platform: youtube
+          connected: true
+          max_extra_profiles: 6
+          profiles:
+          - url: url
+            handle: handle
+            kind: profile
+            main: true
+            store: store
+            name: name
+            avatar_url: avatar_url
+            scrape_status: scrape_status
+          - url: url
+            handle: handle
+            kind: profile
+            main: true
+            store: store
+            name: name
+            avatar_url: avatar_url
+            scrape_status: scrape_status
+        - platform: youtube
+          connected: true
+          max_extra_profiles: 6
+          profiles:
+          - url: url
+            handle: handle
+            kind: profile
+            main: true
+            store: store
+            name: name
+            avatar_url: avatar_url
+            scrape_status: scrape_status
+          - url: url
+            handle: handle
+            kind: profile
+            main: true
+            store: store
+            name: name
+            avatar_url: avatar_url
+            scrape_status: scrape_status
+        settings:
+          youtube_channel_url: youtube_channel_url
+          app_store_url: app_store_url
+          google_play_url: google_play_url
+          instagram_profile_url: instagram_profile_url
+          facebook_page_url: facebook_page_url
+          tiktok_profile_url: tiktok_profile_url
+          linkedin_company_url: linkedin_company_url
+          youtube_extra_profile_urls:
+          - youtube_extra_profile_urls
+          - youtube_extra_profile_urls
+          mobile_apps_extra_profile_urls:
+          - mobile_apps_extra_profile_urls
+          - mobile_apps_extra_profile_urls
+          instagram_extra_profile_urls:
+          - instagram_extra_profile_urls
+          - instagram_extra_profile_urls
+          facebook_extra_profile_urls:
+          - facebook_extra_profile_urls
+          - facebook_extra_profile_urls
+          tiktok_extra_profile_urls:
+          - tiktok_extra_profile_urls
+          - tiktok_extra_profile_urls
+          linkedin_extra_profile_urls:
+          - linkedin_extra_profile_urls
+          - linkedin_extra_profile_urls
+          reddit_subreddits:
+          - reddit_subreddits
+          - reddit_subreddits
+          reddit_usernames:
+          - reddit_usernames
+          - reddit_usernames
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        platforms:
+          items:
+            $ref: "#/components/schemas/OwnedMediaPlatformProfiles"
+          type: array
+        settings:
+          $ref: "#/components/schemas/OwnedMediaProfileSettings"
+        request_id:
+          type: string
+      type: object
+    OwnedMediaProfilesUpdateResponse:
+      allOf:
+      - $ref: "#/components/schemas/OwnedMediaProfilesResponse"
+      - properties:
+          updated_fields:
+            description: The fields this request set
+            items:
+              type: string
+            type: array
+          profile_scrapes_queued:
+            description: Platforms whose new profile is being scraped in the background
+              for its name and avatar
+            items:
+              type: string
+            type: array
+        type: object
+      example:
+        project_id: 0
+        platforms:
+        - platform: youtube
+          connected: true
+          max_extra_profiles: 6
+          profiles:
+          - url: url
+            handle: handle
+            kind: profile
+            main: true
+            store: store
+            name: name
+            avatar_url: avatar_url
+            scrape_status: scrape_status
+          - url: url
+            handle: handle
+            kind: profile
+            main: true
+            store: store
+            name: name
+            avatar_url: avatar_url
+            scrape_status: scrape_status
+        - platform: youtube
+          connected: true
+          max_extra_profiles: 6
+          profiles:
+          - url: url
+            handle: handle
+            kind: profile
+            main: true
+            store: store
+            name: name
+            avatar_url: avatar_url
+            scrape_status: scrape_status
+          - url: url
+            handle: handle
+            kind: profile
+            main: true
+            store: store
+            name: name
+            avatar_url: avatar_url
+            scrape_status: scrape_status
+        settings:
+          youtube_channel_url: youtube_channel_url
+          app_store_url: app_store_url
+          google_play_url: google_play_url
+          instagram_profile_url: instagram_profile_url
+          facebook_page_url: facebook_page_url
+          tiktok_profile_url: tiktok_profile_url
+          linkedin_company_url: linkedin_company_url
+          youtube_extra_profile_urls:
+          - youtube_extra_profile_urls
+          - youtube_extra_profile_urls
+          mobile_apps_extra_profile_urls:
+          - mobile_apps_extra_profile_urls
+          - mobile_apps_extra_profile_urls
+          instagram_extra_profile_urls:
+          - instagram_extra_profile_urls
+          - instagram_extra_profile_urls
+          facebook_extra_profile_urls:
+          - facebook_extra_profile_urls
+          - facebook_extra_profile_urls
+          tiktok_extra_profile_urls:
+          - tiktok_extra_profile_urls
+          - tiktok_extra_profile_urls
+          linkedin_extra_profile_urls:
+          - linkedin_extra_profile_urls
+          - linkedin_extra_profile_urls
+          reddit_subreddits:
+          - reddit_subreddits
+          - reddit_subreddits
+          reddit_usernames:
+          - reddit_usernames
+          - reddit_usernames
+        request_id: request_id
+        updated_fields:
+        - updated_fields
+        - updated_fields
+        profile_scrapes_queued:
+        - profile_scrapes_queued
+        - profile_scrapes_queued
     GeoAuditSchedule:
       description: Present for weekly and monthly audits. day is 0 (Sunday) to 6 for
         weekly audits and 1 to 28 for monthly ones; hour is in timezone.
@@ -18565,6 +21920,1635 @@ components:
       - permissions
       - project_ids
       type: object
+    SuggestedPrompt:
+      example:
+        id: 5
+        prompt: prompt
+        source: source
+        status: status
+        country_code: country_code
+        language_code: language_code
+        prompt_id: 2
+        accepted_at: 2000-01-23T04:56:07.000+00:00
+        created_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        prompt:
+          type: string
+        source:
+          description: "The generator that wrote it: website, magic (keyword runs),\
+            \ topic, reddit, paa, reputational, translate, gsc (Search Console) or\
+            \ catalog"
+          type: string
+        status:
+          description: "pending, accepted or rejected"
+          type: string
+        country_code:
+          nullable: true
+          type: string
+        language_code:
+          nullable: true
+          type: string
+        prompt_id:
+          description: The prompt an accepted suggestion became
+          nullable: true
+          type: integer
+        accepted_at:
+          format: date-time
+          nullable: true
+          type: string
+        created_at:
+          format: date-time
+          type: string
+      required:
+      - accepted_at
+      - country_code
+      - created_at
+      - id
+      - language_code
+      - prompt
+      - prompt_id
+      - source
+      - status
+      type: object
+    SuggestedPromptsResponse:
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        data:
+        - id: 5
+          prompt: prompt
+          source: source
+          status: status
+          country_code: country_code
+          language_code: language_code
+          prompt_id: 2
+          accepted_at: 2000-01-23T04:56:07.000+00:00
+          created_at: 2000-01-23T04:56:07.000+00:00
+        - id: 5
+          prompt: prompt
+          source: source
+          status: status
+          country_code: country_code
+          language_code: language_code
+          prompt_id: 2
+          accepted_at: 2000-01-23T04:56:07.000+00:00
+          created_at: 2000-01-23T04:56:07.000+00:00
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        data:
+          items:
+            $ref: "#/components/schemas/SuggestedPrompt"
+          type: array
+        request_id:
+          type: string
+      required:
+      - data
+      - page
+      - per_page
+      - project_id
+      - request_id
+      - total
+      type: object
+    SuggestedPromptIdsRequest:
+      example:
+        project_id: 0
+        ids:
+        - 6
+        - 6
+        - 6
+        - 6
+        - 6
+      properties:
+        project_id:
+          type: integer
+        ids:
+          description: Suggestion ids (max 100)
+          items:
+            type: integer
+          maxItems: 100
+          type: array
+      required:
+      - ids
+      - project_id
+      type: object
+    SuggestedPromptsAcceptRequest:
+      example:
+        project_id: 0
+        ids:
+        - 6
+        - 6
+        - 6
+        - 6
+        - 6
+        tag_ids:
+        - 1
+        tag_names:
+        - tag_names
+        create_missing: false
+      properties:
+        project_id:
+          type: integer
+        ids:
+          description: Suggestion ids to accept (max 100)
+          items:
+            type: integer
+          maxItems: 100
+          type: array
+        tag_ids:
+          description: One tag id to put the new prompts in
+          items:
+            type: integer
+          maxItems: 1
+          type: array
+        tag_names:
+          description: One tag name (case-insensitive) to put the new prompts in
+          items:
+            type: string
+          maxItems: 1
+          type: array
+        create_missing:
+          default: false
+          description: Create the tag named in tag_names when it does not exist
+          type: boolean
+      required:
+      - ids
+      - project_id
+      type: object
+    SuggestedPromptsAcceptResponse:
+      example:
+        project_id: 0
+        accepted:
+        - suggestion_id: 6
+          prompt_id: 1
+          collection_id: 5
+        - suggestion_id: 6
+          prompt_id: 1
+          collection_id: 5
+        skipped:
+        - suggestion_id: 5
+          reason: reason
+        - suggestion_id: 5
+          reason: reason
+        prompts_available: 2
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        accepted:
+          items:
+            $ref: "#/components/schemas/SuggestedPromptsAcceptResponse_accepted_inner"
+          type: array
+        skipped:
+          items:
+            $ref: "#/components/schemas/CatalogPromptSuggestionsAcceptResponse_skipped_inner"
+          type: array
+        prompts_available:
+          description: Prompt slots left on the plan; null when unlimited
+          nullable: true
+          type: integer
+        request_id:
+          type: string
+      required:
+      - accepted
+      - project_id
+      - prompts_available
+      - request_id
+      - skipped
+      type: object
+    SuggestedPromptsRejectResponse:
+      example:
+        project_id: 0
+        rejected: 6
+        ids:
+        - 1
+        - 1
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        rejected:
+          type: integer
+        ids:
+          description: The suggestions that were pending and are now rejected
+          items:
+            type: integer
+          type: array
+        request_id:
+          type: string
+      required:
+      - ids
+      - project_id
+      - rejected
+      - request_id
+      type: object
+    PromptGenerationRequest:
+      example:
+        project_id: 0
+        source: website
+        query: query
+        count: 60
+        country_code: country_code
+        language_code: language_code
+        competitor_id: 1
+        search_type: topic
+        keywords:
+        - keywords
+        - keywords
+        - keywords
+        - keywords
+        - keywords
+        source_country_code: source_country_code
+        source_language_code: source_language_code
+        min_words: 5
+        all_countries: false
+      properties:
+        project_id:
+          type: integer
+        source:
+          description: Which Add prompts generator to run
+          enum:
+          - website
+          - keyword
+          - topic
+          - reddit
+          - paa
+          - reputational
+          - translate
+          - search_console
+          type: string
+        query:
+          description: "keyword: optional keyword or research query. topic and reddit:\
+            \ required topic (reddit: the brand when search_type=brand). paa: one\
+            \ keyword, as an alternative to keywords."
+          maxLength: 500
+          type: string
+        count:
+          default: 20
+          description: "keyword and topic: how many suggestions to ask for, capped\
+            \ by the prompt slots left"
+          maximum: 100
+          minimum: 1
+          type: integer
+        country_code:
+          description: ISO 3166-1 alpha-2 country of the suggestions (default the
+            project country)
+          type: string
+        language_code:
+          description: ISO language code of the suggestions (default the project language)
+          type: string
+        competitor_id:
+          description: "keyword: write the suggestions around this competitor of the\
+            \ project"
+          type: integer
+        search_type:
+          default: topic
+          description: "reddit: search discussions of a topic or a brand"
+          enum:
+          - topic
+          - brand
+          type: string
+        keywords:
+          description: "paa: up to 5 keywords; each is a People Also Ask lookup counted\
+            \ against the account's 24-hour allowance"
+          items:
+            type: string
+          maxItems: 5
+          type: array
+        source_country_code:
+          description: "translate: country of the prompts to translate"
+          type: string
+        source_language_code:
+          description: "translate: language of the prompts to translate"
+          type: string
+        min_words:
+          default: 0
+          description: "search_console: skip queries shorter than this many words"
+          maximum: 10
+          minimum: 0
+          type: integer
+        all_countries:
+          default: false
+          description: "search_console: include queries from every country instead\
+            \ of country_code only"
+          type: boolean
+      required:
+      - project_id
+      - source
+      type: object
+    PromptGenerationResponse:
+      example:
+        id: 046b6c7f-0b8a-43b9-b35d-6489e6daee91
+        project_id: 0
+        source: source
+        status: processing
+        params:
+          country_code: country_code
+          language_code: language_code
+          query: query
+          count: 6
+          competitor_id: 1
+          search_type: search_type
+          keywords:
+          - keywords
+          - keywords
+          source_country_code: source_country_code
+          source_language_code: source_language_code
+          min_words: 5
+          all_countries: true
+        created_at: 2000-01-23T04:56:07.000+00:00
+        finished_at: 2000-01-23T04:56:07.000+00:00
+        suggestions_count: 5
+        suggestions:
+        - id: 5
+          prompt: prompt
+          source: source
+          status: status
+          country_code: country_code
+          language_code: language_code
+          prompt_id: 2
+          accepted_at: 2000-01-23T04:56:07.000+00:00
+          created_at: 2000-01-23T04:56:07.000+00:00
+        - id: 5
+          prompt: prompt
+          source: source
+          status: status
+          country_code: country_code
+          language_code: language_code
+          prompt_id: 2
+          accepted_at: 2000-01-23T04:56:07.000+00:00
+          created_at: 2000-01-23T04:56:07.000+00:00
+        error:
+          code: code
+          message: message
+        request_id: request_id
+      properties:
+        id:
+          description: "The run id; poll GET /prompt_generations/{id} with it (kept\
+            \ for 24 hours)"
+          format: uuid
+          type: string
+        project_id:
+          type: integer
+        source:
+          type: string
+        status:
+          enum:
+          - processing
+          - completed
+          - failed
+          type: string
+        params:
+          $ref: "#/components/schemas/PromptGenerationResponse_params"
+        created_at:
+          format: date-time
+          type: string
+        finished_at:
+          format: date-time
+          nullable: true
+          type: string
+        suggestions_count:
+          type: integer
+        suggestions:
+          description: "The suggestions the run saved to the Suggested prompts queue,\
+            \ with their current status"
+          items:
+            $ref: "#/components/schemas/SuggestedPrompt"
+          type: array
+        error:
+          $ref: "#/components/schemas/PromptGenerationResponse_error"
+        request_id:
+          type: string
+      required:
+      - created_at
+      - error
+      - finished_at
+      - id
+      - params
+      - project_id
+      - request_id
+      - source
+      - status
+      - suggestions
+      - suggestions_count
+      type: object
+    PromptsImportRequest:
+      example:
+        project_id: 0
+        rows:
+        - prompt: prompt
+          country_code: country_code
+          language_code: language_code
+          tags:
+          - tags
+          - tags
+        - prompt: prompt
+          country_code: country_code
+          language_code: language_code
+          tags:
+          - tags
+          - tags
+        - prompt: prompt
+          country_code: country_code
+          language_code: language_code
+          tags:
+          - tags
+          - tags
+        - prompt: prompt
+          country_code: country_code
+          language_code: language_code
+          tags:
+          - tags
+          - tags
+        - prompt: prompt
+          country_code: country_code
+          language_code: language_code
+          tags:
+          - tags
+          - tags
+      properties:
+        project_id:
+          type: integer
+        rows:
+          description: One object per prompt (max 500)
+          items:
+            $ref: "#/components/schemas/PromptsImportRequest_rows_inner"
+          maxItems: 500
+          type: array
+      required:
+      - project_id
+      - rows
+      type: object
+    PromptsImportResponse:
+      example:
+        project_id: 0
+        processed_rows: 6
+        created: 1
+        duplicates: 5
+        tagged: 5
+        created_tags: 2
+        row_errors:
+        - row: 7
+          error: error
+        - row: 7
+          error: error
+        length_warning: length_warning
+        prompts_available: 9
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        processed_rows:
+          description: Distinct rows imported or matched to an existing prompt
+          type: integer
+        created:
+          type: integer
+        duplicates:
+          description: Rows that matched an existing prompt (they still get the row's
+            tags)
+          type: integer
+        tagged:
+          description: New prompt-tag links
+          type: integer
+        created_tags:
+          type: integer
+        row_errors:
+          description: "Rows that were skipped, by their index in rows"
+          items:
+            $ref: "#/components/schemas/PromptsImportResponse_row_errors_inner"
+          type: array
+        length_warning:
+          description: Which tracked AI models will skip new prompts that are too
+            long for them
+          nullable: true
+          type: string
+        prompts_available:
+          description: Prompt slots left on the plan; null when unlimited
+          nullable: true
+          type: integer
+        request_id:
+          type: string
+      required:
+      - created
+      - created_tags
+      - duplicates
+      - length_warning
+      - processed_rows
+      - project_id
+      - prompts_available
+      - request_id
+      - row_errors
+      - tagged
+      type: object
+    PromptTagsRemoveResponse:
+      example:
+        project_id: 0
+        prompts_targeted: 6
+        tags_detached:
+        - id: 1
+          name: name
+        - id: 1
+          name: name
+        links_removed: 1
+        skipped_not_linked: 5
+        missing_tag_names:
+        - missing_tag_names
+        - missing_tag_names
+        ignored_prompt_ids:
+        - 5
+        - 5
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        prompts_targeted:
+          description: Prompts of the project among prompt_ids
+          type: integer
+        tags_detached:
+          items:
+            $ref: "#/components/schemas/TagRef"
+          type: array
+        links_removed:
+          type: integer
+        skipped_not_linked:
+          type: integer
+        missing_tag_names:
+          description: tag_names that matched no tag
+          items:
+            type: string
+          type: array
+        ignored_prompt_ids:
+          description: prompt_ids that are not prompts of this project
+          items:
+            type: integer
+          type: array
+        request_id:
+          type: string
+      required:
+      - ignored_prompt_ids
+      - links_removed
+      - missing_tag_names
+      - project_id
+      - prompts_targeted
+      - request_id
+      - skipped_not_linked
+      - tags_detached
+      type: object
+    RecommendationItem:
+      description: "One recommendation item, in the shape GET /recommendations/{id}\
+        \ lists items"
+      example:
+        id: 6
+        recommendation_id: 1
+        recommendation_type: recommendation_type
+        category: category
+        title: title
+        description: description
+        priority: high
+        estimated_impact: estimated_impact
+        action_items:
+        - action_items
+        - action_items
+        source_refs:
+        - source_refs
+        - source_refs
+        status: active
+        status_changed_at: 2000-01-23T04:56:07.000+00:00
+        position: 5
+        metadata:
+          key: ""
+        created_at: 2000-01-23T04:56:07.000+00:00
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        resolved_source_refs:
+        - key: ""
+        - key: ""
+        unresolved_source_refs:
+        - unresolved_source_refs
+        - unresolved_source_refs
+      properties:
+        id:
+          type: integer
+        recommendation_id:
+          type: integer
+        recommendation_type:
+          type: string
+        category:
+          type: string
+        title:
+          type: string
+        description:
+          nullable: true
+          type: string
+        priority:
+          enum:
+          - high
+          - medium
+          - low
+          type: string
+        estimated_impact:
+          nullable: true
+          type: string
+        action_items:
+          items:
+            type: string
+          type: array
+        source_refs:
+          description: "Evidence codes (e.g. P1, C2) resolved in resolved_source_refs"
+          items:
+            type: string
+          type: array
+        status:
+          enum:
+          - active
+          - completed
+          - archived
+          type: string
+        status_changed_at:
+          format: date-time
+          nullable: true
+          type: string
+        position:
+          type: integer
+        metadata:
+          additionalProperties: true
+          type: object
+        created_at:
+          format: date-time
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+        resolved_source_refs:
+          description: "The evidence each source_refs code points to (prompt, citation\
+            \ or own page)"
+          items:
+            additionalProperties: true
+            type: object
+          type: array
+        unresolved_source_refs:
+          description: Present only when a code points to no stored evidence
+          items:
+            type: string
+          type: array
+      required:
+      - action_items
+      - category
+      - created_at
+      - id
+      - position
+      - priority
+      - recommendation_id
+      - recommendation_type
+      - source_refs
+      - status
+      - title
+      - updated_at
+      type: object
+    RecommendationItemUpdateResponse:
+      example:
+        project_id: 0
+        item:
+          id: 6
+          recommendation_id: 1
+          recommendation_type: recommendation_type
+          category: category
+          title: title
+          description: description
+          priority: high
+          estimated_impact: estimated_impact
+          action_items:
+          - action_items
+          - action_items
+          source_refs:
+          - source_refs
+          - source_refs
+          status: active
+          status_changed_at: 2000-01-23T04:56:07.000+00:00
+          position: 5
+          metadata:
+            key: ""
+          created_at: 2000-01-23T04:56:07.000+00:00
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          resolved_source_refs:
+          - key: ""
+          - key: ""
+          unresolved_source_refs:
+          - unresolved_source_refs
+          - unresolved_source_refs
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        item:
+          $ref: "#/components/schemas/RecommendationItem"
+        request_id:
+          type: string
+      required:
+      - item
+      - project_id
+      - request_id
+      type: object
+    PromptCategorization:
+      example:
+        id: 6
+        raw_input: raw_input
+        prompt_type: prompt_type
+        brand_kind: brand_kind
+        categorization_source: categorization_source
+        manually_categorized: true
+        categorized_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        raw_input:
+          type: string
+        prompt_type:
+          nullable: true
+          type: string
+        brand_kind:
+          nullable: true
+          type: string
+        categorization_source:
+          description: manual after an edit by hand; the prompt page's revert hands
+            it back to automatic categorization
+          nullable: true
+          type: string
+        manually_categorized:
+          type: boolean
+        categorized_at:
+          format: date-time
+          nullable: true
+          type: string
+      required:
+      - id
+      - manually_categorized
+      - raw_input
+      type: object
+    PromptCategorizationResponse:
+      example:
+        project_id: 0
+        prompt:
+          id: 6
+          raw_input: raw_input
+          prompt_type: prompt_type
+          brand_kind: brand_kind
+          categorization_source: categorization_source
+          manually_categorized: true
+          categorized_at: 2000-01-23T04:56:07.000+00:00
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        prompt:
+          $ref: "#/components/schemas/PromptCategorization"
+        request_id:
+          type: string
+      required:
+      - project_id
+      - prompt
+      - request_id
+      type: object
+    CustomReportDateRange:
+      example:
+        type: rolling
+        range_days: 2
+        from: 2000-01-23
+        to: 2000-01-23
+        label: label
+      properties:
+        type:
+          description: rolling (the last range_days days) or previous_month (the previous
+            calendar month)
+          enum:
+          - rolling
+          - previous_month
+          type: string
+        range_days:
+          description: Length of a rolling window; null for previous_month
+          nullable: true
+          type: integer
+        from:
+          description: First day of the window as of now (detail only)
+          format: date
+          type: string
+        to:
+          description: Last day of the window as of now (detail only)
+          format: date
+          type: string
+        label:
+          description: The window as the report shows it (detail only)
+          type: string
+      required:
+      - range_days
+      - type
+      type: object
+    CustomReportSchedule:
+      example:
+        enabled: true
+        day_of_week: 7
+        hour: 9
+        timezone: timezone
+      properties:
+        enabled:
+          type: boolean
+        day_of_week:
+          description: 0 (Sunday) to 6 (Saturday)
+          nullable: true
+          type: integer
+        hour:
+          nullable: true
+          type: integer
+        timezone:
+          nullable: true
+          type: string
+      required:
+      - enabled
+      type: object
+    CustomReportWidgetRef:
+      example:
+        key: key
+        label: label
+        kind: kpi_grid
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        kind:
+          enum:
+          - kpi_grid
+          - timeseries
+          - donut
+          - bar
+          - table
+          type: string
+      required:
+      - key
+      - kind
+      - label
+      type: object
+    CustomReportSummary:
+      example:
+        id: 5
+        name: name
+        date_range:
+          type: rolling
+          range_days: 2
+          from: 2000-01-23
+          to: 2000-01-23
+          label: label
+        schedule:
+          enabled: true
+          day_of_week: 7
+          hour: 9
+          timezone: timezone
+        recipients_count: 3
+        published: true
+        public_link_active: true
+        password_protected: true
+        portal_only: true
+        widget_count: 2
+        widgets:
+        - key: key
+          label: label
+          kind: kpi_grid
+        - key: key
+          label: label
+          kind: kpi_grid
+        last_sent_at: 2000-01-23T04:56:07.000+00:00
+        created_at: 2000-01-23T04:56:07.000+00:00
+        updated_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        date_range:
+          $ref: "#/components/schemas/CustomReportDateRange"
+        schedule:
+          $ref: "#/components/schemas/CustomReportSchedule"
+        recipients_count:
+          type: integer
+        published:
+          description: Whether the shared link is published
+          type: boolean
+        public_link_active:
+          description: Whether the shared link opens (published and not made inside
+            a client portal)
+          type: boolean
+        password_protected:
+          type: boolean
+        portal_only:
+          description: "Made inside a client portal, so it cannot be shared or emailed"
+          type: boolean
+        widget_count:
+          type: integer
+        widgets:
+          items:
+            $ref: "#/components/schemas/CustomReportWidgetRef"
+          type: array
+        last_sent_at:
+          description: "When the report was last emailed, on its schedule or with\
+            \ Send now"
+          format: date-time
+          nullable: true
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+      required:
+      - created_at
+      - date_range
+      - id
+      - name
+      - password_protected
+      - portal_only
+      - public_link_active
+      - published
+      - recipients_count
+      - schedule
+      - updated_at
+      - widget_count
+      - widgets
+      type: object
+    CustomReportsResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - properties:
+          data:
+            items:
+              $ref: "#/components/schemas/CustomReportSummary"
+            type: array
+        required:
+        - data
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        data:
+        - id: 5
+          name: name
+          date_range:
+            type: rolling
+            range_days: 2
+            from: 2000-01-23
+            to: 2000-01-23
+            label: label
+          schedule:
+            enabled: true
+            day_of_week: 7
+            hour: 9
+            timezone: timezone
+          recipients_count: 3
+          published: true
+          public_link_active: true
+          password_protected: true
+          portal_only: true
+          widget_count: 2
+          widgets:
+          - key: key
+            label: label
+            kind: kpi_grid
+          - key: key
+            label: label
+            kind: kpi_grid
+          last_sent_at: 2000-01-23T04:56:07.000+00:00
+          created_at: 2000-01-23T04:56:07.000+00:00
+          updated_at: 2000-01-23T04:56:07.000+00:00
+        - id: 5
+          name: name
+          date_range:
+            type: rolling
+            range_days: 2
+            from: 2000-01-23
+            to: 2000-01-23
+            label: label
+          schedule:
+            enabled: true
+            day_of_week: 7
+            hour: 9
+            timezone: timezone
+          recipients_count: 3
+          published: true
+          public_link_active: true
+          password_protected: true
+          portal_only: true
+          widget_count: 2
+          widgets:
+          - key: key
+            label: label
+            kind: kpi_grid
+          - key: key
+            label: label
+            kind: kpi_grid
+          last_sent_at: 2000-01-23T04:56:07.000+00:00
+          created_at: 2000-01-23T04:56:07.000+00:00
+          updated_at: 2000-01-23T04:56:07.000+00:00
+    CustomReportFilters:
+      example:
+        models:
+        - models
+        - models
+        collection_ids:
+        - 5
+        - 5
+        brand_kind: brand_kind
+        competitor_ids:
+        - 5
+        - 5
+      properties:
+        models:
+          description: AI models the report covers; empty means every enabled model
+          items:
+            type: string
+          type: array
+        collection_ids:
+          description: Tags the report is limited to; empty means every prompt
+          items:
+            type: integer
+          type: array
+        brand_kind:
+          nullable: true
+          type: string
+        competitor_ids:
+          description: "Competitors compared, the report's own choice or else the\
+            \ Overview selection"
+          items:
+            type: integer
+          type: array
+      required:
+      - collection_ids
+      - competitor_ids
+      - models
+      type: object
+    CustomReportBlock:
+      example:
+        type: widget
+        key: key
+        text: text
+      properties:
+        type:
+          enum:
+          - widget
+          - heading
+          - text
+          - separator
+          - image
+          type: string
+        key:
+          description: "The widget key, for a widget block"
+          nullable: true
+          type: string
+        text:
+          description: The text of a heading or text block
+          nullable: true
+          type: string
+      required:
+      - type
+      type: object
+    CustomReportWidget:
+      example:
+        key: key
+        label: label
+        kind: kpi_grid
+        width: half
+        available: true
+        data:
+          key: ""
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        kind:
+          enum:
+          - kpi_grid
+          - timeseries
+          - donut
+          - bar
+          - table
+          type: string
+        width:
+          enum:
+          - half
+          - full
+          type: string
+        available:
+          description: "false when the widget's data source (web analytics, agent\
+            \ analytics, owned media) is not connected"
+          type: boolean
+        data:
+          additionalProperties: true
+          description: "Shaped by kind. timeseries: series [{ name, color, points\
+            \ [{ date, value }] }]. donut: slices [{ name, value, color }]. bar: bars\
+            \ [{ label, value, color }]. kpi_grid: values and changes (null unless\
+            \ the report compares with the previous period). table: rows, one object\
+            \ per row. Null when the widget is not available."
+          nullable: true
+          type: object
+      required:
+      - available
+      - key
+      - kind
+      - label
+      - width
+      type: object
+    CustomReportDetailResponse:
+      example:
+        project_id: 0
+        id: 6
+        name: name
+        date_range:
+          type: rolling
+          range_days: 2
+          from: 2000-01-23
+          to: 2000-01-23
+          label: label
+        schedule:
+          enabled: true
+          day_of_week: 7
+          hour: 9
+          timezone: timezone
+        recipients_count: 1
+        published: true
+        public_link_active: true
+        password_protected: true
+        portal_only: true
+        last_sent_at: 2000-01-23T04:56:07.000+00:00
+        created_at: 2000-01-23T04:56:07.000+00:00
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        filters:
+          models:
+          - models
+          - models
+          collection_ids:
+          - 5
+          - 5
+          brand_kind: brand_kind
+          competitor_ids:
+          - 5
+          - 5
+        compare_previous: true
+        attach_excel: true
+        manual_send_available_at: 2000-01-23T04:56:07.000+00:00
+        generated_at: 2000-01-23T04:56:07.000+00:00
+        blocks:
+        - type: widget
+          key: key
+          text: text
+        - type: widget
+          key: key
+          text: text
+        widgets:
+        - key: key
+          label: label
+          kind: kpi_grid
+          width: half
+          available: true
+          data:
+            key: ""
+        - key: key
+          label: label
+          kind: kpi_grid
+          width: half
+          available: true
+          data:
+            key: ""
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        id:
+          type: integer
+        name:
+          type: string
+        date_range:
+          $ref: "#/components/schemas/CustomReportDateRange"
+        schedule:
+          $ref: "#/components/schemas/CustomReportSchedule"
+        recipients_count:
+          type: integer
+        published:
+          type: boolean
+        public_link_active:
+          type: boolean
+        password_protected:
+          type: boolean
+        portal_only:
+          type: boolean
+        last_sent_at:
+          description: "When the report was last emailed, on its schedule or with\
+            \ Send now"
+          format: date-time
+          nullable: true
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+        filters:
+          $ref: "#/components/schemas/CustomReportFilters"
+        compare_previous:
+          type: boolean
+        attach_excel:
+          type: boolean
+        manual_send_available_at:
+          description: When the 10-minute cooldown after the last manual send ends;
+            null when none is running
+          format: date-time
+          nullable: true
+          type: string
+        generated_at:
+          format: date-time
+          type: string
+        blocks:
+          description: The report layout in order
+          items:
+            $ref: "#/components/schemas/CustomReportBlock"
+          type: array
+        widgets:
+          items:
+            $ref: "#/components/schemas/CustomReportWidget"
+          type: array
+        request_id:
+          type: string
+      required:
+      - blocks
+      - date_range
+      - filters
+      - generated_at
+      - id
+      - name
+      - project_id
+      - request_id
+      - schedule
+      - widgets
+      type: object
+    CustomReportSendResponse:
+      example:
+        project_id: 0
+        id: 6
+        status: queued
+        recipients_count: 1
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        id:
+          type: integer
+        status:
+          enum:
+          - queued
+          type: string
+        recipients_count:
+          type: integer
+        request_id:
+          type: string
+      required:
+      - id
+      - project_id
+      - recipients_count
+      - request_id
+      - status
+      type: object
+    SentimentBreakdownBrand:
+      example:
+        type: project
+        id: 5
+        name: name
+      properties:
+        type:
+          enum:
+          - project
+          - competitor
+          - all
+          type: string
+        id:
+          description: The competitor id when type is competitor
+          nullable: true
+          type: integer
+        name:
+          nullable: true
+          type: string
+      required:
+      - type
+      type: object
+    SentimentBreakdownCounts:
+      properties:
+        mentions:
+          description: Analyzed mentions
+          type: integer
+        positive:
+          description: Positive and very positive
+          type: integer
+        neutral:
+          type: integer
+        negative:
+          description: Negative and very negative
+          type: integer
+        positive_pct:
+          type: number
+        neutral_pct:
+          type: number
+        negative_pct:
+          type: number
+        net_score:
+          description: "Positive minus negative, divided by mentions, times 100"
+          type: number
+      required:
+      - mentions
+      - negative
+      - negative_pct
+      - net_score
+      - neutral
+      - neutral_pct
+      - positive
+      - positive_pct
+      type: object
+    SentimentTopicRow:
+      allOf:
+      - properties:
+          topic:
+            type: string
+        required:
+        - topic
+        type: object
+      - $ref: "#/components/schemas/SentimentBreakdownCounts"
+      example:
+        topic: topic
+        mentions: 2
+        positive: 7
+        neutral: 9
+        negative: 3
+        positive_pct: 2.027123023002322
+        neutral_pct: 4.145608029883936
+        negative_pct: 7.386281948385884
+        net_score: 1.2315135367772556
+    SentimentTagRow:
+      allOf:
+      - properties:
+          tag_id:
+            type: integer
+          tag:
+            type: string
+        required:
+        - tag
+        - tag_id
+        type: object
+      - $ref: "#/components/schemas/SentimentBreakdownCounts"
+      example:
+        tag_id: 5
+        tag: tag
+        mentions: 2
+        positive: 7
+        neutral: 9
+        negative: 3
+        positive_pct: 2.027123023002322
+        neutral_pct: 4.145608029883936
+        negative_pct: 7.386281948385884
+        net_score: 1.2315135367772556
+    SentimentBreakdownEnvelope:
+      properties:
+        from:
+          format: date-time
+          type: string
+        to:
+          format: date-time
+          type: string
+        brand:
+          $ref: "#/components/schemas/SentimentBreakdownBrand"
+        sort:
+          type: string
+        sort_dir:
+          type: string
+      required:
+      - brand
+      - from
+      - sort
+      - sort_dir
+      - to
+      type: object
+    SentimentTopicsResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - $ref: "#/components/schemas/SentimentBreakdownEnvelope"
+      - properties:
+          data:
+            items:
+              $ref: "#/components/schemas/SentimentTopicRow"
+            type: array
+        required:
+        - data
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        from: 2000-01-23T04:56:07.000+00:00
+        to: 2000-01-23T04:56:07.000+00:00
+        brand:
+          type: project
+          id: 5
+          name: name
+        sort: sort
+        sort_dir: sort_dir
+        data:
+        - topic: topic
+          mentions: 2
+          positive: 7
+          neutral: 9
+          negative: 3
+          positive_pct: 2.027123023002322
+          neutral_pct: 4.145608029883936
+          negative_pct: 7.386281948385884
+          net_score: 1.2315135367772556
+        - topic: topic
+          mentions: 2
+          positive: 7
+          neutral: 9
+          negative: 3
+          positive_pct: 2.027123023002322
+          neutral_pct: 4.145608029883936
+          negative_pct: 7.386281948385884
+          net_score: 1.2315135367772556
+    SentimentTagsResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - $ref: "#/components/schemas/SentimentBreakdownEnvelope"
+      - properties:
+          data:
+            items:
+              $ref: "#/components/schemas/SentimentTagRow"
+            type: array
+        required:
+        - data
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        from: 2000-01-23T04:56:07.000+00:00
+        to: 2000-01-23T04:56:07.000+00:00
+        brand:
+          type: project
+          id: 5
+          name: name
+        sort: sort
+        sort_dir: sort_dir
+        data:
+        - tag_id: 5
+          tag: tag
+          mentions: 2
+          positive: 7
+          neutral: 9
+          negative: 3
+          positive_pct: 2.027123023002322
+          neutral_pct: 4.145608029883936
+          negative_pct: 7.386281948385884
+          net_score: 1.2315135367772556
+        - tag_id: 5
+          tag: tag
+          mentions: 2
+          positive: 7
+          neutral: 9
+          negative: 3
+          positive_pct: 2.027123023002322
+          neutral_pct: 4.145608029883936
+          negative_pct: 7.386281948385884
+          net_score: 1.2315135367772556
+    CompetitorSuggestion:
+      example:
+        id: id
+        domain: domain
+        brand_name: brand_name
+        matching_names:
+        - matching_names
+        - matching_names
+        mentions: 5
+        citations: 2
+      properties:
+        id:
+          description: The suggestion key (brands) or the id of one citing source
+            row (citations)
+          type: string
+        domain:
+          type: string
+        brand_name:
+          description: The proposed brand name; null for a cited domain
+          nullable: true
+          type: string
+        matching_names:
+          description: The names a tracked competitor would be matched by; empty for
+            a cited domain
+          items:
+            type: string
+          type: array
+        mentions:
+          description: "Answers naming the brand, when the discovery counted them\
+            \ (brands only)"
+          nullable: true
+          type: integer
+        citations:
+          description: Answers citing the domain (citations only)
+          nullable: true
+          type: integer
+      required:
+      - domain
+      - id
+      - matching_names
+      type: object
+    CompetitorDiscoveryState:
+      example:
+        status: status
+        loading: true
+        generated_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        status:
+          description: "The last discovery run: pending, processing, completed or\
+            \ failed; null when none ever ran"
+          nullable: true
+          type: string
+        loading:
+          description: A discovery run is in progress
+          type: boolean
+        generated_at:
+          format: date-time
+          nullable: true
+          type: string
+      required:
+      - loading
+      type: object
+    CompetitorSuggestionsResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - properties:
+          basis:
+            enum:
+            - brands
+            - citations
+            type: string
+          discovery:
+            $ref: "#/components/schemas/CompetitorDiscoveryState"
+          data:
+            items:
+              $ref: "#/components/schemas/CompetitorSuggestion"
+            type: array
+        required:
+        - basis
+        - data
+        - discovery
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        basis: brands
+        discovery:
+          status: status
+          loading: true
+          generated_at: 2000-01-23T04:56:07.000+00:00
+        data:
+        - id: id
+          domain: domain
+          brand_name: brand_name
+          matching_names:
+          - matching_names
+          - matching_names
+          mentions: 5
+          citations: 2
+        - id: id
+          domain: domain
+          brand_name: brand_name
+          matching_names:
+          - matching_names
+          - matching_names
+          mentions: 5
+          citations: 2
     ApiError:
       example:
         error:
@@ -19031,6 +24015,29 @@ components:
       required:
       - project_id
       type: object
+    updatePrompt_request:
+      properties:
+        project_id:
+          type: integer
+        prompt_type:
+          description: Search intent
+          enum:
+          - informational
+          - navigational
+          - commercial
+          - transactional
+          type: string
+        brand_kind:
+          description: "Brand focus: brand (your own brand or products), brand_other\
+            \ (competing brands), non_brand (generic)"
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+      required:
+      - project_id
+      type: object
     assignPromptTags_request:
       properties:
         project_id:
@@ -19049,6 +24056,26 @@ components:
           type: array
         create_missing:
           type: boolean
+      required:
+      - project_id
+      - prompt_ids
+      type: object
+    removePromptTags_request:
+      properties:
+        project_id:
+          type: integer
+        prompt_ids:
+          items:
+            type: integer
+          type: array
+        tag_ids:
+          items:
+            type: integer
+          type: array
+        tag_names:
+          items:
+            type: string
+          type: array
       required:
       - project_id
       - prompt_ids
@@ -19093,6 +24120,99 @@ components:
       - project_id
       - query
       type: object
+    updateOwnedMediaProfiles_request:
+      properties:
+        youtube_channel_url:
+          description: "The main YouTube channel URL (@handle, /channel/UC..., /c/...\
+            \ or /user/...). An empty string or null clears it"
+          nullable: true
+          type: string
+        app_store_url:
+          description: "The App Store app URL, with its id number. An empty string\
+            \ or null clears it"
+          nullable: true
+          type: string
+        google_play_url:
+          description: "The Google Play app URL, or its package name (com.acme.app).\
+            \ An empty string or null clears it"
+          nullable: true
+          type: string
+        instagram_profile_url:
+          description: The main Instagram profile URL. An empty string or null clears
+            it
+          nullable: true
+          type: string
+        facebook_page_url:
+          description: The main Facebook Page URL. An empty string or null clears
+            it
+          nullable: true
+          type: string
+        tiktok_profile_url:
+          description: The main TikTok profile URL. An empty string or null clears
+            it
+          nullable: true
+          type: string
+        linkedin_company_url:
+          description: The main LinkedIn Company Page URL (/company/...). An empty
+            string or null clears it
+          nullable: true
+          type: string
+        youtube_extra_profile_urls:
+          description: "FULL replacement list of extra YouTube channel URLs (at most\
+            \ 10); [] clears it"
+          items:
+            type: string
+          type: array
+        mobile_apps_extra_profile_urls:
+          description: "FULL replacement list of extra App Store or Google Play app\
+            \ URLs (at most 10); [] clears it"
+          items:
+            type: string
+          type: array
+        instagram_extra_profile_urls:
+          description: "FULL replacement list of extra Instagram profile URLs (at\
+            \ most 10); [] clears it"
+          items:
+            type: string
+          type: array
+        facebook_extra_profile_urls:
+          description: "FULL replacement list of extra Facebook Page URLs (at most\
+            \ 10); [] clears it"
+          items:
+            type: string
+          type: array
+        tiktok_extra_profile_urls:
+          description: "FULL replacement list of extra TikTok profile URLs (at most\
+            \ 10); [] clears it"
+          items:
+            type: string
+          type: array
+        linkedin_extra_profile_urls:
+          description: "FULL replacement list of extra LinkedIn Company Page URLs\
+            \ (at most 10); [] clears it"
+          items:
+            type: string
+          type: array
+        reddit_subreddits:
+          description: "FULL replacement list (at most 10) of subreddit names the\
+            \ brand owns, without r/; [] clears it"
+          items:
+            type: string
+          type: array
+        reddit_usernames:
+          description: "FULL replacement list (at most 25) of Reddit usernames the\
+            \ brand owns, without u/; [] clears it"
+          items:
+            type: string
+          type: array
+      type: object
+    sendCustomReport_request:
+      properties:
+        project_id:
+          type: integer
+      required:
+      - project_id
+      type: object
     launchRecommendations_request:
       properties:
         project_id:
@@ -19107,6 +24227,21 @@ components:
           type: string
       required:
       - project_id
+      type: object
+    updateRecommendationItem_request:
+      properties:
+        project_id:
+          type: integer
+        status:
+          description: "completed, archived, or active to restore the item"
+          enum:
+          - active
+          - completed
+          - archived
+          type: string
+      required:
+      - project_id
+      - status
       type: object
     createTechnicalGeoReports_request:
       properties:
@@ -20418,6 +25553,64 @@ components:
           nullable: true
           type: integer
       type: object
+    OwnedMediaPlatformRollup_weekly_inner:
+      example:
+        week: 2000-01-23
+        citations: 1
+      properties:
+        week:
+          format: date
+          type: string
+        citations:
+          type: integer
+      type: object
+    OwnedMediaSummaryResponse_previous:
+      description: The period of the same length that ends just before from
+      example:
+        from: 2000-01-23T04:56:07.000+00:00
+        to: 2000-01-23T04:56:07.000+00:00
+        kpis:
+          total: 6
+          yours: 1
+          your_profile: 5
+          your_content: 5
+          share_pct: 2.3021358869347655
+      properties:
+        from:
+          format: date-time
+          type: string
+        to:
+          format: date-time
+          type: string
+        kpis:
+          $ref: "#/components/schemas/OwnedMediaKpis"
+      type: object
+    OwnedMediaCitedItem_stats:
+      description: The counts the platform reports for the item; absent keys are unknown
+      example:
+        citations: 6
+        likes: 1
+        comments: 5
+        views: 5
+        followers: 2
+        unique_posts: 7
+        unique_videos: 9
+      properties:
+        citations:
+          type: integer
+        likes:
+          type: integer
+        comments:
+          type: integer
+        views:
+          type: integer
+        followers:
+          type: integer
+        unique_posts:
+          type: integer
+        unique_videos:
+          type: integer
+      type: object
     GeoAuditRunDetail_allOf_result_data:
       description: "The full report of the run, in the shape of the matching technical\
         \ GEO report type"
@@ -20701,6 +25894,124 @@ components:
         position:
           description: Impression-weighted average position
           type: number
+      type: object
+    SuggestedPromptsAcceptResponse_accepted_inner:
+      example:
+        suggestion_id: 6
+        prompt_id: 1
+        collection_id: 5
+      properties:
+        suggestion_id:
+          type: integer
+        prompt_id:
+          type: integer
+        collection_id:
+          description: The tag the prompt was put in; null when no tag was given
+          nullable: true
+          type: integer
+      required:
+      - collection_id
+      - prompt_id
+      - suggestion_id
+      type: object
+    PromptGenerationResponse_params:
+      description: "The validated request the run uses, with the project's locale\
+        \ filled in"
+      example:
+        country_code: country_code
+        language_code: language_code
+        query: query
+        count: 6
+        competitor_id: 1
+        search_type: search_type
+        keywords:
+        - keywords
+        - keywords
+        source_country_code: source_country_code
+        source_language_code: source_language_code
+        min_words: 5
+        all_countries: true
+      properties:
+        country_code:
+          type: string
+        language_code:
+          type: string
+        query:
+          type: string
+        count:
+          type: integer
+        competitor_id:
+          type: integer
+        search_type:
+          type: string
+        keywords:
+          items:
+            type: string
+          type: array
+        source_country_code:
+          type: string
+        source_language_code:
+          type: string
+        min_words:
+          type: integer
+        all_countries:
+          type: boolean
+      type: object
+    PromptGenerationResponse_error:
+      description: Why a failed run failed
+      example:
+        code: code
+        message: message
+      nullable: true
+      properties:
+        code:
+          description: "ERR_GENERATION_FAILED, ERR_NOT_FOUND (no suggestions came\
+            \ back), ERR_QUOTA_EXCEEDED, or a Search Console error code"
+          type: string
+        message:
+          type: string
+      required:
+      - code
+      - message
+      type: object
+    PromptsImportRequest_rows_inner:
+      example:
+        prompt: prompt
+        country_code: country_code
+        language_code: language_code
+        tags:
+        - tags
+        - tags
+      properties:
+        prompt:
+          type: string
+        country_code:
+          description: ISO 3166-1 alpha-2 code or country name (default the project
+            country)
+          type: string
+        language_code:
+          description: ISO language code or language name (default the project language)
+          type: string
+        tags:
+          description: "Tag names for this prompt, created when missing"
+          items:
+            type: string
+          type: array
+      required:
+      - prompt
+      type: object
+    PromptsImportResponse_row_errors_inner:
+      example:
+        row: 7
+        error: error
+      properties:
+        row:
+          type: integer
+        error:
+          type: string
+      required:
+      - error
+      - row
       type: object
     ApiError_error:
       example:

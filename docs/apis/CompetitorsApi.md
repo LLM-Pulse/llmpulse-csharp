@@ -7,6 +7,7 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 | [**CreateCompetitor**](CompetitorsApi.md#createcompetitor) | **POST** /competitors | Add a competitor |
 | [**DeleteCompetitor**](CompetitorsApi.md#deletecompetitor) | **DELETE** /competitors/{id} | Delete a competitor |
 | [**GetCompetitorDetails**](CompetitorsApi.md#getcompetitordetails) | **GET** /dimensions/competitors/{id} | Competitor details |
+| [**ListCompetitorSuggestions**](CompetitorsApi.md#listcompetitorsuggestions) | **GET** /competitors/suggestions | List competitor suggestions |
 | [**ListCompetitors**](CompetitorsApi.md#listcompetitors) | **GET** /dimensions/competitors | List competitors |
 | [**UpdateCompetitor**](CompetitorsApi.md#updatecompetitor) | **PATCH** /competitors/{id} | Update a competitor |
 
@@ -119,6 +120,48 @@ Competitor details
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | Competitor details |  -  |
+
+[[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
+
+<a id="listcompetitorsuggestions"></a>
+# **ListCompetitorSuggestions**
+> CompetitorSuggestionsResponse ListCompetitorSuggestions (int projectId, string basis = null, string query = null, int page = null, int perPage = null, string output = null)
+
+List competitor suggestions
+
+The two lists of the Suggested tab of the Competitors page. `basis=brands` (default) returns the competing brands the AI discovery proposed that are not tracked or rejected yet, with the names it would match and, when counted, how many answers name it (`mentions`). `basis=citations` returns the domains AI answers cite most that are not your own or tracked yet, with how many answers cite each (`citations`). `discovery` tells whether a discovery run is still loading. Read-only: it never starts a discovery run, which the page starts from its Discover button. Add a suggestion with POST /competitors.
+
+
+### Parameters
+
+| Name | Type | Description | Notes |
+|------|------|-------------|-------|
+| **projectId** | **int** | Project ID |  |
+| **basis** | **string** |  | [optional] [default to brands] |
+| **query** | **string** | Only suggestions whose brand name or domain contains this text | [optional]  |
+| **page** | **int** |  | [optional] [default to 1] |
+| **perPage** | **int** |  | [optional] [default to 20] |
+| **output** | **string** | Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. | [optional]  |
+
+### Return type
+
+[**CompetitorSuggestionsResponse**](CompetitorSuggestionsResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | Paginated suggestions |  -  |
+| **422** | Invalid parameters |  -  |
 
 [[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
 

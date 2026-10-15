@@ -7,6 +7,7 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 | [**GetRecommendation**](RecommendationsApi.md#getrecommendation) | **GET** /recommendations/{id} | Get recommendation run with items |
 | [**LaunchRecommendations**](RecommendationsApi.md#launchrecommendations) | **POST** /recommendations | Launch a recommendations generation |
 | [**ListRecommendations**](RecommendationsApi.md#listrecommendations) | **GET** /recommendations | List recommendation runs |
+| [**UpdateRecommendationItem**](RecommendationsApi.md#updaterecommendationitem) | **PATCH** /recommendations/{id}/items/{item_id} | Complete, archive or restore a recommendation item |
 
 <a id="getrecommendation"></a>
 # **GetRecommendation**
@@ -119,6 +120,47 @@ List recommendation runs
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | Paginated recommendations |  -  |
+
+[[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
+
+<a id="updaterecommendationitem"></a>
+# **UpdateRecommendationItem**
+> RecommendationItemUpdateResponse UpdateRecommendationItem (int id, int itemId, UpdateRecommendationItemRequest updateRecommendationItemRequest)
+
+Complete, archive or restore a recommendation item
+
+Moves one item of a recommendation run between `active`, `completed` and `archived`, exactly like the complete, archive and restore buttons on the Recommendations page, and stamps `status_changed_at`. Returns the item in the shape `GET /recommendations/{id}` lists items. Requires a `read_write` scope API key and, for team members, create permission on Recommendations (the permission the page uses for these buttons).
+
+
+### Parameters
+
+| Name | Type | Description | Notes |
+|------|------|-------------|-------|
+| **id** | **int** | Recommendation run id |  |
+| **itemId** | **int** | Item id, from the items of GET /recommendations/{id} |  |
+| **updateRecommendationItemRequest** | [**UpdateRecommendationItemRequest**](UpdateRecommendationItemRequest.md) |  |  |
+
+### Return type
+
+[**RecommendationItemUpdateResponse**](RecommendationItemUpdateResponse.md)
+
+### Authorization
+
+[BearerAuth](../README.md#BearerAuth)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+
+### HTTP response details
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+| **200** | The updated item |  -  |
+| **403** | API key lacks write permission |  -  |
+| **404** | Resource not found |  -  |
+| **422** | Invalid parameters |  -  |
 
 [[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
 
