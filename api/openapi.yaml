@@ -9056,8 +9056,9 @@ paths:
         \ new main or extra profile is scraped in the background for its name and\
         \ avatar, listed in profile_scrapes_queued. The response is the GET payload\
         \ after the change. A team member needs the Owned Media create permission,\
-        \ and YouTube Intelligence create to change the YouTube channel. Requires\
-        \ the Growth plan or above and a `read_write` scope API key."
+        \ YouTube Intelligence create to change the YouTube channel, and Projects\
+        \ update to change the extra profile or Reddit lists. Requires the Growth\
+        \ plan or above and a `read_write` scope API key."
       operationId: updateOwnedMediaProfiles
       parameters:
       - description: Project ID
