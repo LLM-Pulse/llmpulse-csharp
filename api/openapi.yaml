@@ -2982,19 +2982,21 @@ paths:
     post:
       description: "Starts a suggestion run with one of the generators behind the\
         \ app's Add prompts wizards and answers 202 with the run. website writes suggestions\
-        \ from the scraped website (80% non-brand, 20% brand), keyword from a keyword\
-        \ or the project profile (optionally around a competitor), topic from a topic,\
-        \ reddit from Reddit discussions of a topic or brand, paa from Google People\
-        \ Also Ask (up to 5 keywords, counted against the account's 24-hour lookup\
-        \ allowance), reputational from brand reputation questions, translate from\
-        \ the project's prompts of another locale, search_console from the connected\
-        \ property's top queries of the last 28 days (Growth plan or above, ERR_PLAN_REQUIRED).\
-        \ The suggestions land in the Suggested prompts queue; poll GET /prompt_generations/{id},\
+        \ from the scraped website (80% non-brand, 20% brand; up to 100 per project,\
+        \ then ERR_LIMIT_REACHED), keyword from a keyword or the project profile (optionally\
+        \ around a competitor), topic from a topic, reddit from Reddit discussions\
+        \ of a topic or brand, paa from Google People Also Ask (up to 5 keywords,\
+        \ counted against the account's 24-hour lookup allowance), reputational from\
+        \ brand reputation questions, translate from the project's prompts of another\
+        \ locale, search_console from the connected property's top queries of the\
+        \ last 28 days (Growth plan or above, ERR_PLAN_REQUIRED). The suggestions\
+        \ land in the Suggested prompts queue; poll GET /prompt_generations/{id},\
         \ then accept the ones you want with POST /suggested_prompts/accept. Nothing\
         \ is tracked until accepted. The request is validated before the run starts,\
-        \ and refused with ERR_LIMIT_REACHED when the plan has no prompt slot left.\
-        \ Requires a `read_write` scope API key and, for team members, create access\
-        \ to Prompts."
+        \ and refused with ERR_LIMIT_REACHED when the plan has no prompt slot left,\
+        \ or ERR_QUOTA_EXCEEDED after 60 runs in an hour (the per-user prompt suggestion\
+        \ allowance, shared with project setup). Requires a `read_write` scope API\
+        \ key and, for team members, create access to Prompts."
       operationId: createPromptGeneration
       requestBody:
         content:
@@ -7036,11 +7038,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: "Upstream provider unavailable, retry after the number of seconds\
-            \ in the Retry-After header"
+            \ in the Retry-After header: Google's own value when it sent one, otherwise\
+            \ 900 after a quota error and 60 after an outage"
           headers:
             Retry-After:
-              description: "Seconds to wait before retrying: Google's own value when\
-                \ it sent one, otherwise 900 after a quota error and 60 after an outage"
+              description: Seconds to wait before retrying
               explode: false
               schema:
                 type: integer
@@ -7146,11 +7148,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: "Upstream provider unavailable, retry after the number of seconds\
-            \ in the Retry-After header"
+            \ in the Retry-After header: Google's own value when it sent one, otherwise\
+            \ 900 after a quota error and 60 after an outage"
           headers:
             Retry-After:
-              description: "Seconds to wait before retrying: Google's own value when\
-                \ it sent one, otherwise 900 after a quota error and 60 after an outage"
+              description: Seconds to wait before retrying
               explode: false
               schema:
                 type: integer
@@ -9749,11 +9751,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: "Upstream provider unavailable, retry after the number of seconds\
-            \ in the Retry-After header"
+            \ in the Retry-After header: Google's own value when it sent one, otherwise\
+            \ 900 after a quota error and 60 after an outage"
           headers:
             Retry-After:
-              description: "Seconds to wait before retrying: Google's own value when\
-                \ it sent one, otherwise 900 after a quota error and 60 after an outage"
+              description: Seconds to wait before retrying
               explode: false
               schema:
                 type: integer
@@ -9976,11 +9978,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: "Upstream provider unavailable, retry after the number of seconds\
-            \ in the Retry-After header"
+            \ in the Retry-After header: Google's own value when it sent one, otherwise\
+            \ 900 after a quota error and 60 after an outage"
           headers:
             Retry-After:
-              description: "Seconds to wait before retrying: Google's own value when\
-                \ it sent one, otherwise 900 after a quota error and 60 after an outage"
+              description: Seconds to wait before retrying
               explode: false
               schema:
                 type: integer
@@ -10239,11 +10241,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: "Upstream provider unavailable, retry after the number of seconds\
-            \ in the Retry-After header"
+            \ in the Retry-After header: Google's own value when it sent one, otherwise\
+            \ 900 after a quota error and 60 after an outage"
           headers:
             Retry-After:
-              description: "Seconds to wait before retrying: Google's own value when\
-                \ it sent one, otherwise 900 after a quota error and 60 after an outage"
+              description: Seconds to wait before retrying
               explode: false
               schema:
                 type: integer
@@ -10502,11 +10504,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: "Upstream provider unavailable, retry after the number of seconds\
-            \ in the Retry-After header"
+            \ in the Retry-After header: Google's own value when it sent one, otherwise\
+            \ 900 after a quota error and 60 after an outage"
           headers:
             Retry-After:
-              description: "Seconds to wait before retrying: Google's own value when\
-                \ it sent one, otherwise 900 after a quota error and 60 after an outage"
+              description: Seconds to wait before retrying
               explode: false
               schema:
                 type: integer
@@ -10775,11 +10777,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: "Upstream provider unavailable, retry after the number of seconds\
-            \ in the Retry-After header"
+            \ in the Retry-After header: Google's own value when it sent one, otherwise\
+            \ 900 after a quota error and 60 after an outage"
           headers:
             Retry-After:
-              description: "Seconds to wait before retrying: Google's own value when\
-                \ it sent one, otherwise 900 after a quota error and 60 after an outage"
+              description: Seconds to wait before retrying
               explode: false
               schema:
                 type: integer
@@ -11012,7 +11014,7 @@ paths:
             number of seconds in the Retry-After header
           headers:
             Retry-After:
-              description: Seconds until the report can be sent again
+              description: Seconds to wait before retrying
               explode: false
               schema:
                 type: integer
@@ -14885,11 +14887,11 @@ components:
           schema:
             $ref: "#/components/schemas/ApiError"
       description: "Upstream provider unavailable, retry after the number of seconds\
-        \ in the Retry-After header"
+        \ in the Retry-After header: Google's own value when it sent one, otherwise\
+        \ 900 after a quota error and 60 after an outage"
       headers:
         Retry-After:
-          description: "Seconds to wait before retrying: Google's own value when it\
-            \ sent one, otherwise 900 after a quota error and 60 after an outage"
+          description: Seconds to wait before retrying
           explode: false
           schema:
             type: integer
@@ -14922,7 +14924,7 @@ components:
         of seconds in the Retry-After header
       headers:
         Retry-After:
-          description: Seconds until the report can be sent again
+          description: Seconds to wait before retrying
           explode: false
           schema:
             type: integer
