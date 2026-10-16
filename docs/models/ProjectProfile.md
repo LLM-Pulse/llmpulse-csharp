@@ -18,6 +18,7 @@ Name | Type | Description | Notes
 **PrimaryProducts** | **List&lt;string&gt;** |  | [optional] 
 **BrandVoice** | **string** |  | [optional] 
 **Goals** | **string** |  | [optional] 
+**PromptLimit** | **int** | Maximum number of active prompts this project may hold; null when only the account quota applies | 
 
 [[Back to Model list]](../../README.md#documentation-for-models) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to README]](../../README.md)
 

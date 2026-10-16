@@ -12,7 +12,7 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 | [**ListLocales**](ProjectsApi.md#listlocales) | **GET** /dimensions/locales | List locales with data |
 | [**ListModels**](ProjectsApi.md#listmodels) | **GET** /dimensions/models | List models with data |
 | [**ListProjects**](ProjectsApi.md#listprojects) | **GET** /dimensions/projects | List projects |
-| [**UpdateProject**](ProjectsApi.md#updateproject) | **PATCH** /projects/{id} | Update a project profile (Brand Book) |
+| [**UpdateProject**](ProjectsApi.md#updateproject) | **PATCH** /projects/{id} | Update a project profile (Brand Book) or prompt limit |
 | [**UpdateProjectDraft**](ProjectsApi.md#updateprojectdraft) | **PATCH** /project_drafts/{id} | Submit a wizard step |
 
 <a id="createproject"></a>
@@ -139,7 +139,7 @@ void (empty response body)
 
 Project details
 
-Detailed info for one project: matching_names, additional_owned_domains, industry, business model, primary products, target audience, brand voice, locale, app store IDs, stats (incl. prompts_by_brand_kind counts) and data_coverage (models, countries and languages with data).
+Detailed info for one project: matching_names, additional_owned_domains, industry, business model, primary products, target audience, brand voice, locale, app store IDs, prompt_limit (the project's own prompt cap, null when none), stats (incl. prompts_by_brand_kind counts and prompts_available, what can still be added under the project and account limits) and data_coverage (models, countries and languages with data).
 
 
 ### Parameters
@@ -315,9 +315,9 @@ All projects accessible with your API key.
 # **UpdateProject**
 > ProjectUpdateResponse UpdateProject (int id, UpdateProjectRequest updateProjectRequest)
 
-Update a project profile (Brand Book)
+Update a project profile (Brand Book) or prompt limit
 
-Updates the project name and profile, the same fields as Project Settings: name, brand_name, description, industry, business_model (plus business_model_other when it is OTHER), target_audience, brand_voice, goals, primary_products, matching_names, and the additional owned domains (additional_owned_domains). Send only the fields to change; unknown fields are rejected, and a request is applied whole or not at all. All seven Brand Book fields feed every GEO Writer task and prompt suggestions; only industry, description, and target_audience help Recommendations. A matching_names change re-runs mention/citation matching over the project history in the background, and an additional_owned_domains change reprocesses the past answers that cite an added or removed domain (rematching=true); further edits are rejected while that runs. Only the account owner can send additional_owned_domains: a team member key gets ERR_INSUFFICIENT_PERMISSION and nothing is applied. Requires a `read_write` scope API key.
+Updates the project name and profile, the same fields as Project Settings: name, brand_name, description, industry, business_model (plus business_model_other when it is OTHER), target_audience, brand_voice, goals, primary_products, matching_names, the additional owned domains (additional_owned_domains) and the project prompt limit of Account Settings > Prompt Limits (prompt_limit). Send only the fields to change; unknown fields are rejected, and a request is applied whole or not at all. All seven Brand Book fields feed every GEO Writer task and prompt suggestions; only industry, description, and target_audience help Recommendations. A matching_names change re-runs mention/citation matching over the project history in the background, and an additional_owned_domains change reprocesses the past answers that cite an added or removed domain (rematching=true); further edits are rejected while that runs. Only the account owner can send additional_owned_domains, and only the account owner or a co-owner can send prompt_limit: a team member key gets ERR_INSUFFICIENT_PERMISSION, a key limited to some projects sending prompt_limit gets ERR_KEY_PROJECT_SCOPED, and nothing is applied. A prompt_limit alone is saved even while a recalculation runs. Requires a `read_write` scope API key.
 
 
 ### Parameters
@@ -345,7 +345,7 @@ Updates the project name and profile, the same fields as Project Settings: name,
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | Updated |  -  |
-| **403** | A write with a read-only key answers ERR_INSUFFICIENT_SCOPE. A team member whose permissions do not grant Projects update, or who sends additional_owned_domains, answers ERR_INSUFFICIENT_PERMISSION, with the same status |  -  |
+| **403** | A write with a read-only key answers ERR_INSUFFICIENT_SCOPE. A team member whose permissions do not grant Projects update, or who sends additional_owned_domains or prompt_limit, answers ERR_INSUFFICIENT_PERMISSION, and a key limited to some projects that sends prompt_limit answers ERR_KEY_PROJECT_SCOPED, with the same status |  -  |
 | **404** | Resource not found |  -  |
 | **422** | Invalid parameters |  -  |
 
