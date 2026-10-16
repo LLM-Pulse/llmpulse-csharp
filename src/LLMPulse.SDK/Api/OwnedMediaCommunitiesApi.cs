@@ -107,7 +107,7 @@ namespace LLMPulse.SDK.Api
         /// List owned-media citations
         /// </summary>
         /// <remarks>
-        /// Which owned-media content AI answers cite, by platform. &#x60;provider&#x60; is required. Each row carries a &#x60;yours&#x60; flag so you can compare your own presence against everyone else cited on the same platform. Video, post, channel and profile rows also carry their image (thumbnail_url or avatar_url, our cached copy where one exists), their average position in the answers and, on YouTube, the video id, the channel handle and URL, and the channel key that /dimensions/owned_media/citing_prompts accepts. view&#x3D;own_citations returns the raw citations of the connected profile only and stays empty until a profile is connected. For Reddit use /dimensions/reddit. Requires the Growth plan or above.
+        /// Which owned-media content AI answers cite, by platform. &#x60;provider&#x60; is required. Each row carries a &#x60;yours&#x60; flag so you can compare your own presence against everyone else cited on the same platform. Video, post, channel and profile rows also carry their image (thumbnail_url or avatar_url, our cached copy where one exists), their average position in the answers and, on YouTube, the video id, the channel handle and URL, and the channel key that /dimensions/owned_media/citing_prompts accepts. view&#x3D;own_citations returns the raw citations of the connected profile only and stays empty until a profile is connected. For Reddit use /dimensions/reddit. A team member also needs the YouTube Intelligence permission for provider&#x3D;youtube. Requires the Growth plan or above.
         /// </remarks>
         /// <exception cref="ApiException">Thrown when fails to make API call</exception>
         /// <param name="projectId">Project ID</param>
@@ -134,7 +134,7 @@ namespace LLMPulse.SDK.Api
         /// List owned-media citations
         /// </summary>
         /// <remarks>
-        /// Which owned-media content AI answers cite, by platform. &#x60;provider&#x60; is required. Each row carries a &#x60;yours&#x60; flag so you can compare your own presence against everyone else cited on the same platform. Video, post, channel and profile rows also carry their image (thumbnail_url or avatar_url, our cached copy where one exists), their average position in the answers and, on YouTube, the video id, the channel handle and URL, and the channel key that /dimensions/owned_media/citing_prompts accepts. view&#x3D;own_citations returns the raw citations of the connected profile only and stays empty until a profile is connected. For Reddit use /dimensions/reddit. Requires the Growth plan or above.
+        /// Which owned-media content AI answers cite, by platform. &#x60;provider&#x60; is required. Each row carries a &#x60;yours&#x60; flag so you can compare your own presence against everyone else cited on the same platform. Video, post, channel and profile rows also carry their image (thumbnail_url or avatar_url, our cached copy where one exists), their average position in the answers and, on YouTube, the video id, the channel handle and URL, and the channel key that /dimensions/owned_media/citing_prompts accepts. view&#x3D;own_citations returns the raw citations of the connected profile only and stays empty until a profile is connected. For Reddit use /dimensions/reddit. A team member also needs the YouTube Intelligence permission for provider&#x3D;youtube. Requires the Growth plan or above.
         /// </remarks>
         /// <param name="projectId">Project ID</param>
         /// <param name="provider">The platform to report on</param>
@@ -351,13 +351,19 @@ namespace LLMPulse.SDK.Api
     /// <summary>
     /// The <see cref="IListOwnedMediaApiResponse"/>
     /// </summary>
-    public interface IListOwnedMediaApiResponse : LLMPulse.SDK.Client.IApiResponse, IOk<LLMPulse.SDK.Model.OwnedMediaListResponse?>, IUnprocessableContent<LLMPulse.SDK.Model.ApiError?>
+    public interface IListOwnedMediaApiResponse : LLMPulse.SDK.Client.IApiResponse, IOk<LLMPulse.SDK.Model.OwnedMediaListResponse?>, IForbidden<LLMPulse.SDK.Model.ApiError?>, IUnprocessableContent<LLMPulse.SDK.Model.ApiError?>
     {
         /// <summary>
         /// Returns true if the response is 200 Ok
         /// </summary>
         /// <returns></returns>
         bool IsOk { get; }
+
+        /// <summary>
+        /// Returns true if the response is 403 Forbidden
+        /// </summary>
+        /// <returns></returns>
+        bool IsForbidden { get; }
 
         /// <summary>
         /// Returns true if the response is 422 UnprocessableContent
@@ -1548,7 +1554,7 @@ namespace LLMPulse.SDK.Api
         partial void OnErrorListOwnedMedia(ref bool suppressDefaultLogLocalVar, Exception exceptionLocalVar, string pathFormatLocalVar, string pathLocalVar, int projectId, string provider, Option<int> page, Option<int> perPage, Option<string> view, Option<string> store, Option<bool> owned, Option<string> model, Option<string> collectionId, Option<string> countryCode, Option<string> languageCode, Option<string> brandKind, Option<int> range, Option<DateTime> from, Option<DateTime> to, Option<string> output);
 
         /// <summary>
-        /// List owned-media citations Which owned-media content AI answers cite, by platform. &#x60;provider&#x60; is required. Each row carries a &#x60;yours&#x60; flag so you can compare your own presence against everyone else cited on the same platform. Video, post, channel and profile rows also carry their image (thumbnail_url or avatar_url, our cached copy where one exists), their average position in the answers and, on YouTube, the video id, the channel handle and URL, and the channel key that /dimensions/owned_media/citing_prompts accepts. view&#x3D;own_citations returns the raw citations of the connected profile only and stays empty until a profile is connected. For Reddit use /dimensions/reddit. Requires the Growth plan or above.
+        /// List owned-media citations Which owned-media content AI answers cite, by platform. &#x60;provider&#x60; is required. Each row carries a &#x60;yours&#x60; flag so you can compare your own presence against everyone else cited on the same platform. Video, post, channel and profile rows also carry their image (thumbnail_url or avatar_url, our cached copy where one exists), their average position in the answers and, on YouTube, the video id, the channel handle and URL, and the channel key that /dimensions/owned_media/citing_prompts accepts. view&#x3D;own_citations returns the raw citations of the connected profile only and stays empty until a profile is connected. For Reddit use /dimensions/reddit. A team member also needs the YouTube Intelligence permission for provider&#x3D;youtube. Requires the Growth plan or above.
         /// </summary>
         /// <param name="projectId">Project ID</param>
         /// <param name="provider">The platform to report on</param>
@@ -1581,7 +1587,7 @@ namespace LLMPulse.SDK.Api
         }
 
         /// <summary>
-        /// List owned-media citations Which owned-media content AI answers cite, by platform. &#x60;provider&#x60; is required. Each row carries a &#x60;yours&#x60; flag so you can compare your own presence against everyone else cited on the same platform. Video, post, channel and profile rows also carry their image (thumbnail_url or avatar_url, our cached copy where one exists), their average position in the answers and, on YouTube, the video id, the channel handle and URL, and the channel key that /dimensions/owned_media/citing_prompts accepts. view&#x3D;own_citations returns the raw citations of the connected profile only and stays empty until a profile is connected. For Reddit use /dimensions/reddit. Requires the Growth plan or above.
+        /// List owned-media citations Which owned-media content AI answers cite, by platform. &#x60;provider&#x60; is required. Each row carries a &#x60;yours&#x60; flag so you can compare your own presence against everyone else cited on the same platform. Video, post, channel and profile rows also carry their image (thumbnail_url or avatar_url, our cached copy where one exists), their average position in the answers and, on YouTube, the video id, the channel handle and URL, and the channel key that /dimensions/owned_media/citing_prompts accepts. view&#x3D;own_citations returns the raw citations of the connected profile only and stays empty until a profile is connected. For Reddit use /dimensions/reddit. A team member also needs the YouTube Intelligence permission for provider&#x3D;youtube. Requires the Growth plan or above.
         /// </summary>
         /// <exception cref="ApiException">Thrown when fails to make API call</exception>
         /// <param name="projectId">Project ID</param>
@@ -1802,6 +1808,44 @@ namespace LLMPulse.SDK.Api
                 } catch (Exception e)
                 {
                     OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)200);
+                }
+
+                return result != null;
+            }
+
+            /// <summary>
+            /// Returns true if the response is 403 Forbidden
+            /// </summary>
+            /// <returns></returns>
+            public bool IsForbidden => 403 == (int)StatusCode;
+
+            /// <summary>
+            /// Deserializes the response if the response is 403 Forbidden
+            /// </summary>
+            /// <returns></returns>
+            public LLMPulse.SDK.Model.ApiError? Forbidden()
+            {
+                // This logic may be modified with the AsModel.mustache template
+                return IsForbidden
+                    ? System.Text.Json.JsonSerializer.Deserialize<LLMPulse.SDK.Model.ApiError>(RawContent, _jsonSerializerOptions)
+                    : null;
+            }
+
+            /// <summary>
+            /// Returns true if the response is 403 Forbidden and the deserialized response is not null
+            /// </summary>
+            /// <param name="result"></param>
+            /// <returns></returns>
+            public bool TryForbidden([NotNullWhen(true)]out LLMPulse.SDK.Model.ApiError? result)
+            {
+                result = null;
+
+                try
+                {
+                    result = Forbidden();
+                } catch (Exception e)
+                {
+                    OnDeserializationErrorDefaultImplementation(e, (HttpStatusCode)403);
                 }
 
                 return result != null;

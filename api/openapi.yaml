@@ -7959,8 +7959,9 @@ paths:
         \ and, on YouTube, the video id, the channel handle and URL, and the channel\
         \ key that /dimensions/owned_media/citing_prompts accepts. view=own_citations\
         \ returns the raw citations of the connected profile only and stays empty\
-        \ until a profile is connected. For Reddit use /dimensions/reddit. Requires\
-        \ the Growth plan or above."
+        \ until a profile is connected. For Reddit use /dimensions/reddit. A team\
+        \ member also needs the YouTube Intelligence permission for provider=youtube.\
+        \ Requires the Growth plan or above."
       operationId: listOwnedMedia
       parameters:
       - description: Project ID
@@ -8156,6 +8157,21 @@ paths:
               schema:
                 $ref: "#/components/schemas/OwnedMediaListResponse"
           description: Paginated owned-media rows
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_PERMISSION
+                  message: Your team-member permissions do not include the youtube
+                    report.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "A plan below Growth answers ERR_PLAN_REQUIRED. A team member\
+            \ whose permissions do not grant Owned Media (or YouTube Intelligence\
+            \ for provider=youtube) answers ERR_INSUFFICIENT_PERMISSION, with the\
+            \ same status"
         "422":
           content:
             application/json:
