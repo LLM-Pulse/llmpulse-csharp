@@ -34,19 +34,19 @@ namespace LLMPulse.SDK.Model
         /// <summary>
         /// Initializes a new instance of the <see cref="ProjectDetailsAllOfStats" /> class.
         /// </summary>
-        /// <param name="promptsCount">Active prompts in the project</param>
-        /// <param name="promptsAvailable">Prompts that can still be added to this project, the lower of its free slots under prompt_limit and the prompts left in the account quota; null when neither caps it</param>
+        /// <param name="promptsCount">promptsCount</param>
         /// <param name="promptsByBrandKind">promptsByBrandKind</param>
         /// <param name="competitorsCount">competitorsCount</param>
         /// <param name="collectionsCount">collectionsCount</param>
+        /// <param name="promptsAvailable">How many prompts can still be added to this project now, the same number the Prompts page offers. The lower of the project&#39;s free slots under prompt_limit and the account&#39;s remaining prompts; 0 when either is full (a project over its limit keeps its prompts). Null when neither caps it</param>
         [JsonConstructor]
-        public ProjectDetailsAllOfStats(Option<int?> promptsCount = default, Option<int?> promptsAvailable = default, Option<ProjectDetailsAllOfStatsPromptsByBrandKind?> promptsByBrandKind = default, Option<int?> competitorsCount = default, Option<int?> collectionsCount = default)
+        public ProjectDetailsAllOfStats(Option<int?> promptsCount = default, Option<ProjectDetailsAllOfStatsPromptsByBrandKind?> promptsByBrandKind = default, Option<int?> competitorsCount = default, Option<int?> collectionsCount = default, Option<int?> promptsAvailable = default)
         {
             PromptsCountOption = promptsCount;
-            PromptsAvailableOption = promptsAvailable;
             PromptsByBrandKindOption = promptsByBrandKind;
             CompetitorsCountOption = competitorsCount;
             CollectionsCountOption = collectionsCount;
+            PromptsAvailableOption = promptsAvailable;
             OnCreated();
         }
 
@@ -60,25 +60,10 @@ namespace LLMPulse.SDK.Model
         public Option<int?> PromptsCountOption { get; private set; }
 
         /// <summary>
-        /// Active prompts in the project
+        /// Gets or Sets PromptsCount
         /// </summary>
-        /// <value>Active prompts in the project</value>
         [JsonPropertyName("prompts_count")]
         public int? PromptsCount { get { return this.PromptsCountOption.Value; } set { this.PromptsCountOption = new(value); } }
-
-        /// <summary>
-        /// Used to track the state of PromptsAvailable
-        /// </summary>
-        [JsonIgnore]
-        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
-        public Option<int?> PromptsAvailableOption { get; private set; }
-
-        /// <summary>
-        /// Prompts that can still be added to this project, the lower of its free slots under prompt_limit and the prompts left in the account quota; null when neither caps it
-        /// </summary>
-        /// <value>Prompts that can still be added to this project, the lower of its free slots under prompt_limit and the prompts left in the account quota; null when neither caps it</value>
-        [JsonPropertyName("prompts_available")]
-        public int? PromptsAvailable { get { return this.PromptsAvailableOption.Value; } set { this.PromptsAvailableOption = new(value); } }
 
         /// <summary>
         /// Used to track the state of PromptsByBrandKind
@@ -120,6 +105,20 @@ namespace LLMPulse.SDK.Model
         public int? CollectionsCount { get { return this.CollectionsCountOption.Value; } set { this.CollectionsCountOption = new(value); } }
 
         /// <summary>
+        /// Used to track the state of PromptsAvailable
+        /// </summary>
+        [JsonIgnore]
+        [global::System.ComponentModel.EditorBrowsable(global::System.ComponentModel.EditorBrowsableState.Never)]
+        public Option<int?> PromptsAvailableOption { get; private set; }
+
+        /// <summary>
+        /// How many prompts can still be added to this project now, the same number the Prompts page offers. The lower of the project&#39;s free slots under prompt_limit and the account&#39;s remaining prompts; 0 when either is full (a project over its limit keeps its prompts). Null when neither caps it
+        /// </summary>
+        /// <value>How many prompts can still be added to this project now, the same number the Prompts page offers. The lower of the project&#39;s free slots under prompt_limit and the account&#39;s remaining prompts; 0 when either is full (a project over its limit keeps its prompts). Null when neither caps it</value>
+        [JsonPropertyName("prompts_available")]
+        public int? PromptsAvailable { get { return this.PromptsAvailableOption.Value; } set { this.PromptsAvailableOption = new(value); } }
+
+        /// <summary>
         /// Returns the string presentation of the object
         /// </summary>
         /// <returns>String presentation of the object</returns>
@@ -128,10 +127,10 @@ namespace LLMPulse.SDK.Model
             StringBuilder sb = new StringBuilder();
             sb.Append("class ProjectDetailsAllOfStats {\n");
             sb.Append("  PromptsCount: ").Append(PromptsCount).Append("\n");
-            sb.Append("  PromptsAvailable: ").Append(PromptsAvailable).Append("\n");
             sb.Append("  PromptsByBrandKind: ").Append(PromptsByBrandKind).Append("\n");
             sb.Append("  CompetitorsCount: ").Append(CompetitorsCount).Append("\n");
             sb.Append("  CollectionsCount: ").Append(CollectionsCount).Append("\n");
+            sb.Append("  PromptsAvailable: ").Append(PromptsAvailable).Append("\n");
             sb.Append("}\n");
             return sb.ToString();
         }
@@ -180,10 +179,10 @@ namespace LLMPulse.SDK.Model
             JsonTokenType startingTokenType = utf8JsonReader.TokenType;
 
             Option<int?> promptsCount = default;
-            Option<int?> promptsAvailable = default;
             Option<ProjectDetailsAllOfStatsPromptsByBrandKind?> promptsByBrandKind = default;
             Option<int?> competitorsCount = default;
             Option<int?> collectionsCount = default;
+            Option<int?> promptsAvailable = default;
 
             while (utf8JsonReader.Read())
             {
@@ -203,9 +202,6 @@ namespace LLMPulse.SDK.Model
                         case "prompts_count":
                             promptsCount = new Option<int?>(utf8JsonReader.TokenType == JsonTokenType.Null ? (int?)null : utf8JsonReader.GetInt32());
                             break;
-                        case "prompts_available":
-                            promptsAvailable = new Option<int?>(utf8JsonReader.TokenType == JsonTokenType.Null ? (int?)null : utf8JsonReader.GetInt32());
-                            break;
                         case "prompts_by_brand_kind":
                             promptsByBrandKind = new Option<ProjectDetailsAllOfStatsPromptsByBrandKind?>(JsonSerializer.Deserialize<ProjectDetailsAllOfStatsPromptsByBrandKind>(ref utf8JsonReader, jsonSerializerOptions)!);
                             break;
@@ -214,6 +210,9 @@ namespace LLMPulse.SDK.Model
                             break;
                         case "collections_count":
                             collectionsCount = new Option<int?>(utf8JsonReader.TokenType == JsonTokenType.Null ? (int?)null : utf8JsonReader.GetInt32());
+                            break;
+                        case "prompts_available":
+                            promptsAvailable = new Option<int?>(utf8JsonReader.TokenType == JsonTokenType.Null ? (int?)null : utf8JsonReader.GetInt32());
                             break;
                         default:
                             break;
@@ -233,7 +232,7 @@ namespace LLMPulse.SDK.Model
             if (collectionsCount.IsSet && collectionsCount.Value == null)
                 throw new ArgumentNullException(nameof(collectionsCount), "Property is not nullable for class ProjectDetailsAllOfStats.");
 
-            return new ProjectDetailsAllOfStats(promptsCount, promptsAvailable, promptsByBrandKind, competitorsCount, collectionsCount);
+            return new ProjectDetailsAllOfStats(promptsCount, promptsByBrandKind, competitorsCount, collectionsCount, promptsAvailable);
         }
 
         /// <summary>
@@ -266,12 +265,6 @@ namespace LLMPulse.SDK.Model
             if (projectDetailsAllOfStats.PromptsCountOption.IsSet)
                 writer.WriteNumber("prompts_count", projectDetailsAllOfStats.PromptsCountOption.Value!.Value);
 
-            if (projectDetailsAllOfStats.PromptsAvailableOption.IsSet)
-                if (projectDetailsAllOfStats.PromptsAvailableOption.Value != null)
-                    writer.WriteNumber("prompts_available", projectDetailsAllOfStats.PromptsAvailableOption.Value!.Value);
-                else
-                    writer.WriteNull("prompts_available");
-
             if (projectDetailsAllOfStats.PromptsByBrandKindOption.IsSet)
             {
                 writer.WritePropertyName("prompts_by_brand_kind");
@@ -282,6 +275,12 @@ namespace LLMPulse.SDK.Model
 
             if (projectDetailsAllOfStats.CollectionsCountOption.IsSet)
                 writer.WriteNumber("collections_count", projectDetailsAllOfStats.CollectionsCountOption.Value!.Value);
+
+            if (projectDetailsAllOfStats.PromptsAvailableOption.IsSet)
+                if (projectDetailsAllOfStats.PromptsAvailableOption.Value != null)
+                    writer.WriteNumber("prompts_available", projectDetailsAllOfStats.PromptsAvailableOption.Value!.Value);
+                else
+                    writer.WriteNull("prompts_available");
         }
     }
 }

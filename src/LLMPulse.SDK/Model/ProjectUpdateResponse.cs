@@ -37,7 +37,7 @@ namespace LLMPulse.SDK.Model
         /// <param name="project">project</param>
         /// <param name="updatedFields">The fields the request sent</param>
         /// <param name="rematching">True when a matching_names or additional_owned_domains change started a background recalculation of past answers; further edits are rejected until it finishes</param>
-        /// <param name="note">What the change does to mention detection, citation ownership, historical numbers and the prompts the project can hold</param>
+        /// <param name="note">What the change does to mention detection, citation ownership and historical numbers, and, when prompt_limit was sent, how many prompts the project holds and how many more can be added</param>
         /// <param name="requestId">requestId</param>
         [JsonConstructor]
         public ProjectUpdateResponse(ProjectProfile project, List<string> updatedFields, bool rematching, string note, string requestId)
@@ -73,9 +73,9 @@ namespace LLMPulse.SDK.Model
         public bool Rematching { get; set; }
 
         /// <summary>
-        /// What the change does to mention detection, citation ownership, historical numbers and the prompts the project can hold
+        /// What the change does to mention detection, citation ownership and historical numbers, and, when prompt_limit was sent, how many prompts the project holds and how many more can be added
         /// </summary>
-        /// <value>What the change does to mention detection, citation ownership, historical numbers and the prompts the project can hold</value>
+        /// <value>What the change does to mention detection, citation ownership and historical numbers, and, when prompt_limit was sent, how many prompts the project holds and how many more can be added</value>
         [JsonPropertyName("note")]
         public string Note { get; set; }
 

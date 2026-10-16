@@ -18,7 +18,7 @@ Name | Type | Description | Notes
 **PrimaryProducts** | **List&lt;string&gt;** |  | [optional] 
 **BrandVoice** | **string** |  | [optional] 
 **Goals** | **string** |  | [optional] 
-**PromptLimit** | **int** | Maximum number of active prompts this project may hold; null when only the account quota applies | 
+**PromptLimit** | **int** | The most prompts this project can hold, set by the account owner or a co-owner (Account Settings &gt; Prompt Limits). Null when the project has no limit of its own; the account&#39;s plan allowance applies either way | 
 
 [[Back to Model list]](../../README.md#documentation-for-models) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to README]](../../README.md)
 

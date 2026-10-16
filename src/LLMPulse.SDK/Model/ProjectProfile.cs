@@ -47,7 +47,7 @@ namespace LLMPulse.SDK.Model
         /// <param name="primaryProducts">primaryProducts</param>
         /// <param name="brandVoice">brandVoice</param>
         /// <param name="goals">goals</param>
-        /// <param name="promptLimit">Maximum number of active prompts this project may hold; null when only the account quota applies</param>
+        /// <param name="promptLimit">The most prompts this project can hold, set by the account owner or a co-owner (Account Settings &gt; Prompt Limits). Null when the project has no limit of its own; the account&#39;s plan allowance applies either way</param>
         [JsonConstructor]
         public ProjectProfile(int id, string name, List<string> matchingNames, List<string> additionalOwnedDomains, Option<string?> brandName = default, Option<string?> description = default, Option<Object?> industry = default, Option<string?> businessModel = default, Option<string?> businessModelOther = default, Option<string?> targetAudience = default, Option<List<string>?> primaryProducts = default, Option<string?> brandVoice = default, Option<string?> goals = default, int? promptLimit = default)
         {
@@ -215,9 +215,9 @@ namespace LLMPulse.SDK.Model
         public string? Goals { get { return this.GoalsOption.Value; } set { this.GoalsOption = new(value); } }
 
         /// <summary>
-        /// Maximum number of active prompts this project may hold; null when only the account quota applies
+        /// The most prompts this project can hold, set by the account owner or a co-owner (Account Settings &gt; Prompt Limits). Null when the project has no limit of its own; the account&#39;s plan allowance applies either way
         /// </summary>
-        /// <value>Maximum number of active prompts this project may hold; null when only the account quota applies</value>
+        /// <value>The most prompts this project can hold, set by the account owner or a co-owner (Account Settings &gt; Prompt Limits). Null when the project has no limit of its own; the account&#39;s plan allowance applies either way</value>
         [JsonPropertyName("prompt_limit")]
         public int? PromptLimit { get; set; }
 

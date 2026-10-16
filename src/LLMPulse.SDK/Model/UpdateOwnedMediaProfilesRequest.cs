@@ -40,13 +40,13 @@ namespace LLMPulse.SDK.Model
         /// <param name="instagramProfileUrl">The main Instagram profile URL. An empty string or null clears it</param>
         /// <param name="facebookPageUrl">The main Facebook Page URL. An empty string or null clears it</param>
         /// <param name="tiktokProfileUrl">The main TikTok profile URL. An empty string or null clears it</param>
-        /// <param name="linkedinCompanyUrl">The main LinkedIn Company Page URL (/company/...). An empty string or null clears it</param>
+        /// <param name="linkedinCompanyUrl">The main LinkedIn page URL: a company (/company/...), school (/school/...) or showcase (/showcase/...) page. An empty string or null clears it</param>
         /// <param name="youtubeExtraProfileUrls">FULL replacement list of extra YouTube channel URLs (at most 10); [] clears it</param>
         /// <param name="mobileAppsExtraProfileUrls">FULL replacement list of extra App Store or Google Play app URLs (at most 10); [] clears it</param>
         /// <param name="instagramExtraProfileUrls">FULL replacement list of extra Instagram profile URLs (at most 10); [] clears it</param>
         /// <param name="facebookExtraProfileUrls">FULL replacement list of extra Facebook Page URLs (at most 10); [] clears it</param>
         /// <param name="tiktokExtraProfileUrls">FULL replacement list of extra TikTok profile URLs (at most 10); [] clears it</param>
-        /// <param name="linkedinExtraProfileUrls">FULL replacement list of extra LinkedIn Company Page URLs (at most 10); [] clears it</param>
+        /// <param name="linkedinExtraProfileUrls">FULL replacement list of extra LinkedIn company, school or showcase page URLs (at most 10); [] clears it</param>
         /// <param name="redditSubreddits">FULL replacement list (at most 10) of subreddit names the brand owns, without r/; [] clears it</param>
         /// <param name="redditUsernames">FULL replacement list (at most 25) of Reddit usernames the brand owns, without u/; [] clears it</param>
         [JsonConstructor]
@@ -164,9 +164,9 @@ namespace LLMPulse.SDK.Model
         public Option<string?> LinkedinCompanyUrlOption { get; private set; }
 
         /// <summary>
-        /// The main LinkedIn Company Page URL (/company/...). An empty string or null clears it
+        /// The main LinkedIn page URL: a company (/company/...), school (/school/...) or showcase (/showcase/...) page. An empty string or null clears it
         /// </summary>
-        /// <value>The main LinkedIn Company Page URL (/company/...). An empty string or null clears it</value>
+        /// <value>The main LinkedIn page URL: a company (/company/...), school (/school/...) or showcase (/showcase/...) page. An empty string or null clears it</value>
         [JsonPropertyName("linkedin_company_url")]
         public string? LinkedinCompanyUrl { get { return this.LinkedinCompanyUrlOption.Value; } set { this.LinkedinCompanyUrlOption = new(value); } }
 
@@ -248,9 +248,9 @@ namespace LLMPulse.SDK.Model
         public Option<List<string>?> LinkedinExtraProfileUrlsOption { get; private set; }
 
         /// <summary>
-        /// FULL replacement list of extra LinkedIn Company Page URLs (at most 10); [] clears it
+        /// FULL replacement list of extra LinkedIn company, school or showcase page URLs (at most 10); [] clears it
         /// </summary>
-        /// <value>FULL replacement list of extra LinkedIn Company Page URLs (at most 10); [] clears it</value>
+        /// <value>FULL replacement list of extra LinkedIn company, school or showcase page URLs (at most 10); [] clears it</value>
         [JsonPropertyName("linkedin_extra_profile_urls")]
         public List<string>? LinkedinExtraProfileUrls { get { return this.LinkedinExtraProfileUrlsOption.Value; } set { this.LinkedinExtraProfileUrlsOption = new(value); } }
 

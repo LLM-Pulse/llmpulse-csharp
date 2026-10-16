@@ -181,10 +181,7 @@ paths:
         \ two GEO audit quotas show only remaining and unlimited (the capacity the\
         \ key can still spend, without the account total), and the projects quota\
         \ is capped at the projects it reaches. tracking_frequency stays, as the cadence\
-        \ those projects' data is collected at. A project can also have its own prompt\
-        \ cap inside the account quota (Account Settings > Prompt Limits): GET /dimensions/projects/{id}\
-        \ returns it as prompt_limit, with stats.prompts_available, and PATCH /projects/{id}\
-        \ sets it."
+        \ those projects' data is collected at."
       operationId: getAccount
       responses:
         "200":
@@ -247,8 +244,9 @@ paths:
       description: "Detailed info for one project: matching_names, additional_owned_domains,\
         \ industry, business model, primary products, target audience, brand voice,\
         \ locale, app store IDs, prompt_limit (the project's own prompt cap, null\
-        \ when none), stats (incl. prompts_by_brand_kind counts and prompts_available,\
-        \ what can still be added under the project and account limits) and data_coverage\
+        \ without one), stats (incl. prompts_by_brand_kind counts and prompts_available,\
+        \ how many prompts can still be added: the lower of the project's free slots\
+        \ and the account's remaining prompts, null when neither caps it) and data_coverage\
         \ (models, countries and languages with data)."
       operationId: getProjectDetails
       parameters:
@@ -281,7 +279,7 @@ paths:
       tags:
       - Projects
       x-llms-description: "Detailed info for one project: matching names, locale,\
-        \ industry, app store IDs, stats."
+        \ industry, app store IDs, prompt limit, stats."
       x-mcp-tool: get_project_details
   /dimensions/models:
     get:
@@ -637,8 +635,7 @@ paths:
       description: "Updates the project name and profile, the same fields as Project\
         \ Settings: name, brand_name, description, industry, business_model (plus\
         \ business_model_other when it is OTHER), target_audience, brand_voice, goals,\
-        \ primary_products, matching_names, the additional owned domains (additional_owned_domains)\
-        \ and the project prompt limit of Account Settings > Prompt Limits (prompt_limit).\
+        \ primary_products, matching_names, and the additional owned domains (additional_owned_domains).\
         \ Send only the fields to change; unknown fields are rejected, and a request\
         \ is applied whole or not at all. All seven Brand Book fields feed every GEO\
         \ Writer task and prompt suggestions; only industry, description, and target_audience\
@@ -646,11 +643,16 @@ paths:
         \ over the project history in the background, and an additional_owned_domains\
         \ change reprocesses the past answers that cite an added or removed domain\
         \ (rematching=true); further edits are rejected while that runs. Only the\
-        \ account owner can send additional_owned_domains, and only the account owner\
-        \ or a co-owner can send prompt_limit: a team member key gets ERR_INSUFFICIENT_PERMISSION,\
-        \ a key limited to some projects sending prompt_limit gets ERR_KEY_PROJECT_SCOPED,\
-        \ and nothing is applied. A prompt_limit alone is saved even while a recalculation\
-        \ runs. Requires a `read_write` scope API key."
+        \ account owner can send additional_owned_domains: a team member key gets\
+        \ ERR_INSUFFICIENT_PERMISSION and nothing is applied. prompt_limit sets or\
+        \ (null) removes the project's own prompt cap, as in Account Settings > Prompt\
+        \ Limits. Only the account owner or a co-owner whose permissions grant Projects\
+        \ update can send it (Account Settings > Prompt Limits lets any co-owner change\
+        \ it; here a co-owner, like every team member, also needs Projects update):\
+        \ any other team member gets ERR_INSUFFICIENT_PERMISSION, and a key limited\
+        \ to some projects ERR_KEY_PROJECT_SCOPED, with nothing applied. A request\
+        \ that sends only prompt_limit is applied even while a rematch runs. Requires\
+        \ a `read_write` scope API key."
       operationId: updateProject
       parameters:
       - explode: false
@@ -684,10 +686,11 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: "A write with a read-only key answers ERR_INSUFFICIENT_SCOPE.\
-            \ A team member whose permissions do not grant Projects update, or who\
-            \ sends additional_owned_domains or prompt_limit, answers ERR_INSUFFICIENT_PERMISSION,\
-            \ and a key limited to some projects that sends prompt_limit answers ERR_KEY_PROJECT_SCOPED,\
-            \ with the same status"
+            \ A team member whose permissions do not grant Projects update (a co-owner\
+            \ included), who sends additional_owned_domains, or who sends prompt_limit\
+            \ without being a co-owner answers ERR_INSUFFICIENT_PERMISSION. A key\
+            \ limited to some projects that sends prompt_limit answers ERR_KEY_PROJECT_SCOPED.\
+            \ All with the same status, and nothing in the request is applied"
         "404":
           content:
             application/json:
@@ -710,14 +713,14 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Invalid parameters
-      summary: Update a project profile (Brand Book) or prompt limit
+      summary: Update a project profile (Brand Book)
       tags:
       - Projects
       x-llms-description: "Update the project profile / Brand Book (brand_name, description,\
         \ industry, business_model, target_audience, brand_voice, goals, primary_products,\
-        \ matching_names) and, account owner only, additional_owned_domains; the account\
-        \ owner or a co-owner can also set the project prompt_limit. A matching_names\
-        \ or additional_owned_domains change reprocesses past answers in the background."
+        \ matching_names), additional_owned_domains (account owner only) and prompt_limit\
+        \ (account owner or a co-owner with Projects update). A matching_names or\
+        \ additional_owned_domains change reprocesses past answers in the background."
       x-mcp-tool: update_project
       x-write: true
   /metrics/timeseries:
@@ -15077,10 +15080,10 @@ components:
             format: date-time
             type: string
           prompt_limit:
-            description: "Maximum number of active prompts this project may hold,\
-              \ set by the account owner or a co-owner in Account Settings > Prompt\
-              \ Limits; null when the project has no limit of its own and only the\
-              \ account quota applies"
+            description: "The most prompts this project can hold, set by the account\
+              \ owner or a co-owner (Account Settings > Prompt Limits). Null when\
+              \ the project has no limit of its own; the account's plan allowance\
+              \ applies either way"
             nullable: true
             type: integer
           stats:
@@ -15122,13 +15125,13 @@ components:
         prompt_limit: 6
         stats:
           prompts_count: 1
-          prompts_available: 5
           prompts_by_brand_kind:
             brand: 5
-            brand_other: 2
-            non_brand: 7
-          competitors_count: 9
-          collections_count: 3
+            brand_other: 5
+            non_brand: 2
+          competitors_count: 7
+          collections_count: 9
+          prompts_available: 3
         data_coverage:
           models:
           - chatgpt
@@ -15221,8 +15224,10 @@ components:
             type: string
           type: array
         prompt_limit:
-          description: Maximum number of active prompts this project may hold; null
-            when only the account quota applies
+          description: "The most prompts this project can hold, set by the account\
+            \ owner or a co-owner (Account Settings > Prompt Limits). Null when the\
+            \ project has no limit of its own; the account's plan allowance applies\
+            \ either way"
           nullable: true
           type: integer
       required:
@@ -15275,8 +15280,9 @@ components:
             rejected until it finishes
           type: boolean
         note:
-          description: "What the change does to mention detection, citation ownership,\
-            \ historical numbers and the prompts the project can hold"
+          description: "What the change does to mention detection, citation ownership\
+            \ and historical numbers, and, when prompt_limit was sent, how many prompts\
+            \ the project holds and how many more can be added"
           type: string
         request_id:
           type: string
@@ -23965,11 +23971,18 @@ components:
             type: string
           type: array
         prompt_limit:
-          description: "Maximum number of active prompts this project may hold, within\
-            \ the account prompt quota; null removes the project limit so it can use\
-            \ any prompts left in the account. A limit below the current count keeps\
-            \ every existing prompt and refuses new ones. Account owner or co-owner\
-            \ only; a key limited to some projects cannot send it"
+          description: "The most prompts this project can hold, a JSON integer from\
+            \ 1 to 2147483647; null removes the project's limit. A string, a decimal,\
+            \ 0 or a negative number is rejected with ERR_INVALID_PARAM. The account's\
+            \ plan allowance still applies, so the lower of the two wins (GET /dimensions/projects/{id}\
+            \ returns prompt_limit and stats.prompts_available). A limit below the\
+            \ current count keeps every prompt and refuses new ones until the project\
+            \ is under it; note says what the project can now hold. Account owner\
+            \ or a co-owner with Projects update permission only; a key limited to\
+            \ some projects answers ERR_KEY_PROJECT_SCOPED. The Swift, Kotlin, Dart\
+            \ and R clients leave a null field out of the request body, so they can\
+            \ set a limit but not remove one: remove it with a plain HTTP request\
+            \ that sends prompt_limit as null"
           maximum: 2147483647
           minimum: 1
           nullable: true
@@ -24209,8 +24222,9 @@ components:
           nullable: true
           type: string
         linkedin_company_url:
-          description: The main LinkedIn Company Page URL (/company/...). An empty
-            string or null clears it
+          description: "The main LinkedIn page URL: a company (/company/...), school\
+            \ (/school/...) or showcase (/showcase/...) page. An empty string or null\
+            \ clears it"
           nullable: true
           type: string
         youtube_extra_profile_urls:
@@ -24244,8 +24258,8 @@ components:
             type: string
           type: array
         linkedin_extra_profile_urls:
-          description: "FULL replacement list of extra LinkedIn Company Page URLs\
-            \ (at most 10); [] clears it"
+          description: "FULL replacement list of extra LinkedIn company, school or\
+            \ showcase page URLs (at most 10); [] clears it"
           items:
             type: string
           type: array
@@ -24835,8 +24849,8 @@ components:
       description: Prompt counts per brand focus
       example:
         brand: 5
-        brand_other: 2
-        non_brand: 7
+        brand_other: 5
+        non_brand: 2
       properties:
         brand:
           type: integer
@@ -24848,28 +24862,29 @@ components:
     ProjectDetails_allOf_stats:
       example:
         prompts_count: 1
-        prompts_available: 5
         prompts_by_brand_kind:
           brand: 5
-          brand_other: 2
-          non_brand: 7
-        competitors_count: 9
-        collections_count: 3
+          brand_other: 5
+          non_brand: 2
+        competitors_count: 7
+        collections_count: 9
+        prompts_available: 3
       properties:
         prompts_count:
-          description: Active prompts in the project
-          type: integer
-        prompts_available:
-          description: "Prompts that can still be added to this project, the lower\
-            \ of its free slots under prompt_limit and the prompts left in the account\
-            \ quota; null when neither caps it"
-          nullable: true
           type: integer
         prompts_by_brand_kind:
           $ref: "#/components/schemas/ProjectDetails_allOf_stats_prompts_by_brand_kind"
         competitors_count:
           type: integer
         collections_count:
+          type: integer
+        prompts_available:
+          description: "How many prompts can still be added to this project now, the\
+            \ same number the Prompts page offers. The lower of the project's free\
+            \ slots under prompt_limit and the account's remaining prompts; 0 when\
+            \ either is full (a project over its limit keeps its prompts). Null when\
+            \ neither caps it"
+          nullable: true
           type: integer
       type: object
     ProjectDetails_allOf_data_coverage:

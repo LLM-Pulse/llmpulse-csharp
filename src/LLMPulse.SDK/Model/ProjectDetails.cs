@@ -54,7 +54,7 @@ namespace LLMPulse.SDK.Model
         /// <param name="googlePlayId">googlePlayId</param>
         /// <param name="appStoreId">appStoreId</param>
         /// <param name="createdAt">createdAt</param>
-        /// <param name="promptLimit">Maximum number of active prompts this project may hold, set by the account owner or a co-owner in Account Settings &gt; Prompt Limits; null when the project has no limit of its own and only the account quota applies</param>
+        /// <param name="promptLimit">The most prompts this project can hold, set by the account owner or a co-owner (Account Settings &gt; Prompt Limits). Null when the project has no limit of its own; the account&#39;s plan allowance applies either way</param>
         /// <param name="stats">stats</param>
         /// <param name="dataCoverage">dataCoverage</param>
         /// <param name="searchConsole">searchConsole</param>
@@ -365,9 +365,9 @@ namespace LLMPulse.SDK.Model
         public Option<int?> PromptLimitOption { get; private set; }
 
         /// <summary>
-        /// Maximum number of active prompts this project may hold, set by the account owner or a co-owner in Account Settings &gt; Prompt Limits; null when the project has no limit of its own and only the account quota applies
+        /// The most prompts this project can hold, set by the account owner or a co-owner (Account Settings &gt; Prompt Limits). Null when the project has no limit of its own; the account&#39;s plan allowance applies either way
         /// </summary>
-        /// <value>Maximum number of active prompts this project may hold, set by the account owner or a co-owner in Account Settings &gt; Prompt Limits; null when the project has no limit of its own and only the account quota applies</value>
+        /// <value>The most prompts this project can hold, set by the account owner or a co-owner (Account Settings &gt; Prompt Limits). Null when the project has no limit of its own; the account&#39;s plan allowance applies either way</value>
         [JsonPropertyName("prompt_limit")]
         public int? PromptLimit { get { return this.PromptLimitOption.Value; } set { this.PromptLimitOption = new(value); } }
 
