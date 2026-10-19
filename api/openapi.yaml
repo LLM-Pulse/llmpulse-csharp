@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.64.0
+  version: 1.65.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -16655,6 +16655,9 @@ components:
         matching_names:
         - matching_names
         - matching_names
+        - matching_names
+        - matching_names
+        - matching_names
         prompts:
         - prompts
         - prompts
@@ -16683,9 +16686,15 @@ components:
           matching_names:
           - matching_names
           - matching_names
+          - matching_names
+          - matching_names
+          - matching_names
         - domain: domain
           brand_name: brand_name
           matching_names:
+          - matching_names
+          - matching_names
+          - matching_names
           - matching_names
           - matching_names
         owned_media:
@@ -16758,8 +16767,13 @@ components:
             type: string
           type: array
         matching_names:
+          description: Brand-name variants used to detect mentions. At most 50 names
+            of up to 100 characters each; a longer list or name is refused with ERR_INVALID_PARAM
+            (422) and nothing is created
           items:
+            maxLength: 100
             type: string
+          maxItems: 50
           type: array
         prompts:
           items:
@@ -23869,8 +23883,14 @@ components:
             type: string
           type: array
         matching_names:
+          description: "Brand-name variants used to detect mentions (details step).\
+            \ At most 50 names of up to 100 characters each; the step stores the list\
+            \ as sent, and finalize refuses a longer list or name with ERR_INVALID_PARAM\
+            \ (422)"
           items:
+            maxLength: 100
             type: string
+          maxItems: 50
           type: array
         external_identifier:
           type: string
@@ -23880,6 +23900,9 @@ components:
           maxItems: 100
           type: array
         competitors:
+          description: "Competitors step: objects {domain, brand_name, matching_names},\
+            \ capped by plan. Each competitor's matching_names takes at most 50 names\
+            \ of up to 100 characters, checked at finalize like POST /projects"
           items:
             type: object
           type: array
@@ -23951,9 +23974,13 @@ components:
           type: array
         matching_names:
           description: FULL replacement list of the brand-name variants used to detect
-            mentions; send every variant to keep
+            mentions; send every variant to keep. At most 50 names of up to 100 characters
+            each; a longer list or name is refused with ERR_INVALID_PARAM (422) and
+            nothing in the request is applied
           items:
+            maxLength: 100
             type: string
+          maxItems: 50
           type: array
         additional_owned_domains:
           description: "FULL replacement list (at most 10) of other domains the brand\
@@ -24034,8 +24061,14 @@ components:
             → openai.com)
           type: string
         matching_names:
+          description: "Extra names this competitor is matched by; brand_name is added\
+            \ automatically. At most 50 names in all, brand_name included, of up to\
+            \ 100 characters each; a longer list or name is refused with ERR_INVALID_PARAM\
+            \ (422)"
           items:
+            maxLength: 100
             type: string
+          maxItems: 50
           type: array
         citation_match_mode:
           default: domain
@@ -24066,8 +24099,14 @@ components:
             is accepted and normalised to its host.
           type: string
         matching_names:
+          description: "FULL replacement list of the names this competitor is matched\
+            \ by; brand_name is added automatically. At most 50 names in all, brand_name\
+            \ included, of up to 100 characters each; a longer list or name is refused\
+            \ with ERR_INVALID_PARAM (422) and nothing in the request is applied"
           items:
+            maxLength: 100
             type: string
+          maxItems: 50
           type: array
         color:
           description: "Hex color, e.g. #1a2b3c"
@@ -25216,14 +25255,22 @@ components:
         matching_names:
         - matching_names
         - matching_names
+        - matching_names
+        - matching_names
+        - matching_names
       properties:
         domain:
           type: string
         brand_name:
           type: string
         matching_names:
+          description: Names this competitor is matched by. At most 50 names of up
+            to 100 characters each; a longer list or name is refused with ERR_INVALID_PARAM
+            (422) and nothing is created
           items:
+            maxLength: 100
             type: string
+          maxItems: 50
           type: array
       required:
       - domain
