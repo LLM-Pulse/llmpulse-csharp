@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.65.0
+  version: 1.66.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -2927,10 +2927,16 @@ paths:
         \ project's) and tags, created when missing. Duplicates are skipped and existing\
         \ prompts still get the row's tags. The prompt limits are checked before anything\
         \ is written: when the new prompts would exceed the plan the call returns\
-        \ ERR_LIMIT_REACHED and imports nothing. Rows with an unknown country or language\
-        \ come back in row_errors. Responds 201 when it created prompts, 200 otherwise.\
-        \ Requires a `read_write` scope API key and, for team members, create access\
-        \ to Prompts."
+        \ ERR_LIMIT_REACHED and imports nothing. A row is skipped and comes back in\
+        \ row_errors when its country or language is unknown, when it would give a\
+        \ prompt more than 50 tags (rows repeating a prompt add up) or when its tags\
+        \ would take the request past 500 new tags. For a team member without create\
+        \ access to Tags, a row that needs a tag that does not exist yet is skipped\
+        \ and comes back in row_errors. For a team member without update access to\
+        \ Prompts, a row matching a prompt that already existed adds no tags to it,\
+        \ and comes back in row_errors when it would have added one. Responds 201\
+        \ when it created prompts, 200 otherwise. Requires a `read_write` scope API\
+        \ key and, for team members, create access to Prompts."
       operationId: importPrompts
       requestBody:
         content:
@@ -3864,7 +3870,10 @@ paths:
   /answers/{id}:
     get:
       description: "Full answer with mentions, citations, sentiments, sources, shopping_products,\
-        \ brand_entities, fan_out_queries. Pass `include_source_page_details=true`\
+        \ brand_entities, fan_out_queries. `sentiments` need the Growth plan or above\
+        \ and `shopping_products` the Scale plan or above; below those plans each\
+        \ is left out and listed in `plan_required_fields`, which is always present\
+        \ and empty when nothing is left out. Pass `include_source_page_details=true`\
         \ to nest page-cache metadata under each source."
       operationId: getAnswer
       parameters:
@@ -13993,7 +14002,10 @@ paths:
   /webhooks:
     get:
       description: "Lists active webhook subscriptions for the account, optionally\
-        \ filtered by project. Requires the Scale plan or above."
+        \ filtered by project. A read-only API key receives each `target_url` masked\
+        \ to its scheme, host and any non-default port followed by `/…`, because the\
+        \ full URL can let anyone post to the receiver; a `read_write` scope key receives\
+        \ the full URL. Requires the Scale plan or above."
       operationId: listWebhooks
       parameters:
       - description: Optional project filter
@@ -14062,13 +14074,19 @@ paths:
         \ header (HMAC-SHA256 of the raw body computed with the subscription secret).\
         \ Failed deliveries receive up to 5 attempts in total, including the first,\
         \ with backoff; subscriptions auto-disable after 20 consecutive failed deliveries.\
-        \ Idempotent for the same project + event + URL: re-posting returns the existing\
-        \ subscription, unless the API key or OAuth connection that created it was\
-        \ revoked; then it is replaced by a new subscription with a new secret. The\
-        \ response carries `secret` when it creates the subscription, and on a re-post\
-        \ only for the API key or OAuth connection that created it: any other credential\
-        \ gets the subscription without `secret`. Requires a `read_write` scope API\
-        \ key and the Scale plan or above."
+        \ While the account is below the Scale plan its subscriptions are kept but\
+        \ deliver nothing: no failed delivery is counted, none is disabled, and deliveries\
+        \ resume once the account is back on Scale or above, without resending the\
+        \ events from that period. Each delivery also checks that the API key that\
+        \ created the subscription still covers its project: an API key limited to\
+        \ some projects that loses the project stops the subscription for good. Idempotent\
+        \ for the same project + event + URL: re-posting returns the existing subscription,\
+        \ unless the API key or OAuth connection that created it was revoked, or that\
+        \ API key no longer covers the project; then it is replaced by a new subscription\
+        \ with a new secret. The response carries `secret` when it creates the subscription,\
+        \ and on a re-post only for the API key or OAuth connection that created it:\
+        \ any other credential gets the subscription without `secret`. Requires a\
+        \ `read_write` scope API key and the Scale plan or above."
       operationId: createWebhook
       requestBody:
         content:
@@ -16550,6 +16568,9 @@ components:
         locale:
           country_code: country_code
           language_code: language_code
+        plan_required_fields:
+        - plan_required_fields
+        - plan_required_fields
         app_url: https://openapi-generator.tech
         request_id: request_id
       properties:
@@ -16605,6 +16626,8 @@ components:
             type: object
           type: array
         sentiments:
+          description: Needs the Growth plan or above; left out below it and named
+            in plan_required_fields
           items:
             type: object
           type: array
@@ -16613,6 +16636,8 @@ components:
             type: object
           type: array
         shopping_products:
+          description: Needs the Scale plan or above; left out below it and named
+            in plan_required_fields
           items:
             type: object
           type: array
@@ -16626,6 +16651,13 @@ components:
           type: array
         locale:
           $ref: "#/components/schemas/AnswerDetails_locale"
+        plan_required_fields:
+          description: "The fields left out of this answer because the account's plan\
+            \ does not include them (sentiments below Growth, shopping_products below\
+            \ Scale). Always present, empty when nothing is left out"
+          items:
+            type: string
+          type: array
         app_url:
           description: "Opens this answer in the app. The link names its project,\
             \ so it opens there for any user with access to that project"
@@ -16633,6 +16665,8 @@ components:
           type: string
         request_id:
           type: string
+      required:
+      - plan_required_fields
       type: object
     ProjectCreateRequest:
       example:
@@ -22481,8 +22515,8 @@ components:
         created:
           type: integer
         duplicates:
-          description: Rows that matched an existing prompt (they still get the row's
-            tags)
+          description: "Rows that matched an existing prompt (they still get the row's\
+            \ tags, unless a team member lacks update access to Prompts)"
           type: integer
         tagged:
           description: New prompt-tag links
@@ -22490,7 +22524,8 @@ components:
         created_tags:
           type: integer
         row_errors:
-          description: "Rows that were skipped, by their index in rows"
+          description: "Rows that were skipped or whose tags were not added, by their\
+            \ index in rows"
           items:
             $ref: "#/components/schemas/PromptsImportResponse_row_errors_inner"
           type: array
@@ -24665,12 +24700,17 @@ components:
           - geo_audit_alert.triggered
           type: string
         target_url:
+          description: "The URL deliveries are sent to. A read-only API key receives\
+            \ only its scheme, host and any non-default port followed by `/…` (for\
+            \ example `https://hook.eu1.make.com/…`); a `read_write` scope key receives\
+            \ the full URL."
           type: string
         disabled:
           description: "True when the subscription receives no more events, including\
-            \ when the API key or OAuth connection that created it was revoked. Creating\
-            \ it again with the same project, event and URL replaces it with a new\
-            \ subscription and secret."
+            \ when the API key or OAuth connection that created it was revoked, or\
+            \ when that API key is limited to some projects and no longer covers the\
+            \ subscription's project. Creating it again with the same project, event\
+            \ and URL replaces it with a new subscription and secret."
           type: boolean
         failure_count:
           type: integer
@@ -24778,9 +24818,10 @@ components:
           type: string
         disabled:
           description: "True when the subscription receives no more events, including\
-            \ when the API key or OAuth connection that created it was revoked. Creating\
-            \ it again with the same project, event and URL replaces it with a new\
-            \ subscription and secret."
+            \ when the API key or OAuth connection that created it was revoked, or\
+            \ when that API key is limited to some projects and no longer covers the\
+            \ subscription's project. Creating it again with the same project, event\
+            \ and URL replaces it with a new subscription and secret."
           type: boolean
         failure_count:
           type: integer

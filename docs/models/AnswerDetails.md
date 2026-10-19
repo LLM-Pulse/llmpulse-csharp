@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**PlanRequiredFields** | **List&lt;string&gt;** | The fields left out of this answer because the account&#39;s plan does not include them (sentiments below Growth, shopping_products below Scale). Always present, empty when nothing is left out | 
 **Id** | **int** |  | [optional] 
 **PromptId** | **int** |  | [optional] 
 **PromptText** | **string** |  | [optional] 
@@ -19,9 +20,9 @@ Name | Type | Description | Notes
 **Citations** | **List&lt;Object&gt;** |  | [optional] 
 **CompetitorMentions** | **List&lt;Object&gt;** |  | [optional] 
 **CompetitorCitations** | **List&lt;Object&gt;** |  | [optional] 
-**Sentiments** | **List&lt;Object&gt;** |  | [optional] 
+**Sentiments** | **List&lt;Object&gt;** | Needs the Growth plan or above; left out below it and named in plan_required_fields | [optional] 
 **Sources** | **List&lt;Object&gt;** |  | [optional] 
-**ShoppingProducts** | **List&lt;Object&gt;** |  | [optional] 
+**ShoppingProducts** | **List&lt;Object&gt;** | Needs the Scale plan or above; left out below it and named in plan_required_fields | [optional] 
 **BrandEntities** | **List&lt;Object&gt;** |  | [optional] 
 **LocalBusinesses** | **List&lt;Object&gt;** |  | [optional] 
 **Locale** | [**AnswerDetailsLocale**](AnswerDetailsLocale.md) |  | [optional] 
