@@ -14,6 +14,7 @@ Name | Type | Description | Notes
 **Clicks** | **int** |  | [optional] 
 **Ctr** | **decimal** | 0..1 fraction | [optional] 
 **Position** | **decimal** | Impression-weighted average position | [optional] 
+**Property** | **string** | Present when grouped by property | [optional] 
 
 [[Back to Model list]](../../README.md#documentation-for-models) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to README]](../../README.md)
 

@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.67.0
+  version: 1.68.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -9573,25 +9573,110 @@ paths:
         \ model, subject, dimension and attribute, with score and reasoning."
       x-mcp-tool: get_study_report
       x-plan: reputation_access
+  /search_console/properties:
+    get:
+      description: "The Google Search Console properties connected to the project,\
+        \ up to max_properties, from one or more Google accounts, primary first. Each\
+        \ id is a value the property parameter of the other /search_console endpoints\
+        \ accepts: omit it for the primary property, pass one id, or a comma-separated\
+        \ list or all to combine several. type is domain (sc-domain:example.com, which\
+        \ counts every subdomain and protocol) or url_prefix. status reconnect_required\
+        \ means Google refused the stored access; reconnect the property in Preferences\
+        \ > Project Settings > Data Connections. An empty data list means the project\
+        \ has no Search Console connection. Requires the Growth plan or above."
+      operationId: listSearchConsoleProperties
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchConsolePropertiesResponse"
+          description: Search Console properties
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_REVOKED_API_KEY
+                  message: revoked_api_key
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Access forbidden
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+      summary: List Search Console properties (Growth+)
+      tags:
+      - Search Console
+      x-llms-description: "The Google Search Console properties connected to a project\
+        \ (up to 10, from one or more Google accounts), primary first: the values\
+        \ the property parameter of the other Search Console endpoints accepts (Growth+)."
+      x-mcp-tool: list_search_console_properties
+      x-plan: growth
   /search_console/summary:
     get:
       description: "Google Search Console headline totals (impressions, clicks, ctr\
         \ as a 0..1 fraction, average position) for the project over a date range.\
         \ Pass dimension=country, device, page, query or searchAppearance to also\
-        \ receive the breakdown aggregated over the range, capped by limit. With filters\
-        \ and no dimension, totals are the complete figure Google reports for that\
-        \ filter. Breakdown rows are capped by limit and by Google's 25,000-row maximum;\
-        \ breakdown_truncated: true means rows were left out. Query rows exclude anonymized\
-        \ queries, and page and searchAppearance rows are counted per page rather\
-        \ than per property, so breakdown rows can differ from the totals. Requires\
-        \ the project to have a connected Search Console property and the Growth plan\
-        \ or above; otherwise returns ERR_SEARCH_CONSOLE_NOT_CONNECTED or ERR_PLAN_REQUIRED.\
-        \ X-Search-Console-Backend identifies stored or live reads. Stored reads use\
-        \ synced data without contacting Google. Live reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED\
-        \ (403) for revoked Google access; reconnect the property in Preferences >\
-        \ Project Settings > Data Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM\
-        \ (503) when Google Search Console is unavailable or over quota; wait for\
-        \ the number of seconds in Retry-After before retrying."
+        \ receive the breakdown aggregated over the range, capped by limit, or dimension=property\
+        \ for one row per property read (with a property list or property=all). With\
+        \ filters and no dimension, totals are the complete figure Google reports\
+        \ for that filter. Breakdown rows are capped by limit and by Google's 25,000-row\
+        \ maximum; breakdown_truncated: true means rows were left out. Query rows\
+        \ exclude anonymized queries, and page and searchAppearance rows are counted\
+        \ per page rather than per property, so breakdown rows can differ from the\
+        \ totals. Requires the project to have a connected Search Console property\
+        \ and the Growth plan or above; otherwise returns ERR_SEARCH_CONSOLE_NOT_CONNECTED\
+        \ or ERR_PLAN_REQUIRED. X-Search-Console-Backend identifies stored or live\
+        \ reads. Stored reads use synced data without contacting Google. Live reads\
+        \ return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked Google access;\
+        \ reconnect the property in Preferences > Project Settings > Data Connections.\
+        \ They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search Console\
+        \ is unavailable or over quota; wait for the number of seconds in Retry-After\
+        \ before retrying."
       operationId: getSearchConsoleSummary
       parameters:
       - description: Project ID
@@ -9635,7 +9720,8 @@ paths:
         style: form
       - description: "Optional breakdown aggregated over the range. country and device\
           \ are lowercased; page and query keep the casing Google returns, because\
-          \ a page URL is case sensitive."
+          \ a page URL is case sensitive. property gives one row per property read\
+          \ (see the property parameter)."
         explode: true
         in: query
         name: dimension
@@ -9647,6 +9733,7 @@ paths:
           - page
           - query
           - searchAppearance
+          - property
           type: string
         style: form
       - description: "Maximum breakdown rows, sorted by impressions descending. Default\
@@ -9724,6 +9811,24 @@ paths:
           - auto
           - byPage
           - byProperty
+          type: string
+        style: form
+      - description: "Which Search Console properties to read; /search_console/properties\
+          \ lists them. Omit it for the primary property, or pass one property id\
+          \ (e.g. sc-domain:example.com) to read that one; both answer with property.\
+          \ A comma-separated list of ids, or all, combines several and answers with\
+          \ properties, excluded_properties and property_errors instead: excluded_properties\
+          \ are left out because another selected property already counts them (a\
+          \ URL-prefix property under a domain property), so no click is counted twice;\
+          \ property_errors are properties Google refused, left out of the figures\
+          \ and also named in the X-Search-Console-Property-Errors header. When Google\
+          \ refuses every property, the request fails as a single-property read would."
+        example: all
+        explode: true
+        in: query
+        name: property
+        required: false
+        schema:
           type: string
         style: form
       responses:
@@ -9806,9 +9911,11 @@ paths:
       - Search Console
       x-llms-description: "Google Search Console headline totals (impressions, clicks,\
         \ CTR, average position) for a date range, with an optional country, device,\
-        \ page, query or searchAppearance breakdown. With filters and no dimension\
-        \ the totals are the complete filtered figure; breakdown rows are capped and\
-        \ can differ from the totals. Requires a connected GSC property (Growth+)."
+        \ page, query, searchAppearance or property breakdown (property: one row per\
+        \ property read, with a property list or property=all). With filters and no\
+        \ dimension the totals are the complete filtered figure; breakdown rows are\
+        \ capped and can differ from the totals. Requires a connected GSC property\
+        \ (Growth+)."
       x-mcp-tool: get_search_console_summary
       x-plan: growth
   /search_console/timeseries:
@@ -9951,6 +10058,24 @@ paths:
           - auto
           - byPage
           - byProperty
+          type: string
+        style: form
+      - description: "Which Search Console properties to read; /search_console/properties\
+          \ lists them. Omit it for the primary property, or pass one property id\
+          \ (e.g. sc-domain:example.com) to read that one; both answer with property.\
+          \ A comma-separated list of ids, or all, combines several and answers with\
+          \ properties, excluded_properties and property_errors instead: excluded_properties\
+          \ are left out because another selected property already counts them (a\
+          \ URL-prefix property under a domain property), so no click is counted twice;\
+          \ property_errors are properties Google refused, left out of the figures\
+          \ and also named in the X-Search-Console-Property-Errors header. When Google\
+          \ refuses every property, the request fails as a single-property read would."
+        example: all
+        explode: true
+        in: query
+        name: property
+        required: false
+        schema:
           type: string
         style: form
       responses:
@@ -10216,6 +10341,24 @@ paths:
           - byProperty
           type: string
         style: form
+      - description: "Which Search Console properties to read; /search_console/properties\
+          \ lists them. Omit it for the primary property, or pass one property id\
+          \ (e.g. sc-domain:example.com) to read that one; both answer with property.\
+          \ A comma-separated list of ids, or all, combines several and answers with\
+          \ properties, excluded_properties and property_errors instead: excluded_properties\
+          \ are left out because another selected property already counts them (a\
+          \ URL-prefix property under a domain property), so no click is counted twice;\
+          \ property_errors are properties Google refused, left out of the figures\
+          \ and also named in the X-Search-Console-Property-Errors header. When Google\
+          \ refuses every property, the request fails as a single-property read would."
+        example: all
+        explode: true
+        in: query
+        name: property
+        required: false
+        schema:
+          type: string
+        style: form
       responses:
         "200":
           content:
@@ -10479,6 +10622,24 @@ paths:
           - byProperty
           type: string
         style: form
+      - description: "Which Search Console properties to read; /search_console/properties\
+          \ lists them. Omit it for the primary property, or pass one property id\
+          \ (e.g. sc-domain:example.com) to read that one; both answer with property.\
+          \ A comma-separated list of ids, or all, combines several and answers with\
+          \ properties, excluded_properties and property_errors instead: excluded_properties\
+          \ are left out because another selected property already counts them (a\
+          \ URL-prefix property under a domain property), so no click is counted twice;\
+          \ property_errors are properties Google refused, left out of the figures\
+          \ and also named in the X-Search-Console-Property-Errors header. When Google\
+          \ refuses every property, the request fails as a single-property read would."
+        example: all
+        explode: true
+        in: query
+        name: property
+        required: false
+        schema:
+          type: string
+        style: form
       responses:
         "200":
           content:
@@ -10565,18 +10726,18 @@ paths:
   /search_console/rows:
     get:
       description: "Google Search Console rows grouped by 1 to 3 dimensions (date,\
-        \ country, device, page, query, searchAppearance) over a date range, each\
-        \ row carrying its dimension values as fields plus impressions, clicks, ctr\
-        \ (0..1) and position, ranked by impressions, clicks, ctr or position, paginated.\
-        \ Google ranks rows by clicks and returns at most 25,000 per request (truncated:\
-        \ true when reached); start_row moves that window. Query rows exclude anonymized\
-        \ queries, so rows add up to less than the summary totals. Requires a connected\
-        \ Search Console property (Growth+) and live reads: stored reads return ERR_INVALID_PARAM.\
-        \ Live reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked Google\
-        \ access and ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search Console\
-        \ is unavailable or over quota; wait for the number of seconds in Retry-After\
-        \ before retrying. A combination Google refuses comes back as ERR_INVALID_PARAM\
-        \ with its reason."
+        \ country, device, page, query, searchAppearance, property) over a date range,\
+        \ each row carrying its dimension values as fields plus impressions, clicks,\
+        \ ctr (0..1) and position, ranked by impressions, clicks, ctr or position,\
+        \ paginated. Google ranks rows by clicks and returns at most 25,000 per request\
+        \ (truncated: true when reached); start_row moves that window. Query rows\
+        \ exclude anonymized queries, so rows add up to less than the summary totals.\
+        \ Requires a connected Search Console property (Growth+) and live reads: stored\
+        \ reads return ERR_INVALID_PARAM. Live reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED\
+        \ (403) for revoked Google access and ERR_SEARCH_CONSOLE_UPSTREAM (503) when\
+        \ Google Search Console is unavailable or over quota; wait for the number\
+        \ of seconds in Retry-After before retrying. A combination Google refuses\
+        \ comes back as ERR_INVALID_PARAM with its reason."
       operationId: getSearchConsoleRows
       parameters:
       - description: Project ID
@@ -10588,8 +10749,9 @@ paths:
           type: integer
         style: form
       - description: "Comma-separated dimensions to group by, 1 to 3 of date, country,\
-          \ device, page, query, searchAppearance. Each becomes a field of every row;\
-          \ country and device values are lowercase."
+          \ device, page, query, searchAppearance, property. Each becomes a field\
+          \ of every row; country and device values are lowercase. property is the\
+          \ Search Console property the row comes from (see the property parameter)."
         example: "page,query"
         explode: true
         in: query
@@ -10750,6 +10912,24 @@ paths:
           - auto
           - byPage
           - byProperty
+          type: string
+        style: form
+      - description: "Which Search Console properties to read; /search_console/properties\
+          \ lists them. Omit it for the primary property, or pass one property id\
+          \ (e.g. sc-domain:example.com) to read that one; both answer with property.\
+          \ A comma-separated list of ids, or all, combines several and answers with\
+          \ properties, excluded_properties and property_errors instead: excluded_properties\
+          \ are left out because another selected property already counts them (a\
+          \ URL-prefix property under a domain property), so no click is counted twice;\
+          \ property_errors are properties Google refused, left out of the figures\
+          \ and also named in the X-Search-Console-Property-Errors header. When Google\
+          \ refuses every property, the request fails as a single-property read would."
+        example: all
+        explode: true
+        in: query
+        name: property
+        required: false
+        schema:
           type: string
         style: form
       responses:
@@ -14410,6 +14590,25 @@ components:
         - month
         type: string
       style: form
+    GscProperty:
+      description: "Which Search Console properties to read; /search_console/properties\
+        \ lists them. Omit it for the primary property, or pass one property id (e.g.\
+        \ sc-domain:example.com) to read that one; both answer with property. A comma-separated\
+        \ list of ids, or all, combines several and answers with properties, excluded_properties\
+        \ and property_errors instead: excluded_properties are left out because another\
+        \ selected property already counts them (a URL-prefix property under a domain\
+        \ property), so no click is counted twice; property_errors are properties\
+        \ Google refused, left out of the figures and also named in the X-Search-Console-Property-Errors\
+        \ header. When Google refuses every property, the request fails as a single-property\
+        \ read would."
+      example: all
+      explode: true
+      in: query
+      name: property
+      required: false
+      schema:
+        type: string
+      style: form
     GscSearchType:
       description: "Which search surface to measure. Defaults to web. discover and\
         \ googleNews carry no query dimension, so Google rejects /search_console/queries\
@@ -15170,6 +15369,7 @@ components:
           status: connected
           property: property
           connect_url: https://openapi-generator.tech
+          properties_count: 2
         ai_traffic:
           status: connected
           provider: provider
@@ -21541,6 +21741,74 @@ components:
         name:
           type: string
       type: object
+    SearchConsoleExcludedProperty:
+      example:
+        id: id
+        name: name
+        covered_by: covered_by
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        covered_by:
+          description: The selected property that already counts this one
+          type: string
+      type: object
+    SearchConsolePropertyError:
+      example:
+        id: id
+        name: name
+        code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+        message: message
+        retry_after: 2
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        code:
+          enum:
+          - ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          - ERR_SEARCH_CONSOLE_UPSTREAM
+          type: string
+        message:
+          type: string
+        retry_after:
+          description: "Seconds to wait before retrying, for ERR_SEARCH_CONSOLE_UPSTREAM"
+          type: integer
+      type: object
+    SearchConsolePropertiesResponse:
+      example:
+        project_id: 0
+        max_properties: 6
+        data:
+        - id: id
+          name: name
+          primary: true
+          type: domain
+          status: connected
+          last_synced_at: 2000-01-23T04:56:07.000+00:00
+        - id: id
+          name: name
+          primary: true
+          type: domain
+          status: connected
+          last_synced_at: 2000-01-23T04:56:07.000+00:00
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        max_properties:
+          description: How many properties a project can connect
+          type: integer
+        data:
+          items:
+            $ref: "#/components/schemas/SearchConsolePropertiesResponse_data_inner"
+          type: array
+        request_id:
+          type: string
+      type: object
     SearchConsoleMetrics:
       example:
         impressions: 6
@@ -21587,6 +21855,29 @@ components:
           position: 3.616076749251911
         breakdown_truncated: true
         request_id: request_id
+        properties:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        excluded_properties:
+        - id: id
+          name: name
+          covered_by: covered_by
+        - id: id
+          name: name
+          covered_by: covered_by
+        property_errors:
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
       properties:
         project_id:
           type: integer
@@ -21599,8 +21890,9 @@ components:
           format: date
           type: string
         data_through:
-          description: "Latest date Google has published for the property (it lags\
-            \ 2-3 days). Later days are missing, not zero."
+          description: "Latest date Google has published for the property, or for\
+            \ every combined property (it lags 2-3 days). Later days are missing,\
+            \ not zero."
           format: date
           nullable: true
           type: string
@@ -21621,6 +21913,24 @@ components:
           type: boolean
         request_id:
           type: string
+        properties:
+          description: "With a list or all in the property parameter, the properties\
+            \ whose data the response holds (instead of property)"
+          items:
+            $ref: "#/components/schemas/SearchConsoleProperty"
+          type: array
+        excluded_properties:
+          description: "With a list or all, selected properties left out because another\
+            \ selected property already counts them"
+          items:
+            $ref: "#/components/schemas/SearchConsoleExcludedProperty"
+          type: array
+        property_errors:
+          description: "With a list or all, selected properties Google refused, left\
+            \ out of the figures"
+          items:
+            $ref: "#/components/schemas/SearchConsolePropertyError"
+          type: array
       type: object
     SearchConsoleTimeseriesResponse:
       example:
@@ -21644,6 +21954,29 @@ components:
           ctr: 5.962133916683182
           position: 5.637376656633329
         request_id: request_id
+        properties:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        excluded_properties:
+        - id: id
+          name: name
+          covered_by: covered_by
+        - id: id
+          name: name
+          covered_by: covered_by
+        property_errors:
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
       properties:
         project_id:
           type: integer
@@ -21656,8 +21989,9 @@ components:
           format: date
           type: string
         data_through:
-          description: "Latest date Google has published for the property (it lags\
-            \ 2-3 days). Later days are missing, not zero."
+          description: "Latest date Google has published for the property, or for\
+            \ every combined property (it lags 2-3 days). Later days are missing,\
+            \ not zero."
           format: date
           nullable: true
           type: string
@@ -21669,6 +22003,24 @@ components:
           type: array
         request_id:
           type: string
+        properties:
+          description: "With a list or all in the property parameter, the properties\
+            \ whose data the response holds (instead of property)"
+          items:
+            $ref: "#/components/schemas/SearchConsoleProperty"
+          type: array
+        excluded_properties:
+          description: "With a list or all, selected properties left out because another\
+            \ selected property already counts them"
+          items:
+            $ref: "#/components/schemas/SearchConsoleExcludedProperty"
+          type: array
+        property_errors:
+          description: "With a list or all, selected properties Google refused, left\
+            \ out of the figures"
+          items:
+            $ref: "#/components/schemas/SearchConsolePropertyError"
+          type: array
       type: object
     SearchConsoleListResponse:
       example:
@@ -21697,6 +22049,29 @@ components:
           ctr: 9.301444243932576
           position: 3.616076749251911
         request_id: request_id
+        properties:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        excluded_properties:
+        - id: id
+          name: name
+          covered_by: covered_by
+        - id: id
+          name: name
+          covered_by: covered_by
+        property_errors:
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
       properties:
         project_id:
           type: integer
@@ -21709,8 +22084,9 @@ components:
           format: date
           type: string
         data_through:
-          description: "Latest date Google has published for the property (it lags\
-            \ 2-3 days). Later days are missing, not zero."
+          description: "Latest date Google has published for the property, or for\
+            \ every combined property (it lags 2-3 days). Later days are missing,\
+            \ not zero."
           format: date
           nullable: true
           type: string
@@ -21736,6 +22112,24 @@ components:
           type: array
         request_id:
           type: string
+        properties:
+          description: "With a list or all in the property parameter, the properties\
+            \ whose data the response holds (instead of property)"
+          items:
+            $ref: "#/components/schemas/SearchConsoleProperty"
+          type: array
+        excluded_properties:
+          description: "With a list or all, selected properties left out because another\
+            \ selected property already counts them"
+          items:
+            $ref: "#/components/schemas/SearchConsoleExcludedProperty"
+          type: array
+        property_errors:
+          description: "With a list or all, selected properties Google refused, left\
+            \ out of the figures"
+          items:
+            $ref: "#/components/schemas/SearchConsolePropertyError"
+          type: array
       type: object
     SearchConsoleRowsResponse:
       example:
@@ -21766,6 +22160,7 @@ components:
           clicks: 7
           ctr: 9.301444243932576
           position: 3.616076749251911
+          property: property
         - date: 2000-01-23
           country: country
           device: device
@@ -21776,7 +22171,31 @@ components:
           clicks: 7
           ctr: 9.301444243932576
           position: 3.616076749251911
+          property: property
         request_id: request_id
+        properties:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        excluded_properties:
+        - id: id
+          name: name
+          covered_by: covered_by
+        - id: id
+          name: name
+          covered_by: covered_by
+        property_errors:
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
       properties:
         project_id:
           type: integer
@@ -21789,8 +22208,9 @@ components:
           format: date
           type: string
         data_through:
-          description: "Latest date Google has published for the property (it lags\
-            \ 2-3 days). Later days are missing, not zero."
+          description: "Latest date Google has published for the property, or for\
+            \ every combined property (it lags 2-3 days). Later days are missing,\
+            \ not zero."
           format: date
           nullable: true
           type: string
@@ -21822,6 +22242,24 @@ components:
           type: array
         request_id:
           type: string
+        properties:
+          description: "With a list or all in the property parameter, the properties\
+            \ whose data the response holds (instead of property)"
+          items:
+            $ref: "#/components/schemas/SearchConsoleProperty"
+          type: array
+        excluded_properties:
+          description: "With a list or all, selected properties left out because another\
+            \ selected property already counts them"
+          items:
+            $ref: "#/components/schemas/SearchConsoleExcludedProperty"
+          type: array
+        property_errors:
+          description: "With a list or all, selected properties Google refused, left\
+            \ out of the figures"
+          items:
+            $ref: "#/components/schemas/SearchConsolePropertyError"
+          type: array
       type: object
     TeamPermissions:
       additionalProperties:
@@ -22288,6 +22726,7 @@ components:
         source_language_code: source_language_code
         min_words: 5
         all_countries: false
+        property: property
       properties:
         project_id:
           type: integer
@@ -22358,6 +22797,10 @@ components:
           description: "search_console: include queries from every country instead\
             \ of country_code only"
           type: boolean
+        property:
+          description: "search_console: the property id to read queries from (GET\
+            \ /search_console/properties lists them); the primary property when omitted"
+          type: string
       required:
       - project_id
       - source
@@ -22382,6 +22825,7 @@ components:
           source_language_code: source_language_code
           min_words: 5
           all_countries: true
+          property: property
         created_at: 2000-01-23T04:56:07.000+00:00
         finished_at: 2000-01-23T04:56:07.000+00:00
         suggestions_count: 5
@@ -25023,15 +25467,18 @@ components:
           type: array
       type: object
     ProjectDetails_allOf_search_console:
-      description: "Google Search Console connection of the project. connected means\
-        \ the Search Console endpoints can answer; reconnect_required means Google\
-        \ refused the stored access, so the endpoints return ERR_SEARCH_CONSOLE_ACCESS_REVOKED\
-        \ until the property is reconnected at connect_url; not_connected means the\
-        \ endpoints return ERR_SEARCH_CONSOLE_NOT_CONNECTED."
+      description: "Google Search Console connection of the project, judged by its\
+        \ primary property. connected means the Search Console endpoints can answer;\
+        \ reconnect_required means Google refused the primary property's stored access,\
+        \ so reads without property return ERR_SEARCH_CONSOLE_ACCESS_REVOKED until\
+        \ it is reconnected at connect_url, while a property GET /search_console/properties\
+        \ lists as connected, or property=all, still answers; not_connected means\
+        \ the endpoints return ERR_SEARCH_CONSOLE_NOT_CONNECTED."
       example:
         status: connected
         property: property
         connect_url: https://openapi-generator.tech
+        properties_count: 2
       properties:
         status:
           enum:
@@ -25040,8 +25487,8 @@ components:
           - not_connected
           type: string
         property:
-          description: "The connected property (e.g. sc-domain:example.com), null\
-            \ when not connected"
+          description: "The primary property (e.g. sc-domain:example.com), null when\
+            \ not connected"
           nullable: true
           type: string
         connect_url:
@@ -25049,6 +25496,11 @@ components:
             (Preferences > Project Settings > Data Connections)
           format: uri
           type: string
+        properties_count:
+          description: Connected properties Google still accepts (reconnect_required
+            ones excluded); GET /search_console/properties lists every property with
+            its status
+          type: integer
       type: object
     ProjectDetails_allOf_ai_traffic:
       description: "Web analytics provider behind /metrics/ai_traffic and /web_analytics.\
@@ -26039,6 +26491,39 @@ components:
       - id
       - matching_names
       type: object
+    SearchConsolePropertiesResponse_data_inner:
+      example:
+        id: id
+        name: name
+        primary: true
+        type: domain
+        status: connected
+        last_synced_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          description: "Property id, the value the property parameter takes, e.g.\
+            \ sc-domain:example.com"
+          type: string
+        name:
+          type: string
+        primary:
+          description: The property read when the property parameter is omitted
+          type: boolean
+        type:
+          enum:
+          - domain
+          - url_prefix
+          type: string
+        status:
+          enum:
+          - connected
+          - reconnect_required
+          type: string
+        last_synced_at:
+          format: date-time
+          nullable: true
+          type: string
+      type: object
     SearchConsoleSummaryResponse_breakdown_inner:
       example:
         value: value
@@ -26116,6 +26601,7 @@ components:
         clicks: 7
         ctr: 9.301444243932576
         position: 3.616076749251911
+        property: property
       properties:
         date:
           format: date
@@ -26140,6 +26626,9 @@ components:
         position:
           description: Impression-weighted average position
           type: number
+        property:
+          description: Present when grouped by property
+          type: string
       type: object
     SuggestedPromptsAcceptResponse_accepted_inner:
       example:
@@ -26177,6 +26666,7 @@ components:
         source_language_code: source_language_code
         min_words: 5
         all_countries: true
+        property: property
       properties:
         country_code:
           type: string
@@ -26202,6 +26692,8 @@ components:
           type: integer
         all_countries:
           type: boolean
+        property:
+          type: string
       type: object
     PromptGenerationResponse_error:
       description: Why a failed run failed

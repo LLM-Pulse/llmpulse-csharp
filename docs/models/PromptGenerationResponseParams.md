@@ -16,6 +16,7 @@ Name | Type | Description | Notes
 **SourceLanguageCode** | **string** |  | [optional] 
 **MinWords** | **int** |  | [optional] 
 **AllCountries** | **bool** |  | [optional] 
+**Property** | **string** |  | [optional] 
 
 [[Back to Model list]](../../README.md#documentation-for-models) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to README]](../../README.md)
 
