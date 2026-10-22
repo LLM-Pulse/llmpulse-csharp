@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.66.0
+  version: 1.67.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -246,8 +246,10 @@ paths:
         \ locale, app store IDs, prompt_limit (the project's own prompt cap, null\
         \ without one), stats (incl. prompts_by_brand_kind counts and prompts_available,\
         \ how many prompts can still be added: the lower of the project's free slots\
-        \ and the account's remaining prompts, null when neither caps it) and data_coverage\
-        \ (models, countries and languages with data)."
+        \ and the account's remaining prompts, null when neither caps it), data_coverage\
+        \ (models, countries and languages with data) and the status of each data\
+        \ connection (search_console, ai_traffic, agent_traffic) with the connect_url\
+        \ where the user connects it."
       operationId: getProjectDetails
       parameters:
       - explode: false
@@ -279,7 +281,7 @@ paths:
       tags:
       - Projects
       x-llms-description: "Detailed info for one project: matching names, locale,\
-        \ industry, app store IDs, prompt limit, stats."
+        \ industry, app store IDs, prompt limit, stats, data connection status."
       x-mcp-tool: get_project_details
   /dimensions/models:
     get:
@@ -15110,6 +15112,10 @@ components:
             $ref: "#/components/schemas/ProjectDetails_allOf_data_coverage"
           search_console:
             $ref: "#/components/schemas/ProjectDetails_allOf_search_console"
+          ai_traffic:
+            $ref: "#/components/schemas/ProjectDetails_allOf_ai_traffic"
+          agent_traffic:
+            $ref: "#/components/schemas/ProjectDetails_allOf_agent_traffic"
           request_id:
             type: string
         type: object
@@ -15163,6 +15169,15 @@ components:
         search_console:
           status: connected
           property: property
+          connect_url: https://openapi-generator.tech
+        ai_traffic:
+          status: connected
+          provider: provider
+          connect_url: https://openapi-generator.tech
+        agent_traffic:
+          status: connected
+          provider: provider
+          connect_url: https://openapi-generator.tech
         request_id: request_id
     AdditionalOwnedDomains:
       description: "Other domains the brand owns (at most 10, each a website's own\
@@ -25008,13 +25023,15 @@ components:
           type: array
       type: object
     ProjectDetails_allOf_search_console:
-      description: Google Search Console connection of the project. connected means
-        the Search Console endpoints can answer; reconnect_required means Google refused
-        the stored access and the property must be reconnected in Preferences > Project
-        Settings > Data Connections.
+      description: "Google Search Console connection of the project. connected means\
+        \ the Search Console endpoints can answer; reconnect_required means Google\
+        \ refused the stored access, so the endpoints return ERR_SEARCH_CONSOLE_ACCESS_REVOKED\
+        \ until the property is reconnected at connect_url; not_connected means the\
+        \ endpoints return ERR_SEARCH_CONSOLE_NOT_CONNECTED."
       example:
         status: connected
         property: property
+        connect_url: https://openapi-generator.tech
       properties:
         status:
           enum:
@@ -25026,6 +25043,68 @@ components:
           description: "The connected property (e.g. sc-domain:example.com), null\
             \ when not connected"
           nullable: true
+          type: string
+        connect_url:
+          description: The in-app page where the property is connected or reconnected
+            (Preferences > Project Settings > Data Connections)
+          format: uri
+          type: string
+      type: object
+    ProjectDetails_allOf_ai_traffic:
+      description: "Web analytics provider behind /metrics/ai_traffic and /web_analytics.\
+        \ connected means both answer; reconnect_required means the provider refused\
+        \ the stored access, so /metrics/ai_traffic still answers from synced data\
+        \ and /web_analytics returns ERR_WEB_ANALYTICS_ACCESS_REVOKED until it is\
+        \ reconnected at connect_url; not_connected means they return ERR_AI_TRAFFIC_NOT_CONNECTED\
+        \ and ERR_WEB_ANALYTICS_NOT_CONNECTED."
+      example:
+        status: connected
+        provider: provider
+        connect_url: https://openapi-generator.tech
+      properties:
+        status:
+          enum:
+          - connected
+          - reconnect_required
+          - not_connected
+          type: string
+        provider:
+          description: "The connected provider (e.g. google_analytics, adobe_analytics,\
+            \ adobe_cja, posthog, plausible, matomo, piano), null when not connected"
+          nullable: true
+          type: string
+        connect_url:
+          description: "The in-app AI Traffic page, where the provider is connected\
+            \ or reconnected"
+          format: uri
+          type: string
+      type: object
+    ProjectDetails_allOf_agent_traffic:
+      description: "Agent traffic source behind /metrics/agent_traffic. connected\
+        \ and reconnect_required (the source refused the stored access, so syncing\
+        \ stopped) both answer from stored data; imported means no live source is\
+        \ connected but imported logs answer; not_connected means it returns ERR_AGENT_TRAFFIC_NOT_CONNECTED."
+      example:
+        status: connected
+        provider: provider
+        connect_url: https://openapi-generator.tech
+      properties:
+        status:
+          enum:
+          - connected
+          - reconnect_required
+          - imported
+          - not_connected
+          type: string
+        provider:
+          description: "The connected source (e.g. cloudflare_graphql, bunny_cdn,\
+            \ s3 or the log drain's provider), null without a live source"
+          nullable: true
+          type: string
+        connect_url:
+          description: "The in-app Agent Analytics page, where a source is connected\
+            \ or reconnected"
+          format: uri
           type: string
       type: object
     SummaryResponse_allOf_position_distribution_percentages:
@@ -26221,6 +26300,10 @@ components:
         message:
           type: string
         meta:
+          description: "Extra detail for some codes. A not-connected or access-revoked\
+            \ error from the Search Console, AI traffic, web analytics or agent traffic\
+            \ endpoints carries connect_url, the in-app page where the user connects\
+            \ or reconnects the source."
           type: object
       type: object
   securitySchemes:

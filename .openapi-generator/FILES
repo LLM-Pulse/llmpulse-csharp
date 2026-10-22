@@ -187,6 +187,8 @@ docs/models/ProjectCreateResponseLimits.md
 docs/models/ProjectCreateResponsePrompts.md
 docs/models/ProjectCreateResponseSameDomainProjectsInner.md
 docs/models/ProjectDetails.md
+docs/models/ProjectDetailsAllOfAgentTraffic.md
+docs/models/ProjectDetailsAllOfAiTraffic.md
 docs/models/ProjectDetailsAllOfDataCoverage.md
 docs/models/ProjectDetailsAllOfSearchConsole.md
 docs/models/ProjectDetailsAllOfStats.md
@@ -503,6 +505,8 @@ src/LLMPulse.SDK/Model/ProjectCreateResponseLimits.cs
 src/LLMPulse.SDK/Model/ProjectCreateResponsePrompts.cs
 src/LLMPulse.SDK/Model/ProjectCreateResponseSameDomainProjectsInner.cs
 src/LLMPulse.SDK/Model/ProjectDetails.cs
+src/LLMPulse.SDK/Model/ProjectDetailsAllOfAgentTraffic.cs
+src/LLMPulse.SDK/Model/ProjectDetailsAllOfAiTraffic.cs
 src/LLMPulse.SDK/Model/ProjectDetailsAllOfDataCoverage.cs
 src/LLMPulse.SDK/Model/ProjectDetailsAllOfSearchConsole.cs
 src/LLMPulse.SDK/Model/ProjectDetailsAllOfStats.cs
