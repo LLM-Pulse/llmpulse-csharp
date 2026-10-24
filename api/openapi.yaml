@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.69.0
+  version: 1.70.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -1122,6 +1122,30 @@ paths:
           - csv
           type: string
         style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: include_project
+        required: false
+        schema:
+          default: true
+          type: boolean
+        style: form
       responses:
         "200":
           content:
@@ -1548,6 +1572,30 @@ paths:
           - breakdown
           type: string
         style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: include_project
+        required: false
+        schema:
+          default: true
+          type: boolean
+        style: form
       responses:
         "200":
           content:
@@ -1744,6 +1792,32 @@ paths:
           - flat
           - csv
           type: string
+        style: form
+      - description: "Tags (collections) to include at once, as a union: one ID or\
+          \ a comma-separated list, e.g. collection_ids=12,15 (collection_ids[]=12&collection_ids[]=15\
+          \ is also accepted). Combines with collection_id. An ID outside the project\
+          \ returns 422 ERR_INVALID_PARAM."
+        explode: false
+        in: query
+        name: collection_ids
+        required: false
+        schema:
+          items:
+            type: integer
+          type: array
+        style: form
+      - description: "Restrict the result to these exact domains, case-insensitive:\
+          \ one domain or a comma-separated list, e.g. domains=wikipedia.org,reddit.com.\
+          \ The bracket form domains[]=wikipedia.org&domains[]=reddit.com is also\
+          \ accepted."
+        explode: false
+        in: query
+        name: domains
+        required: false
+        schema:
+          items:
+            type: string
+          type: array
         style: form
       responses:
         "200":
@@ -2450,6 +2524,31 @@ paths:
           enum:
           - flat
           - csv
+          type: string
+        style: form
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
+        explode: true
+        in: query
+        name: prompt_type
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
           type: string
         style: form
       responses:
@@ -4050,6 +4149,39 @@ paths:
           - csv
           type: string
         style: form
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
+        explode: true
+        in: query
+        name: prompt_type
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - description: Number of days to look back (alternative to from/to)
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
+        style: form
       responses:
         "200":
           content:
@@ -4188,6 +4320,39 @@ paths:
           - csv
           type: string
         style: form
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
+        explode: true
+        in: query
+        name: prompt_type
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - description: Number of days to look back (alternative to from/to)
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
+        style: form
       responses:
         "200":
           content:
@@ -4315,6 +4480,55 @@ paths:
           - flat
           - csv
           type: string
+        style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
+        explode: true
+        in: query
+        name: prompt_type
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - description: Number of days to look back (alternative to from/to)
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
         style: form
       responses:
         "200":
@@ -4446,6 +4660,55 @@ paths:
           - csv
           type: string
         style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
+        explode: true
+        in: query
+        name: prompt_type
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - description: Number of days to look back (alternative to from/to)
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
+        style: form
       responses:
         "200":
           description: Paginated competitor citations
@@ -4571,6 +4834,55 @@ paths:
           - flat
           - csv
           type: string
+        style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
+        explode: true
+        in: query
+        name: prompt_type
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - description: Number of days to look back (alternative to from/to)
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
         style: form
       responses:
         "200":
@@ -4699,6 +5011,55 @@ paths:
           - flat
           - csv
           type: string
+        style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
+        explode: true
+        in: query
+        name: prompt_type
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - description: Number of days to look back (alternative to from/to)
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
         style: form
       responses:
         "200":
@@ -5586,6 +5947,39 @@ paths:
           - csv
           type: string
         style: form
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
+        explode: true
+        in: query
+        name: prompt_type
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - description: Number of days to look back (alternative to from/to)
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
+        style: form
       responses:
         "200":
           description: Paginated sources
@@ -5906,8 +6300,10 @@ paths:
         schema:
           type: integer
         style: form
-      - description: "Source domains to analyze, e.g. domains[]=gmac.com&domains[]=educaweb.com"
-        explode: true
+      - description: "Source domains to analyze: one domain or a comma-separated list,\
+          \ e.g. domains=gmac.com,educaweb.com. The bracket form domains[]=gmac.com&domains[]=educaweb.com\
+          \ is also accepted."
+        explode: false
         in: query
         name: domains
         required: true
@@ -6586,10 +6982,9 @@ paths:
           - non_brand
           type: string
         style: form
-      - description: "Restrict the comparison to one AI model: chatgpt, ai_mode, ai_overview,\
-          \ perplexity, gemini, naver_ai or baidu_ai, whether or not that model is\
-          \ enabled for the API key's user. Any other value returns 422 ERR_INVALID_PARAM\
-          \ (invalid model)."
+      - description: "Restrict the comparison to one AI model of AI Model Insights,\
+          \ whether or not that model is enabled for the API key's user. Any other\
+          \ value returns 422 ERR_INVALID_PARAM (invalid model)."
         explode: true
         in: query
         name: model
@@ -6597,18 +6992,12 @@ paths:
         schema:
           enum:
           - chatgpt
-          - perplexity
           - ai_mode
           - ai_overview
+          - perplexity
           - gemini
-          - copilot
-          - amazon_rufus
-          - claude
-          - grok
-          - deepseek
           - naver_ai
           - baidu_ai
-          - meta_ai
           type: string
         style: form
       - description: Competitor ID for the first comparison brand (omit to compare
@@ -11534,11 +11923,21 @@ paths:
           - product_listing
           type: string
         style: form
-      - explode: true
+      - description: "Keep only the tasks in this status. Discarded tasks are never\
+          \ listed, so discarded returns an empty page."
+        explode: true
         in: query
         name: status
         required: false
         schema:
+          enum:
+          - pending
+          - processing
+          - review
+          - completed
+          - in_progress
+          - blocked
+          - discarded
           type: string
         style: form
       - explode: true

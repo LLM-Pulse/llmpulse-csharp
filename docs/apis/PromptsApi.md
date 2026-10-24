@@ -253,7 +253,7 @@ The app's CSV import as JSON: up to 500 rows, each with its own prompt, country_
 
 <a id="listpromptexecutions"></a>
 # **ListPromptExecutions**
-> PromptExecutionsResponse ListPromptExecutions (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string mentionFilter = null, string citationFilter = null, string competitors = null, string output = null)
+> PromptExecutionsResponse ListPromptExecutions (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string mentionFilter = null, string citationFilter = null, string competitors = null, string output = null, string promptType = null, string brandKind = null)
 
 List prompt executions
 
@@ -276,6 +276,8 @@ List prompt executions
 | **citationFilter** | **string** | Same two-axis matrix applied to the domains cited in the answer instead of the brands named in it. Independent of mention_filter; pass both to intersect them (e.g. mentions_you + not_cites_you finds answers that talk about you without linking to you). | [optional]  |
 | **competitors** | **string** | Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM) | [optional]  |
 | **output** | **string** | Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. | [optional]  |
+| **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
+| **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
 
 ### Return type
 

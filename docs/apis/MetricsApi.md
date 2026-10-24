@@ -65,7 +65,7 @@ Paginated per-prompt aggregated metrics. Returns responses, mentions, citations,
 
 <a id="getshareofvoice"></a>
 # **GetShareOfVoice**
-> SovResponse GetShareOfVoice (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, string competitors = null, string model = null, string collectionId = null, int prompt = null, string promptType = null, string brandKind = null, string output = null, string view = null)
+> SovResponse GetShareOfVoice (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, string competitors = null, string model = null, string collectionId = null, int prompt = null, string promptType = null, string brandKind = null, string output = null, string view = null, string countryCode = null, string languageCode = null, bool includeProject = null)
 
 Share of Voice
 
@@ -89,6 +89,9 @@ Share of Voice breakdown comparing your project to competitors. Returns over_tim
 | **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
 | **output** | **string** | Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. | [optional]  |
 | **view** | **string** | Which Share of Voice projection to flatten. Only valid together with &#39;output&#39;. &#39;over_time&#39; (default) is one row per date and actor, &#39;current&#39; the ranked snapshot, &#39;breakdown&#39; the Top 4 plus Others. | [optional] [default to over_time] |
+| **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
+| **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
+| **includeProject** | **bool** |  | [optional] [default to true] |
 
 ### Return type
 
@@ -113,7 +116,7 @@ Share of Voice breakdown comparing your project to competitors. Returns over_tim
 
 <a id="getsummary"></a>
 # **GetSummary**
-> SummaryResponse GetSummary (int projectId, string metrics = null, string granularity = null, int range = null, DateTime from = null, DateTime to = null, string competitors = null, string model = null, string collectionId = null, int prompt = null, string promptType = null, string brandKind = null, string output = null)
+> SummaryResponse GetSummary (int projectId, string metrics = null, string granularity = null, int range = null, DateTime from = null, DateTime to = null, string competitors = null, string model = null, string collectionId = null, int prompt = null, string promptType = null, string brandKind = null, string output = null, string countryCode = null, string languageCode = null, bool includeProject = null)
 
 Aggregated metrics summary
 
@@ -137,6 +140,9 @@ Same as /metrics/timeseries but adds a `summary` block with total/min/max/last p
 | **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
 | **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
 | **output** | **string** | Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. | [optional]  |
+| **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
+| **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
+| **includeProject** | **bool** |  | [optional] [default to true] |
 
 ### Return type
 
@@ -217,7 +223,7 @@ Returns time-series data for one or more metrics, broken down by actor (project 
 
 <a id="gettopsources"></a>
 # **GetTopSources**
-> TopSourcesResponse GetTopSources (int projectId, int range = null, DateTime from = null, DateTime to = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, string sort = null, string query = null, int page = null, int perPage = null, string output = null)
+> TopSourcesResponse GetTopSources (int projectId, int range = null, DateTime from = null, DateTime to = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, string sort = null, string query = null, int page = null, int perPage = null, string output = null, List<int> collectionIds = null, List<string> domains = null)
 
 Top cited sources
 
@@ -244,6 +250,8 @@ Registrable domains most frequently cited in AI responses for the project, inclu
 | **page** | **int** |  | [optional] [default to 1] |
 | **perPage** | **int** |  | [optional] [default to 20] |
 | **output** | **string** | Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. | [optional]  |
+| **collectionIds** | [**List&lt;int&gt;**](int.md) | Tags (collections) to include at once, as a union: one ID or a comma-separated list, e.g. collection_ids&#x3D;12,15 (collection_ids[]&#x3D;12&amp;collection_ids[]&#x3D;15 is also accepted). Combines with collection_id. An ID outside the project returns 422 ERR_INVALID_PARAM. | [optional]  |
+| **domains** | [**List&lt;string&gt;**](string.md) | Restrict the result to these exact domains, case-insensitive: one domain or a comma-separated list, e.g. domains&#x3D;wikipedia.org,reddit.com. The bracket form domains[]&#x3D;wikipedia.org&amp;domains[]&#x3D;reddit.com is also accepted. | [optional]  |
 
 ### Return type
 

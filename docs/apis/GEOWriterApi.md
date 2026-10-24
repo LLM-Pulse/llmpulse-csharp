@@ -96,7 +96,7 @@ List GEO Writer tasks
 |------|------|-------------|-------|
 | **projectId** | **int** | Project ID |  |
 | **taskType** | **string** |  | [optional]  |
-| **status** | **string** |  | [optional]  |
+| **status** | **string** | Keep only the tasks in this status. Discarded tasks are never listed, so discarded returns an empty page. | [optional]  |
 | **page** | **int** |  | [optional] [default to 1] |
 | **perPage** | **int** |  | [optional] [default to 20] |
 

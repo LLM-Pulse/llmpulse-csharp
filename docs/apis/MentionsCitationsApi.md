@@ -13,7 +13,7 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 
 <a id="listallcitations"></a>
 # **ListAllCitations**
-> void ListAllCitations (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
+> void ListAllCitations (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, int range = null)
 
 List all citations (brand + competitor)
 
@@ -34,6 +34,11 @@ Unified citations stream with an `actor_type` field on each record. Includes vis
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **output** | **string** | Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. | [optional]  |
+| **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
+| **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
+| **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
+| **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
+| **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
 
 ### Return type
 
@@ -58,7 +63,7 @@ void (empty response body)
 
 <a id="listallmentions"></a>
 # **ListAllMentions**
-> void ListAllMentions (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
+> void ListAllMentions (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, int range = null)
 
 List all mentions (brand + competitor)
 
@@ -79,6 +84,11 @@ Unified mentions stream. Each record has an `actor_type` field (`project` or `co
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **output** | **string** | Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. | [optional]  |
+| **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
+| **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
+| **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
+| **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
+| **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
 
 ### Return type
 
@@ -103,7 +113,7 @@ void (empty response body)
 
 <a id="listcitations"></a>
 # **ListCitations**
-> CitationsResponse ListCitations (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
+> CitationsResponse ListCitations (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null, string promptType = null, string brandKind = null, int range = null)
 
 List brand citations
 
@@ -125,6 +135,9 @@ Includes visible citations and background source references. Background referenc
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **output** | **string** | Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. | [optional]  |
+| **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
+| **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
+| **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
 
 ### Return type
 
@@ -149,7 +162,7 @@ Includes visible citations and background source references. Background referenc
 
 <a id="listcompetitorcitations"></a>
 # **ListCompetitorCitations**
-> void ListCompetitorCitations (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
+> void ListCompetitorCitations (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, int range = null)
 
 List competitor citations
 
@@ -170,6 +183,11 @@ Includes visible citations and background source references. Background referenc
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **output** | **string** | Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. | [optional]  |
+| **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
+| **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
+| **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
+| **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
+| **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
 
 ### Return type
 
@@ -194,7 +212,7 @@ void (empty response body)
 
 <a id="listcompetitormentions"></a>
 # **ListCompetitorMentions**
-> CompetitorMentionsResponse ListCompetitorMentions (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
+> CompetitorMentionsResponse ListCompetitorMentions (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, int range = null)
 
 List competitor mentions
 
@@ -213,6 +231,11 @@ List competitor mentions
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **output** | **string** | Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. | [optional]  |
+| **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
+| **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
+| **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
+| **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
+| **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
 
 ### Return type
 
@@ -237,7 +260,7 @@ List competitor mentions
 
 <a id="listmentions"></a>
 # **ListMentions**
-> MentionsResponse ListMentions (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null)
+> MentionsResponse ListMentions (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null, string promptType = null, string brandKind = null, int range = null)
 
 List brand mentions
 
@@ -257,6 +280,9 @@ List brand mentions
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **output** | **string** | Rectangular output for BI tools (Tableau, Excel, Sheets, ELT). Omit for the default nested JSON. &#39;flat&#39; returns the same metadata plus &#39;columns&#39; and &#39;rows&#39;; &#39;csv&#39; returns those rows as text/csv. Errors are always returned as JSON. | [optional]  |
+| **promptType** | **string** | One prompt type or a comma-separated list: informational, navigational, commercial, transactional | [optional]  |
+| **brandKind** | **string** | Filter by brand kind: brand (own brand/products), brand_other (competitors/other brands), non_brand (generic, no brand named). For fair 1:1 brand-vs-competitor comparisons (visibility, share of voice), use non_brand: brand-focused prompts skew results toward the brand they name. The in-app Overview page applies non_brand by default. | [optional]  |
+| **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
 
 ### Return type
 
