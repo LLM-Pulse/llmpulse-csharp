@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.68.0
+  version: 1.69.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -11425,10 +11425,17 @@ paths:
     patch:
       description: "Moves one item of a recommendation run between `active`, `completed`\
         \ and `archived`, exactly like the complete, archive and restore buttons on\
-        \ the Recommendations page, and stamps `status_changed_at`. Returns the item\
-        \ in the shape `GET /recommendations/{id}` lists items. Requires a `read_write`\
-        \ scope API key and, for team members, create permission on Recommendations\
-        \ (the permission the page uses for these buttons)."
+        \ the Recommendations page, and stamps `status_changed_at`. When archiving,\
+        \ an optional `reason` teaches later runs: `not_relevant` and `too_complex`\
+        \ steer the next recommendations away from similar ones, and on a PR & Citation\
+        \ Building item that targets a domain (`metadata.domain`), `competitor` or\
+        \ `not_relevant` stops that site from being suggested again. The reason is\
+        \ stored in `metadata.archive_reason` and dropped when the item leaves `archived`.\
+        \ A reason with another status, an unknown one, or `competitor` on an item\
+        \ without a domain returns `ERR_INVALID_PARAM`. Returns the item in the shape\
+        \ `GET /recommendations/{id}` lists items. Requires a `read_write` scope API\
+        \ key and, for team members, create permission on Recommendations (the permission\
+        \ the page uses for these buttons)."
       operationId: updateRecommendationItem
       parameters:
       - description: Recommendation run id
@@ -11496,8 +11503,9 @@ paths:
       summary: "Complete, archive or restore a recommendation item"
       tags:
       - Recommendations
-      x-llms-description: "Mark one recommendation item as completed, archive it,\
-        \ or move it back to active, like the buttons on the Recommendations page."
+      x-llms-description: "Mark one recommendation item as completed, archive it (with\
+        \ an optional reason later runs learn from), or move it back to active, like\
+        \ the buttons on the Recommendations page."
       x-mcp-tool: update_recommendation_item
       x-write: true
   /intelligence_tasks:
@@ -23142,6 +23150,10 @@ components:
           type: integer
         metadata:
           additionalProperties: true
+          description: "Free-form details. Carries effort (low, medium or high) when\
+            \ the generator rated it, archive_reason (not_relevant, too_complex or\
+            \ competitor) on an item archived with a reason, and domain on PR & Citation\
+            \ Building items."
           type: object
         created_at:
           format: date-time
@@ -24841,6 +24853,14 @@ components:
           - active
           - completed
           - archived
+          type: string
+        reason:
+          description: "Optional, with status archived only. competitor only on a\
+            \ PR & Citation Building item that targets a domain."
+          enum:
+          - not_relevant
+          - too_complex
+          - competitor
           type: string
       required:
       - project_id
