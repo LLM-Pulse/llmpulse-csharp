@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 **PromptText** | **string** |  | 
 **CollectionIds** | **List&lt;int&gt;** | Every tag the prompt belongs to | 
 **Tags** | [**List&lt;TagRef&gt;**](TagRef.md) |  | 
+**Tracked** | **bool** | Whether scheduled runs include this prompt. False when its project is paused or beyond the plan&#39;s project limit, or when the prompt is beyond the plan&#39;s prompt limit (the oldest prompts up to the limit run) | 
 **AppUrl** | **string** | Opens this prompt in the app. The link names its project, so it opens there for any user with access to that project | 
 **CollectionId** | **int** | Primary tag, when the prompt has one | 
 **CountryCode** | **string** |  | 
@@ -15,6 +16,7 @@ Name | Type | Description | Notes
 **PromptType** | **string** | Search intent: informational, navigational, commercial or transactional. Null until the prompt is classified | 
 **BrandKind** | **string** | Brand focus: brand, brand_other or non_brand. Null until the prompt is classified | 
 **LastExecutedAt** | **DateTime** | Null until the prompt has run | 
+**UntrackedReason** | **string** | Why tracked is false: paused, project_limit or prompt_limit. Null when tracked | 
 
 [[Back to Model list]](../../README.md#documentation-for-models) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to README]](../../README.md)
 

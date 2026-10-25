@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.70.0
+  version: 1.71.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -2975,9 +2975,11 @@ paths:
       x-mcp-tool: get_prompt_generation
   /prompts:
     post:
-      description: Add prompts to a project in bulk (up to 100 per request). Validates
-        the account prompt quota and skips duplicates. Requires a `read_write` scope
-        API key.
+      description: "Add prompts to a project in bulk (up to 100 per request). Validates\
+        \ the account prompt quota and skips duplicates. When the project does not\
+        \ run on the schedule (paused, or beyond the plan's project limit) the prompts\
+        \ are still created, and the response says so with `tracked` false, `untracked_reason`\
+        \ and a `warning`. Requires a `read_write` scope API key."
       operationId: createPrompts
       requestBody:
         content:
@@ -3036,8 +3038,10 @@ paths:
         \ and comes back in row_errors. For a team member without update access to\
         \ Prompts, a row matching a prompt that already existed adds no tags to it,\
         \ and comes back in row_errors when it would have added one. Responds 201\
-        \ when it created prompts, 200 otherwise. Requires a `read_write` scope API\
-        \ key and, for team members, create access to Prompts."
+        \ when it created prompts, 200 otherwise. `tracked` false, with `untracked_reason`\
+        \ and a `warning`, means the project does not run on the schedule, so the\
+        \ imported prompts do not run until that changes. Requires a `read_write`\
+        \ scope API key and, for team members, create access to Prompts."
       operationId: importPrompts
       requestBody:
         content:
@@ -14594,7 +14598,9 @@ paths:
         \ filtered by project. A read-only API key receives each `target_url` masked\
         \ to its scheme, host and any non-default port followed by `/…`, because the\
         \ full URL can let anyone post to the receiver; a `read_write` scope key receives\
-        \ the full URL. Requires the Scale plan or above."
+        \ the full URL. Works on every plan, with an API key created on Scale too.\
+        \ Below Scale the subscriptions are kept but deliver nothing, and they can\
+        \ still be listed and deleted."
       operationId: listWebhooks
       parameters:
       - description: Optional project filter
@@ -14655,7 +14661,6 @@ paths:
       x-llms-description: List active webhook subscriptions for the account (optional
         project_id filter).
       x-mcp-tool: list_webhook_subscriptions
-      x-plan: scale
     post:
       description: "Subscribes a public HTTPS URL to a project event. LLM Pulse POSTs\
         \ a JSON envelope (`event`, `occurred_at`, `project_id`, `subscription_id`,\
@@ -14747,9 +14752,10 @@ paths:
       x-write: true
   /webhooks/{id}:
     delete:
-      description: Deletes a webhook subscription; the target URL stops receiving
-        events immediately. Requires a `read_write` scope API key and the Scale plan
-        or above.
+      description: "Deletes a webhook subscription; the target URL stops receiving\
+        \ events immediately. Requires a `read_write` scope API key. Works on every\
+        \ plan, with an API key created on Scale too, so a subscription paused below\
+        \ Scale can still be removed."
       operationId: deleteWebhook
       parameters:
       - explode: false
@@ -14805,7 +14811,6 @@ paths:
       x-llms-description: Delete a webhook subscription; the target URL stops receiving
         events immediately.
       x-mcp-tool: delete_webhook_subscription
-      x-plan: scale
       x-write: true
   /webhooks/sample/{event_type}:
     get:
@@ -15636,6 +15641,8 @@ components:
         id: 6
         name: name
         brand_name: brand_name
+        tracked: true
+        untracked_reason: untracked_reason
       properties:
         id:
           type: integer
@@ -15645,6 +15652,15 @@ components:
         brand_name:
           description: "LLM-facing brand label (used in prompts and customer-facing\
             \ charts). Null when not set, in which case prompts and charts use `name`."
+          nullable: true
+          type: string
+        tracked:
+          description: "Whether scheduled runs include this project. False when it\
+            \ is paused, or when the plan's project limit leaves it out (the oldest\
+            \ projects up to the limit run), so its prompts do not run"
+          type: boolean
+        untracked_reason:
+          description: "Why tracked is false: paused or project_limit. Null when tracked"
           nullable: true
           type: string
       type: object
@@ -15724,11 +15740,16 @@ components:
             $ref: "#/components/schemas/ProjectDetails_allOf_agent_traffic"
           request_id:
             type: string
+        required:
+        - tracked
+        - untracked_reason
         type: object
       example:
         id: 0
         name: name
         brand_name: brand_name
+        tracked: true
+        untracked_reason: untracked_reason
         url: https://openapi-generator.tech
         description: description
         matching_names:
@@ -17577,6 +17598,9 @@ components:
         skipped: 1
         total_after: 5
         prompts_available: 5
+        tracked: true
+        untracked_reason: untracked_reason
+        warning: warning
         data:
         - id: 2
           raw_input: raw_input
@@ -17596,6 +17620,19 @@ components:
           type: integer
         prompts_available:
           type: integer
+        tracked:
+          description: "Whether scheduled runs include the project the prompts were\
+            \ added to. False when it is paused or beyond the plan's project limit,\
+            \ so the new prompts do not run until that changes"
+          type: boolean
+        untracked_reason:
+          description: "Why tracked is false: paused or project_limit. Null when tracked"
+          nullable: true
+          type: string
+        warning:
+          description: What to do when tracked is false. Null when tracked
+          nullable: true
+          type: string
         data:
           items:
             $ref: "#/components/schemas/PromptsCreateResponse_data_inner"
@@ -20189,8 +20226,10 @@ components:
           - archived
           type: string
         paused_reason:
-          description: "user, or unreachable when three runs in a row could not reach\
-            \ the site"
+          description: "Null unless status is paused. user (paused by hand), unreachable\
+            \ (three runs in a row could not reach the site) or quota (the account\
+            \ has more active recurring audits than its plan allows; resume it once\
+            \ there is room)"
           nullable: true
           type: string
         schedule:
@@ -21290,6 +21329,8 @@ components:
         prompt_type: prompt_type
         brand_kind: brand_kind
         last_executed_at: 2000-01-23T04:56:07.000+00:00
+        tracked: true
+        untracked_reason: untracked_reason
         app_url: https://openapi-generator.tech
       properties:
         id:
@@ -21330,6 +21371,17 @@ components:
           format: date-time
           nullable: true
           type: string
+        tracked:
+          description: "Whether scheduled runs include this prompt. False when its\
+            \ project is paused or beyond the plan's project limit, or when the prompt\
+            \ is beyond the plan's prompt limit (the oldest prompts up to the limit\
+            \ run)"
+          type: boolean
+        untracked_reason:
+          description: "Why tracked is false: paused, project_limit or prompt_limit.\
+            \ Null when tracked"
+          nullable: true
+          type: string
         app_url:
           description: "Opens this prompt in the app. The link names its project,\
             \ so it opens there for any user with access to that project"
@@ -21347,6 +21399,8 @@ components:
       - prompt_text
       - prompt_type
       - tags
+      - tracked
+      - untracked_reason
       type: object
     PromptsResponse:
       allOf:
@@ -21382,6 +21436,8 @@ components:
           prompt_type: prompt_type
           brand_kind: brand_kind
           last_executed_at: 2000-01-23T04:56:07.000+00:00
+          tracked: true
+          untracked_reason: untracked_reason
           app_url: https://openapi-generator.tech
         - id: 5
           prompt_text: prompt_text
@@ -21399,6 +21455,8 @@ components:
           prompt_type: prompt_type
           brand_kind: brand_kind
           last_executed_at: 2000-01-23T04:56:07.000+00:00
+          tracked: true
+          untracked_reason: untracked_reason
           app_url: https://openapi-generator.tech
     PromptExecutionRecord:
       example:
@@ -23371,6 +23429,9 @@ components:
           error: error
         length_warning: length_warning
         prompts_available: 9
+        tracked: true
+        untracked_reason: untracked_reason
+        warning: warning
         request_id: request_id
       properties:
         project_id:
@@ -23404,6 +23465,19 @@ components:
           description: Prompt slots left on the plan; null when unlimited
           nullable: true
           type: integer
+        tracked:
+          description: "Whether scheduled runs include the project the prompts were\
+            \ imported into. False when it is paused or beyond the plan's project\
+            \ limit, so the new prompts do not run until that changes"
+          type: boolean
+        untracked_reason:
+          description: "Why tracked is false: paused or project_limit. Null when tracked"
+          nullable: true
+          type: string
+        warning:
+          description: What to do when tracked is false. Null when tracked
+          nullable: true
+          type: string
         request_id:
           type: string
       required:
@@ -23417,6 +23491,9 @@ components:
       - request_id
       - row_errors
       - tagged
+      - tracked
+      - untracked_reason
+      - warning
       type: object
     PromptTagsRemoveResponse:
       example:
@@ -23815,8 +23892,8 @@ components:
           description: Whether the shared link is published
           type: boolean
         public_link_active:
-          description: Whether the shared link opens (published and not made inside
-            a client portal)
+          description: "Whether the shared link opens (published, not made inside\
+            \ a client portal, and the account is active on the Scale tier or higher)"
           type: boolean
         password_protected:
           type: boolean
@@ -24541,6 +24618,8 @@ components:
           id: 6
           name: name
           brand_name: brand_name
+          tracked: true
+          untracked_reason: untracked_reason
         request_id: request_id
       properties:
         ok:
@@ -24730,9 +24809,13 @@ components:
         - id: 6
           name: name
           brand_name: brand_name
+          tracked: true
+          untracked_reason: untracked_reason
         - id: 6
           name: name
           brand_name: brand_name
+          tracked: true
+          untracked_reason: untracked_reason
         request_id: request_id
       properties:
         projects:
