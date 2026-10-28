@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.72.0
+  version: 1.73.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -24,8 +24,8 @@ tags:
     \ see its remaining budget instead of discovering the ceiling by hitting it."
   name: Account
 - description: "A project is one tracked brand. List and read projects, see which\
-    \ AI models and locales have data, create a project in one call, or drive the\
-    \ multi-step draft wizard."
+    \ AI models and locales have data, create a project in one call or through the\
+    \ multi-step draft wizard, update its profile, or delete it."
   name: Projects
 - description: "Aggregated visibility, share of voice, citation and position data\
     \ for the project and its competitors: time series, period summary, per-prompt\
@@ -638,6 +638,66 @@ paths:
       x-mcp-tool: create_project
       x-write: true
   /projects/{id}:
+    delete:
+      description: "Deletes a project, like Delete Project in Project Settings, and\
+        \ cannot be undone. The project disappears at once from the app, GET /dimensions/projects\
+        \ and every other endpoint, and frees a project slot; a background job then\
+        \ deletes its prompts, answers, mentions, citations, sentiment, competitors\
+        \ and metrics history. API keys limited to it lose it, and a key left with\
+        \ no project is revoked. A project that is already being deleted, or that\
+        \ the key cannot see, answers ERR_PROJECT_NOT_FOUND. Requires an account-wide\
+        \ `read_write` scope API key: a key limited to some projects answers ERR_KEY_PROJECT_SCOPED.\
+        \ A team member needs permission to delete projects."
+      operationId: deleteProject
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDeleteResponse"
+          description: Deleted
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_KEY_PROJECT_SCOPED
+                  message: api_key_limited_to_projects
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "A read-only key answers ERR_INSUFFICIENT_SCOPE and a key limited\
+            \ to some projects ERR_KEY_PROJECT_SCOPED: deleting a project acts on\
+            \ the whole account. A team member whose permissions do not grant deleting\
+            \ projects answers ERR_INSUFFICIENT_PERMISSION. All with the same status,\
+            \ and nothing is deleted"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+      summary: Delete a project
+      tags:
+      - Projects
+      x-llms-description: "Delete a whole project (irreversible; hidden at once, frees\
+        \ a project slot; its prompts, answers, mentions, citations, sentiment, competitors\
+        \ and metrics history are purged in the background)."
+      x-mcp-tool: delete_project
+      x-write: true
     patch:
       description: "Updates the project name and profile, the same fields as Project\
         \ Settings: name, brand_name, description, industry, business_model (plus\
@@ -16202,6 +16262,40 @@ components:
       - rematching
       - request_id
       - updated_fields
+      type: object
+    ProjectDeleteResponse:
+      example:
+        project_id: 0
+        deleted: true
+        name: name
+        url: url
+        note: note
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        deleted:
+          description: Always true
+          type: boolean
+        name:
+          description: The deleted project's name
+          type: string
+        url:
+          description: The deleted project's website
+          nullable: true
+          type: string
+        note:
+          description: What happens next; the deletion cannot be undone
+          type: string
+        request_id:
+          type: string
+      required:
+      - deleted
+      - name
+      - note
+      - project_id
+      - request_id
+      - url
       type: object
     Competitor:
       example:
