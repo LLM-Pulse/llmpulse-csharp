@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.71.0
+  version: 1.72.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -106,6 +106,11 @@ tags:
     \ with the same rules as the Team Members settings page. Not available to a key\
     \ limited to some projects."
   name: Team
+- description: "The API keys of the user the calling key belongs to: list them, create\
+    \ a key limited to some of the account projects (for example one per customer\
+    \ project) and revoke one. Needs an account-wide read and write key; not available\
+    \ to a key limited to some projects."
+  name: API Keys
 - description: "The endpoints behind the LLM Pulse app for Shopify: match a store\
     \ to its project, push the orders AI assistants referred to the store and read\
     \ them back, and turn catalog products into buyer prompts to track. They need\
@@ -14054,6 +14059,235 @@ paths:
         at once and the account is deleted shortly after.
       x-mcp-tool: remove_team_member
       x-write: true
+  /api_keys:
+    get:
+      description: "Lists the API keys of the user the calling key belongs to, newest\
+        \ first, revoked ones included: name, the visible prefix of the token, scope\
+        \ (read or read_write), the projects a key is limited to (project_scoped,\
+        \ project_ids; an empty list on an account-wide key), when it was created\
+        \ and last used, and when it was revoked. The secret token is only ever returned\
+        \ once, by POST /api_keys. Requires an account-wide `read_write` scope API\
+        \ key: a key limited to some projects answers ERR_KEY_PROJECT_SCOPED. Still\
+        \ answers after the account moves below the Scale plan, so old keys can be\
+        \ found and revoked. A team member needs the API Keys permission and sees\
+        \ only their own keys."
+      operationId: listApiKeys
+      parameters:
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          type: integer
+        style: form
+      - description: "Default 20, max 100"
+        explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/listApiKeys_200_response"
+          description: OK
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_KEY_PROJECT_SCOPED
+                  message: api_key_limited_to_projects
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "A key limited to some projects answers ERR_KEY_PROJECT_SCOPED\
+            \ and a read-only key ERR_INSUFFICIENT_SCOPE: managing keys needs an account-wide\
+            \ read and write key. A team member without the API Keys permission answers\
+            \ ERR_INSUFFICIENT_PERMISSION, and creating a key below the Scale plan\
+            \ ERR_PLAN_REQUIRED, with the same status"
+      summary: List API keys
+      tags:
+      - API Keys
+      x-llms-description: "Your API keys, newest first, with their name, visible prefix,\
+        \ scope, projects, last use and revocation; never the secret."
+      x-rest-only: "Minting and revoking credentials stays off AI clients, so a prompt\
+        \ injection cannot create, list or revoke keys."
+      x-write: true
+    post:
+      description: "Creates an API key limited to the projects in project_ids, owned\
+        \ by the same user as the calling key, and returns its secret token once:\
+        \ store it, since it cannot be read again. The key sees only those projects\
+        \ (any other project answers ERR_PROJECT_NOT_FOUND) and cannot act on the\
+        \ whole account, and the set of projects never changes. This endpoint never\
+        \ creates an account-wide key; create one in the app under API Keys. scope\
+        \ is read (default) or read_write. Every project must be one the caller can\
+        \ access: a project of another account, a deleted one or an unknown id answers\
+        \ ERR_PROJECT_NOT_FOUND and nothing is created. A user can hold up to 500\
+        \ active keys; past that the request answers ERR_LIMIT_REACHED until a key\
+        \ is revoked. Requires an account-wide `read_write` scope API key on the Scale\
+        \ plan or above: a key limited to some projects answers ERR_KEY_PROJECT_SCOPED.\
+        \ A team member needs permission to create API keys and can only choose projects\
+        \ they can access."
+      operationId: createApiKey
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createApiKey_request"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/createApiKey_201_response"
+          description: "Created. The key as GET /api_keys lists it, plus its secret\
+            \ token, returned only this once."
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_KEY_PROJECT_SCOPED
+                  message: api_key_limited_to_projects
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "A key limited to some projects answers ERR_KEY_PROJECT_SCOPED\
+            \ and a read-only key ERR_INSUFFICIENT_SCOPE: managing keys needs an account-wide\
+            \ read and write key. A team member without the API Keys permission answers\
+            \ ERR_INSUFFICIENT_PERMISSION, and creating a key below the Scale plan\
+            \ ERR_PLAN_REQUIRED, with the same status"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Create an API key limited to projects
+      tags:
+      - API Keys
+      x-llms-description: "Create an API key limited to one or several of your projects,\
+        \ for example to give each of your own customers a key to their project; the\
+        \ token is returned once."
+      x-rest-only: "Minting and revoking credentials stays off AI clients, so a prompt\
+        \ injection cannot create, list or revoke keys."
+      x-write: true
+  /api_keys/{id}:
+    delete:
+      description: "Revokes an API key of the user the calling key belongs to: it\
+        \ stops working immediately and cannot be restored. Revoking a key that is\
+        \ already revoked answers the same way and keeps its original revocation time.\
+        \ A key of another user answers ERR_NOT_FOUND. The calling key can revoke\
+        \ itself. Requires an account-wide `read_write` scope API key: a key limited\
+        \ to some projects answers ERR_KEY_PROJECT_SCOPED. Still answers after the\
+        \ account moves below the Scale plan. A team member needs permission to delete\
+        \ API keys."
+      operationId: revokeApiKey
+      parameters:
+      - description: The key id from GET /api_keys
+        explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/revokeApiKey_200_response"
+          description: OK
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_KEY_PROJECT_SCOPED
+                  message: api_key_limited_to_projects
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "A key limited to some projects answers ERR_KEY_PROJECT_SCOPED\
+            \ and a read-only key ERR_INSUFFICIENT_SCOPE: managing keys needs an account-wide\
+            \ read and write key. A team member without the API Keys permission answers\
+            \ ERR_INSUFFICIENT_PERMISSION, and creating a key below the Scale plan\
+            \ ERR_PLAN_REQUIRED, with the same status"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+      summary: Revoke an API key
+      tags:
+      - API Keys
+      x-llms-description: Revoke one of your API keys; it stops working immediately.
+        Revoking a key that is already revoked changes nothing.
+      x-rest-only: "Minting and revoking credentials stays off AI clients, so a prompt\
+        \ injection cannot create, list or revoke keys."
+      x-write: true
   /store_connection:
     get:
       description: "Tells a store app whether the API key's account can use it and\
@@ -15499,6 +15733,21 @@ components:
         \ Members permission, or asking for something only the owner or a co-owner\
         \ can do, answers ERR_INSUFFICIENT_PERMISSION, and a write with a read-only\
         \ key ERR_INSUFFICIENT_SCOPE, with the same status"
+    ApiKeysForbidden:
+      content:
+        application/json:
+          example:
+            error:
+              code: ERR_KEY_PROJECT_SCOPED
+              message: api_key_limited_to_projects
+            request_id: abc-123
+          schema:
+            $ref: "#/components/schemas/ApiError"
+      description: "A key limited to some projects answers ERR_KEY_PROJECT_SCOPED\
+        \ and a read-only key ERR_INSUFFICIENT_SCOPE: managing keys needs an account-wide\
+        \ read and write key. A team member without the API Keys permission answers\
+        \ ERR_INSUFFICIENT_PERMISSION, and creating a key below the Scale plan ERR_PLAN_REQUIRED,\
+        \ with the same status"
     IntegrationUnavailable:
       content:
         application/json:
@@ -22938,6 +23187,66 @@ components:
       - permissions
       - project_ids
       type: object
+    ApiKeyInfo:
+      example:
+        id: 5
+        name: name
+        prefix: prefix
+        scope: read
+        project_scoped: true
+        project_ids:
+        - 5
+        - 5
+        created_at: 2000-01-23T04:56:07.000+00:00
+        last_used_at: 2000-01-23T04:56:07.000+00:00
+        revoked_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        prefix:
+          description: "The visible start of the token, to recognize the key. Never\
+            \ the secret itself."
+          type: string
+        scope:
+          enum:
+          - read
+          - read_write
+          type: string
+        project_scoped:
+          description: True when the key is limited to project_ids; false for an account-wide
+            key.
+          type: boolean
+        project_ids:
+          description: The projects the key is limited to; empty for an account-wide
+            key.
+          items:
+            type: integer
+          type: array
+        created_at:
+          format: date-time
+          type: string
+        last_used_at:
+          description: Updated at most once a minute.
+          format: date-time
+          nullable: true
+          type: string
+        revoked_at:
+          format: date-time
+          nullable: true
+          type: string
+      required:
+      - created_at
+      - id
+      - last_used_at
+      - name
+      - prefix
+      - project_ids
+      - project_scoped
+      - revoked_at
+      - scope
+      type: object
     SuggestedPrompt:
       example:
         id: 5
@@ -25629,6 +25938,117 @@ components:
           type: boolean
         id:
           type: integer
+        request_id:
+          type: string
+      type: object
+    listApiKeys_200_response:
+      example:
+        page: 0
+        per_page: 6
+        total: 1
+        data:
+        - id: 5
+          name: name
+          prefix: prefix
+          scope: read
+          project_scoped: true
+          project_ids:
+          - 5
+          - 5
+          created_at: 2000-01-23T04:56:07.000+00:00
+          last_used_at: 2000-01-23T04:56:07.000+00:00
+          revoked_at: 2000-01-23T04:56:07.000+00:00
+        - id: 5
+          name: name
+          prefix: prefix
+          scope: read
+          project_scoped: true
+          project_ids:
+          - 5
+          - 5
+          created_at: 2000-01-23T04:56:07.000+00:00
+          last_used_at: 2000-01-23T04:56:07.000+00:00
+          revoked_at: 2000-01-23T04:56:07.000+00:00
+        request_id: request_id
+      properties:
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        data:
+          items:
+            $ref: "#/components/schemas/ApiKeyInfo"
+          type: array
+        request_id:
+          type: string
+      type: object
+    createApiKey_request:
+      properties:
+        name:
+          description: "A label to recognize the key, for example the customer it\
+            \ is for"
+          maxLength: 100
+          type: string
+        scope:
+          default: read
+          description: "read (default) only reads data; read_write can also create,\
+            \ change and delete within the key's projects"
+          enum:
+          - read
+          - read_write
+          type: string
+        project_ids:
+          description: "The projects the key is limited to, at least one"
+          items:
+            type: integer
+          minItems: 1
+          type: array
+      required:
+      - name
+      - project_ids
+      type: object
+    createApiKey_201_response:
+      allOf:
+      - $ref: "#/components/schemas/ApiKeyInfo"
+      - properties:
+          token:
+            description: The secret to send as Bearer token. Shown only in this response.
+            type: string
+          request_id:
+            type: string
+        required:
+        - token
+        type: object
+      example:
+        id: 0
+        name: name
+        prefix: prefix
+        scope: read
+        project_scoped: true
+        project_ids:
+        - 6
+        - 6
+        created_at: 2000-01-23T04:56:07.000+00:00
+        last_used_at: 2000-01-23T04:56:07.000+00:00
+        revoked_at: 2000-01-23T04:56:07.000+00:00
+        token: token
+        request_id: request_id
+    revokeApiKey_200_response:
+      example:
+        revoked: true
+        id: 0
+        revoked_at: 2000-01-23T04:56:07.000+00:00
+        request_id: request_id
+      properties:
+        revoked:
+          type: boolean
+        id:
+          type: integer
+        revoked_at:
+          format: date-time
+          type: string
         request_id:
           type: string
       type: object

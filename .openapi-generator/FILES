@@ -6,6 +6,7 @@ api/openapi.yaml
 appveyor.yml
 docs/apis/AIAgentTrafficApi.md
 docs/apis/AIModelInsightsApi.md
+docs/apis/APIKeysApi.md
 docs/apis/AccountApi.md
 docs/apis/AnnotationsApi.md
 docs/apis/AnswersApi.md
@@ -49,6 +50,7 @@ docs/models/AnswerDetails.md
 docs/models/AnswerDetailsLocale.md
 docs/models/ApiError.md
 docs/models/ApiErrorError.md
+docs/models/ApiKeyInfo.md
 docs/models/AssignPromptTagsRequest.md
 docs/models/CatalogProduct.md
 docs/models/CatalogPromptSuggestion.md
@@ -77,6 +79,8 @@ docs/models/CompetitorMentionsResponse.md
 docs/models/CompetitorSuggestion.md
 docs/models/CompetitorSuggestionsResponse.md
 docs/models/CreateAnnotationRequest.md
+docs/models/CreateApiKey201Response.md
+docs/models/CreateApiKeyRequest.md
 docs/models/CreateCollectionRequest.md
 docs/models/CreateCompetitorRequest.md
 docs/models/CreateProjectDraftRequest.md
@@ -133,6 +137,7 @@ docs/models/IntelligenceTaskUpdateRequest.md
 docs/models/IntelligenceTaskUpdateResponse.md
 docs/models/IntelligenceTasksResponse.md
 docs/models/LaunchRecommendationsRequest.md
+docs/models/ListApiKeys200Response.md
 docs/models/ListCompetitors200Response.md
 docs/models/ListProjects200Response.md
 docs/models/ListTeamInvitations200Response.md
@@ -224,6 +229,7 @@ docs/models/RecommendationSummarySummary.md
 docs/models/RecommendationsResponse.md
 docs/models/RemovePromptTagsRequest.md
 docs/models/RemoveTeamMember200Response.md
+docs/models/RevokeApiKey200Response.md
 docs/models/RevokeTeamInvitation200Response.md
 docs/models/SampleWebhookPayloads200Response.md
 docs/models/SampleWebhookPayloads200ResponseDataInner.md
@@ -302,6 +308,7 @@ docs/scripts/git_push.sh
 src/LLMPulse.SDK.Test/README.md
 src/LLMPulse.SDK/Api/AIAgentTrafficApi.cs
 src/LLMPulse.SDK/Api/AIModelInsightsApi.cs
+src/LLMPulse.SDK/Api/APIKeysApi.cs
 src/LLMPulse.SDK/Api/AccountApi.cs
 src/LLMPulse.SDK/Api/AnnotationsApi.cs
 src/LLMPulse.SDK/Api/AnswersApi.cs
@@ -371,6 +378,7 @@ src/LLMPulse.SDK/Model/AnswerDetails.cs
 src/LLMPulse.SDK/Model/AnswerDetailsLocale.cs
 src/LLMPulse.SDK/Model/ApiError.cs
 src/LLMPulse.SDK/Model/ApiErrorError.cs
+src/LLMPulse.SDK/Model/ApiKeyInfo.cs
 src/LLMPulse.SDK/Model/AssignPromptTagsRequest.cs
 src/LLMPulse.SDK/Model/CatalogProduct.cs
 src/LLMPulse.SDK/Model/CatalogPromptSuggestion.cs
@@ -399,6 +407,8 @@ src/LLMPulse.SDK/Model/CompetitorMentionsResponse.cs
 src/LLMPulse.SDK/Model/CompetitorSuggestion.cs
 src/LLMPulse.SDK/Model/CompetitorSuggestionsResponse.cs
 src/LLMPulse.SDK/Model/CreateAnnotationRequest.cs
+src/LLMPulse.SDK/Model/CreateApiKey201Response.cs
+src/LLMPulse.SDK/Model/CreateApiKeyRequest.cs
 src/LLMPulse.SDK/Model/CreateCollectionRequest.cs
 src/LLMPulse.SDK/Model/CreateCompetitorRequest.cs
 src/LLMPulse.SDK/Model/CreateProjectDraftRequest.cs
@@ -455,6 +465,7 @@ src/LLMPulse.SDK/Model/IntelligenceTaskUpdateRequest.cs
 src/LLMPulse.SDK/Model/IntelligenceTaskUpdateResponse.cs
 src/LLMPulse.SDK/Model/IntelligenceTasksResponse.cs
 src/LLMPulse.SDK/Model/LaunchRecommendationsRequest.cs
+src/LLMPulse.SDK/Model/ListApiKeys200Response.cs
 src/LLMPulse.SDK/Model/ListCompetitors200Response.cs
 src/LLMPulse.SDK/Model/ListProjects200Response.cs
 src/LLMPulse.SDK/Model/ListTeamInvitations200Response.cs
@@ -546,6 +557,7 @@ src/LLMPulse.SDK/Model/RecommendationSummarySummary.cs
 src/LLMPulse.SDK/Model/RecommendationsResponse.cs
 src/LLMPulse.SDK/Model/RemovePromptTagsRequest.cs
 src/LLMPulse.SDK/Model/RemoveTeamMember200Response.cs
+src/LLMPulse.SDK/Model/RevokeApiKey200Response.cs
 src/LLMPulse.SDK/Model/RevokeTeamInvitation200Response.cs
 src/LLMPulse.SDK/Model/SampleWebhookPayloads200Response.cs
 src/LLMPulse.SDK/Model/SampleWebhookPayloads200ResponseDataInner.cs
