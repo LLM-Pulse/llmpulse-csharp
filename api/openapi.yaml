@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.74.0
+  version: 1.75.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -9277,8 +9277,14 @@ paths:
         \ view=subreddits (default) returns one row per subreddit with its citation\
         \ count, unique authors and positive/negative sentiment split; view=authors\
         \ returns one row per author; view=threads returns the individual cited threads\
-        \ with upvotes, comments, average position and dominant sentiment. Requires\
-        \ the Growth plan or above."
+        \ with upvotes, comments, average position and dominant sentiment. view=breakdowns\
+        \ returns the figures behind Reddit Intelligence > Sentiment and breakdowns:\
+        \ citations is the number of Reddit citations after the filters, and each\
+        \ row is one slice, with breakdown (sentiment, model or country), key, count\
+        \ and pct, the share within its breakdown as the page charts it. Sentiment\
+        \ is that of the AI answer that cited Reddit, with all five labels (very_positive\
+        \ to very_negative) listed, zero included; order and direction do not apply.\
+        \ Requires the Growth plan or above."
       operationId: listRedditCitations
       parameters:
       - description: Project ID
@@ -9318,6 +9324,7 @@ paths:
           - subreddits
           - authors
           - threads
+          - breakdowns
           type: string
         style: form
       - description: Filter to one subreddit (name without the r/ prefix)
@@ -9366,7 +9373,8 @@ paths:
         schema:
           type: string
         style: form
-      - description: Sort field; the allowed set depends on view
+      - description: "Sort field; the allowed set depends on view, and view=breakdowns\
+          \ accepts none"
         explode: true
         in: query
         name: order
@@ -9527,7 +9535,8 @@ paths:
       - Owned Media & Communities
       x-llms-description: "Reddit content cited by AI answers, per subreddit (view=subreddits),\
         \ per author (view=authors) or per thread (view=threads), with sentiment split\
-        \ and engagement (Growth+)."
+        \ and engagement, or the sentiment, model and country breakdowns of those\
+        \ citations (view=breakdowns) (Growth+)."
       x-mcp-tool: list_reddit_citations
       x-plan: growth
   /projects/{id}/owned_media:
