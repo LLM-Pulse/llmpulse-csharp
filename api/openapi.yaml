@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.75.0
+  version: 1.76.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -2549,11 +2549,12 @@ paths:
           \ brand x competitors): mentions_you / not_mentions_you, mentions_competitor\
           \ / not_mentions_competitor, and the four combined cells you_and_competitor,\
           \ competitor_not_you (a rival wins and you are absent), you_not_competitor,\
-          \ no_brands (no tracked brand appears, i.e. open space). Combine with 'competitors'\
-          \ to narrow the competitor side to specific rivals; on a negative cell that\
-          \ reads 'none of these'. On /dimensions/sources it applies to the crawled\
-          \ content of each cited page instead of the answer text. The legacy value\
-          \ 'competitors_only' is still accepted as an alias of competitor_not_you."
+          \ no_brands (no tracked brand appears, i.e. open space; on answers, finished\
+          \ answers only). Combine with 'competitors' to narrow the competitor side\
+          \ to specific rivals; on a negative cell that reads 'none of these'. On\
+          \ /dimensions/sources it applies to the crawled content of each cited page\
+          \ instead of the answer text. The legacy value 'competitors_only' is still\
+          \ accepted as an alias of competitor_not_you."
         explode: true
         in: query
         name: mention_filter
@@ -2570,10 +2571,11 @@ paths:
           - no_brands
           type: string
         style: form
-      - description: Same two-axis matrix applied to the domains cited in the answer
-          instead of the brands named in it. Independent of mention_filter; pass both
-          to intersect them (e.g. mentions_you + not_cites_you finds answers that
-          talk about you without linking to you).
+      - description: "Same two-axis matrix applied to the domains cited in the answer\
+          \ instead of the brands named in it (cites_no_brands still allows other\
+          \ domains), plus no_citations, finished answers that cite no source at all.\
+          \ Independent of mention_filter; pass both to intersect them (e.g. mentions_you\
+          \ + not_cites_you finds answers that talk about you without linking to you)."
         explode: true
         in: query
         name: citation_filter
@@ -2588,6 +2590,7 @@ paths:
           - competitor_not_you
           - you_not_competitor
           - cites_no_brands
+          - no_citations
           type: string
         style: form
       - description: Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM)
@@ -3936,11 +3939,12 @@ paths:
           \ brand x competitors): mentions_you / not_mentions_you, mentions_competitor\
           \ / not_mentions_competitor, and the four combined cells you_and_competitor,\
           \ competitor_not_you (a rival wins and you are absent), you_not_competitor,\
-          \ no_brands (no tracked brand appears, i.e. open space). Combine with 'competitors'\
-          \ to narrow the competitor side to specific rivals; on a negative cell that\
-          \ reads 'none of these'. On /dimensions/sources it applies to the crawled\
-          \ content of each cited page instead of the answer text. The legacy value\
-          \ 'competitors_only' is still accepted as an alias of competitor_not_you."
+          \ no_brands (no tracked brand appears, i.e. open space; on answers, finished\
+          \ answers only). Combine with 'competitors' to narrow the competitor side\
+          \ to specific rivals; on a negative cell that reads 'none of these'. On\
+          \ /dimensions/sources it applies to the crawled content of each cited page\
+          \ instead of the answer text. The legacy value 'competitors_only' is still\
+          \ accepted as an alias of competitor_not_you."
         explode: true
         in: query
         name: mention_filter
@@ -3957,10 +3961,11 @@ paths:
           - no_brands
           type: string
         style: form
-      - description: Same two-axis matrix applied to the domains cited in the answer
-          instead of the brands named in it. Independent of mention_filter; pass both
-          to intersect them (e.g. mentions_you + not_cites_you finds answers that
-          talk about you without linking to you).
+      - description: "Same two-axis matrix applied to the domains cited in the answer\
+          \ instead of the brands named in it (cites_no_brands still allows other\
+          \ domains), plus no_citations, finished answers that cite no source at all.\
+          \ Independent of mention_filter; pass both to intersect them (e.g. mentions_you\
+          \ + not_cites_you finds answers that talk about you without linking to you)."
         explode: true
         in: query
         name: citation_filter
@@ -3975,6 +3980,7 @@ paths:
           - competitor_not_you
           - you_not_competitor
           - cites_no_brands
+          - no_citations
           type: string
         style: form
       - description: Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM)
@@ -4031,7 +4037,7 @@ paths:
         schema:
           type: string
         style: form
-      - description: "Filter sentinel non-answers (the provider returned nothing after\
+      - description: "Filter sentinel non-answers (no answer could be collected after\
           \ all retries, or the model declined to answer, today only Gemini; excluded\
           \ from platform metrics). false = only real answers, true = only sentinels,\
           \ omit = both. Every item carries its own no_result flag."
@@ -6030,11 +6036,12 @@ paths:
           \ brand x competitors): mentions_you / not_mentions_you, mentions_competitor\
           \ / not_mentions_competitor, and the four combined cells you_and_competitor,\
           \ competitor_not_you (a rival wins and you are absent), you_not_competitor,\
-          \ no_brands (no tracked brand appears, i.e. open space). Combine with 'competitors'\
-          \ to narrow the competitor side to specific rivals; on a negative cell that\
-          \ reads 'none of these'. On /dimensions/sources it applies to the crawled\
-          \ content of each cited page instead of the answer text. The legacy value\
-          \ 'competitors_only' is still accepted as an alias of competitor_not_you."
+          \ no_brands (no tracked brand appears, i.e. open space; on answers, finished\
+          \ answers only). Combine with 'competitors' to narrow the competitor side\
+          \ to specific rivals; on a negative cell that reads 'none of these'. On\
+          \ /dimensions/sources it applies to the crawled content of each cited page\
+          \ instead of the answer text. The legacy value 'competitors_only' is still\
+          \ accepted as an alias of competitor_not_you."
         explode: true
         in: query
         name: mention_filter
@@ -7785,7 +7792,7 @@ paths:
         \ saying how many currencies it was priced in (above 1 means the row reports\
         \ its highest-priced listing and min_price may be another currency); view=merchants\
         \ returns one row per selling merchant, with a currency field naming the money\
-        \ its price range and average are expressed in (providers price each market\
+        \ its price range and average are expressed in (AI answers price each market\
         \ in its own currency, so a merchant that sells in more than one reports the\
         \ currency most of its prices use). Every response also carries a totals block\
         \ matching the KPI cards in the app, whose avg_price is computed inside the\
@@ -15723,11 +15730,12 @@ components:
         \ brand x competitors): mentions_you / not_mentions_you, mentions_competitor\
         \ / not_mentions_competitor, and the four combined cells you_and_competitor,\
         \ competitor_not_you (a rival wins and you are absent), you_not_competitor,\
-        \ no_brands (no tracked brand appears, i.e. open space). Combine with 'competitors'\
-        \ to narrow the competitor side to specific rivals; on a negative cell that\
-        \ reads 'none of these'. On /dimensions/sources it applies to the crawled\
-        \ content of each cited page instead of the answer text. The legacy value\
-        \ 'competitors_only' is still accepted as an alias of competitor_not_you."
+        \ no_brands (no tracked brand appears, i.e. open space; on answers, finished\
+        \ answers only). Combine with 'competitors' to narrow the competitor side\
+        \ to specific rivals; on a negative cell that reads 'none of these'. On /dimensions/sources\
+        \ it applies to the crawled content of each cited page instead of the answer\
+        \ text. The legacy value 'competitors_only' is still accepted as an alias\
+        \ of competitor_not_you."
       explode: true
       in: query
       name: mention_filter
@@ -15745,10 +15753,11 @@ components:
         type: string
       style: form
     CitationFilter:
-      description: Same two-axis matrix applied to the domains cited in the answer
-        instead of the brands named in it. Independent of mention_filter; pass both
-        to intersect them (e.g. mentions_you + not_cites_you finds answers that talk
-        about you without linking to you).
+      description: "Same two-axis matrix applied to the domains cited in the answer\
+        \ instead of the brands named in it (cites_no_brands still allows other domains),\
+        \ plus no_citations, finished answers that cite no source at all. Independent\
+        \ of mention_filter; pass both to intersect them (e.g. mentions_you + not_cites_you\
+        \ finds answers that talk about you without linking to you)."
       explode: true
       in: query
       name: citation_filter
@@ -15763,6 +15772,7 @@ components:
         - competitor_not_you
         - you_not_competitor
         - cites_no_brands
+        - no_citations
         type: string
       style: form
     IncludeProject:
@@ -17698,7 +17708,7 @@ components:
           nullable: true
           type: boolean
         no_result:
-          description: "True for a sentinel non-answer (the provider returned nothing\
+          description: "True for a sentinel non-answer (no answer could be collected\
             \ after all retries, or the model declined to answer, today only Gemini);\
             \ excluded from platform metrics"
           type: boolean
