@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.76.0
+  version: 1.76.1
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -12643,7 +12643,7 @@ paths:
         \ original_llms_full_txt_content so POST /technical_geo_reports/{id}/revert_content\
         \ can restore them; running the report again creates a new report without\
         \ these edits. Requires a `read_write` scope API key and, for team members,\
-        \ create permission on GEO Optimization."
+        \ create permission on GEO Audits."
       operationId: updateTechnicalGeoReportContent
       parameters:
       - description: Report id returned by POST /technical_geo_reports or GET /technical_geo_reports
@@ -12715,7 +12715,7 @@ paths:
         \ the llms.txt and llms-full.txt files exactly as they were generated. Returns\
         \ ERR_INVALID_PARAM when the report has no manual edits or report_type is\
         \ not llms_txt. Requires a `read_write` scope API key and, for team members,\
-        \ create permission on GEO Optimization."
+        \ create permission on GEO Audits."
       operationId: revertTechnicalGeoReportContent
       parameters:
       - description: Report id returned by POST /technical_geo_reports or GET /technical_geo_reports
@@ -12917,7 +12917,7 @@ paths:
   /geo_audits/{id}:
     delete:
       description: "Archives the audit. Requires a `read_write` scope API key and,\
-        \ for team members, delete permission on GEO Optimization."
+        \ for team members, delete permission on GEO Audits."
       operationId: deleteGeoAudit
       parameters:
       - description: Project ID
@@ -13019,7 +13019,7 @@ paths:
       description: "Updates the schedule, the email alerts or the status. Making an\
         \ audit recurring or resuming it counts against the plan limit of active recurring\
         \ audits (ERR_LIMIT_REACHED). Requires a `read_write` scope API key and, for\
-        \ team members, update permission on GEO Optimization."
+        \ team members, update permission on GEO Audits."
       operationId: updateGeoAudit
       parameters:
       - description: Audit id
@@ -13508,7 +13508,7 @@ paths:
   /geo_audits/{geo_audit_id}/issues/{id}:
     patch:
       description: "Requires a `read_write` scope API key and, for team members, update\
-        \ permission on GEO Optimization."
+        \ permission on GEO Audits."
       operationId: updateGeoAuditIssue
       parameters:
       - description: Audit id
