@@ -15,7 +15,7 @@ Name | Type | Description | Notes
 **RequestId** | **string** |  | 
 **LengthWarning** | **string** | Which tracked AI models will skip new prompts that are too long for them | 
 **PromptsAvailable** | **int** | Prompt slots left on the plan; null when unlimited | 
-**UntrackedReason** | **string** | Why tracked is false: paused or project_limit. Null when tracked | 
+**UntrackedReason** | **string** | Why tracked is false: pitch_project, paused or project_limit. Null when tracked | 
 **Warning** | **string** | What to do when tracked is false. Null when tracked | 
 
 [[Back to Model list]](../../README.md#documentation-for-models) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to README]](../../README.md)

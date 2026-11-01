@@ -32,6 +32,7 @@ docs/apis/TeamApi.md
 docs/apis/TechnicalGEOReportsApi.md
 docs/apis/WebhooksApi.md
 docs/models/AccountCapacity.md
+docs/models/AccountPitchQuota.md
 docs/models/AccountQuota.md
 docs/models/Actor.md
 docs/models/AgentBot.md
@@ -196,6 +197,7 @@ docs/models/ProjectDetails.md
 docs/models/ProjectDetailsAllOfAgentTraffic.md
 docs/models/ProjectDetailsAllOfAiTraffic.md
 docs/models/ProjectDetailsAllOfDataCoverage.md
+docs/models/ProjectDetailsAllOfPitchRun.md
 docs/models/ProjectDetailsAllOfSearchConsole.md
 docs/models/ProjectDetailsAllOfStats.md
 docs/models/ProjectDetailsAllOfStatsPromptsByBrandKind.md
@@ -361,6 +363,7 @@ src/LLMPulse.SDK/Extensions/IServiceCollectionExtensions.cs
 src/LLMPulse.SDK/LLMPulse.SDK.csproj
 src/LLMPulse.SDK/Logging/RestLogEvents.cs
 src/LLMPulse.SDK/Model/AccountCapacity.cs
+src/LLMPulse.SDK/Model/AccountPitchQuota.cs
 src/LLMPulse.SDK/Model/AccountQuota.cs
 src/LLMPulse.SDK/Model/Actor.cs
 src/LLMPulse.SDK/Model/AgentBot.cs
@@ -525,6 +528,7 @@ src/LLMPulse.SDK/Model/ProjectDetails.cs
 src/LLMPulse.SDK/Model/ProjectDetailsAllOfAgentTraffic.cs
 src/LLMPulse.SDK/Model/ProjectDetailsAllOfAiTraffic.cs
 src/LLMPulse.SDK/Model/ProjectDetailsAllOfDataCoverage.cs
+src/LLMPulse.SDK/Model/ProjectDetailsAllOfPitchRun.cs
 src/LLMPulse.SDK/Model/ProjectDetailsAllOfSearchConsole.cs
 src/LLMPulse.SDK/Model/ProjectDetailsAllOfStats.cs
 src/LLMPulse.SDK/Model/ProjectDetailsAllOfStatsPromptsByBrandKind.cs

@@ -16,7 +16,7 @@ Name | Type | Description | Notes
 **PromptType** | **string** | Search intent: informational, navigational, commercial or transactional. Null until the prompt is classified | 
 **BrandKind** | **string** | Brand focus: brand, brand_other or non_brand. Null until the prompt is classified | 
 **LastExecutedAt** | **DateTime** | Null until the prompt has run | 
-**UntrackedReason** | **string** | Why tracked is false: paused, project_limit or prompt_limit. Null when tracked | 
+**UntrackedReason** | **string** | Why tracked is false: pitch_project, paused, project_limit or prompt_limit. Null when tracked | 
 
 [[Back to Model list]](../../README.md#documentation-for-models) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to README]](../../README.md)
 

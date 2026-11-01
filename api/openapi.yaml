@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.76.1
+  version: 1.77.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -130,7 +130,9 @@ paths:
   /ping:
     get:
       description: "Validates the API key and optionally pings a project. Returns\
-        \ the authenticated user_id, project (if project_id is supplied), and a request_id."
+        \ the authenticated user_id, project (if project_id is supplied), and a request_id.\
+        \ The project object carries only id, name and brand_name; GET /dimensions/projects/{id}\
+        \ returns the rest, pitch and tracked included."
       operationId: ping
       parameters:
       - description: Optional project to verify access for
@@ -170,8 +172,9 @@ paths:
     get:
       description: "Returns the account plan, tracking cadence, subscription window,\
         \ how much of each quota is used (prompts, projects, competitors per project,\
-        \ monthly GEO Writer tasks, team members, active recurring GEO audits and\
-        \ manual GEO audit runs in the last 24 hours) and the published API rate limits.\
+        \ monthly GEO Writer tasks, team members, active recurring GEO audits, manual\
+        \ GEO audit runs in the last 24 hours and pitch projects created this month,\
+        \ with the account's pitch project access) and the published API rate limits.\
         \ Limits resolve through the account owner, so a team member sees the capacity\
         \ that applies to them. An unlimited quota returns limit and remaining as\
         \ null with unlimited set to true, since Infinity is not representable in\
@@ -184,9 +187,9 @@ paths:
         \ api_key_project_ids lists the key's projects, limits.prompts.used counts\
         \ those projects' prompts, limits.prompts, limits.intelligence_tasks and the\
         \ two GEO audit quotas show only remaining and unlimited (the capacity the\
-        \ key can still spend, without the account total), and the projects quota\
-        \ is capped at the projects it reaches. tracking_frequency stays, as the cadence\
-        \ those projects' data is collected at."
+        \ key can still spend, without the account total), limits.pitch_projects is\
+        \ absent, and the projects quota is capped at the projects it reaches. tracking_frequency\
+        \ stays, as the cadence those projects' data is collected at."
       operationId: getAccount
       responses:
         "200":
@@ -210,14 +213,30 @@ paths:
       tags:
       - Account
       x-llms-description: "Plan, subscription window, quota usage (prompts, projects,\
-        \ competitors, intelligence tasks) and API rate limits for the authenticated\
-        \ account."
+        \ competitors, intelligence tasks, pitch projects) and API rate limits for\
+        \ the authenticated account."
       x-mcp-tool: get_account_usage
   /dimensions/projects:
     get:
-      description: All projects accessible with your API key.
+      description: "All projects accessible with your API key. Pitch projects, one-off\
+        \ snapshots deleted 90 days after they are created, are left out unless pitch\
+        \ is include or only."
       operationId: listProjects
       parameters:
+      - description: "exclude (default) leaves pitch projects out, include lists them\
+          \ with the tracked projects, only lists pitch projects alone"
+        explode: true
+        in: query
+        name: pitch
+        required: false
+        schema:
+          default: exclude
+          enum:
+          - exclude
+          - include
+          - only
+          type: string
+        style: form
       - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
           \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
           \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
@@ -252,9 +271,10 @@ paths:
         \ without one), stats (incl. prompts_by_brand_kind counts and prompts_available,\
         \ how many prompts can still be added: the lower of the project's free slots\
         \ and the account's remaining prompts, null when neither caps it), data_coverage\
-        \ (models, countries and languages with data) and the status of each data\
-        \ connection (search_console, ai_traffic, agent_traffic) with the connect_url\
-        \ where the user connects it."
+        \ (models, countries and languages with data), the status of each data connection\
+        \ (search_console, ai_traffic, agent_traffic) with the connect_url where the\
+        \ user connects it, and for a pitch project its pitch_expires_at and pitch_run\
+        \ (when it ran, the AI models it asked and how many answers arrived)."
       operationId: getProjectDetails
       parameters:
       - explode: false
@@ -582,10 +602,17 @@ paths:
     post:
       description: "Create a complete project in one call: project fields, prompts\
         \ (queued for execution and categorization), collections tagging those prompts,\
-        \ competitors, weekly email subscription. The response lists same_domain_projects\
-        \ so an accidental duplicate is visible; it never blocks the create. Idempotent\
-        \ via `external_identifier` (embed-enabled accounts only; replay returns 200\
-        \ with the existing project). Requires a `read_write` scope API key."
+        \ competitors, weekly email subscription. With pitch true it creates a pitch\
+        \ project instead: a one-off snapshot for a prospect that runs once, takes\
+        \ no project slot and is deleted after 90 days unless converted; ERR_PLAN_REQUIRED\
+        \ when the account is below the Scale tier, on a trial or without approved\
+        \ pitch project access (error.meta.access says which), ERR_QUOTA_EXCEEDED\
+        \ when the month's pitch projects are used (error.meta.resets_on), ERR_INVALID_PARAM\
+        \ for more than 100 prompts or a domain the account tracks or pitched in the\
+        \ last 90 days. The response lists same_domain_projects so an accidental duplicate\
+        \ is visible; it never blocks the create. Idempotent via `external_identifier`\
+        \ (embed-enabled accounts only; replay returns 200 with the existing project).\
+        \ Requires a `read_write` scope API key."
       operationId: createProject
       requestBody:
         content:
@@ -718,8 +745,18 @@ paths:
         \ it; here a co-owner, like every team member, also needs Projects update):\
         \ any other team member gets ERR_INSUFFICIENT_PERMISSION, and a key limited\
         \ to some projects ERR_KEY_PROJECT_SCOPED, with nothing applied. A request\
-        \ that sends only prompt_limit is applied even while a rematch runs. Requires\
-        \ a `read_write` scope API key."
+        \ that sends only prompt_limit is applied even while a rematch runs. pitch\
+        \ false, sent on its own, converts a pitch project into a tracked project,\
+        \ like Convert in the app: it keeps its answers and metrics, is no longer\
+        \ deleted, takes a project slot, and its prompts count against the prompt\
+        \ quota and run on the account's schedule from the next run. It cannot be\
+        \ undone and does not give back the month's pitch project. Converting needs\
+        \ the Projects update and create permissions (ERR_INSUFFICIENT_PERMISSION)\
+        \ and a key for the whole account (ERR_KEY_PROJECT_SCOPED); ERR_LIMIT_REACHED,\
+        \ with error.meta.limit, when the account has no project slot or prompts left\
+        \ or the project has more prompts or competitors than the plan allows per\
+        \ project, and ERR_INVALID_PARAM when the project is not a live pitch project.\
+        \ Requires a `read_write` scope API key."
       operationId: updateProject
       parameters:
       - explode: false
@@ -3071,7 +3108,10 @@ paths:
         \ the account prompt quota and skips duplicates. When the project does not\
         \ run on the schedule (paused, or beyond the plan's project limit) the prompts\
         \ are still created, and the response says so with `tracked` false, `untracked_reason`\
-        \ and a `warning`. Requires a `read_write` scope API key."
+        \ and a `warning`. A pitch project holds at most 100 prompts in all, deleted\
+        \ ones included (ERR_LIMIT_REACHED past that), and the prompts of a launched\
+        \ pitch project are fixed, so adding one returns ERR_INVALID_PARAM with error.meta.reason\
+        \ pitch_prompts_frozen. Requires a `read_write` scope API key."
       operationId: createPrompts
       requestBody:
         content:
@@ -3130,10 +3170,12 @@ paths:
         \ and comes back in row_errors. For a team member without update access to\
         \ Prompts, a row matching a prompt that already existed adds no tags to it,\
         \ and comes back in row_errors when it would have added one. Responds 201\
-        \ when it created prompts, 200 otherwise. `tracked` false, with `untracked_reason`\
-        \ and a `warning`, means the project does not run on the schedule, so the\
-        \ imported prompts do not run until that changes. Requires a `read_write`\
-        \ scope API key and, for team members, create access to Prompts."
+        \ when it created prompts, 200 otherwise. The prompts of a launched pitch\
+        \ project are fixed, so importing one returns ERR_INVALID_PARAM with error.meta.reason\
+        \ pitch_prompts_frozen. `tracked` false, with `untracked_reason` and a `warning`,\
+        \ means the project does not run on the schedule, so the imported prompts\
+        \ do not run until that changes. Requires a `read_write` scope API key and,\
+        \ for team members, create access to Prompts."
       operationId: importPrompts
       requestBody:
         content:
@@ -3210,9 +3252,11 @@ paths:
         \ then accept the ones you want with POST /suggested_prompts/accept. Nothing\
         \ is tracked until accepted. The request is validated before the run starts,\
         \ and refused with ERR_LIMIT_REACHED when the plan has no prompt slot left,\
-        \ or ERR_QUOTA_EXCEEDED after 60 runs in an hour (the per-user prompt suggestion\
-        \ allowance, shared with project setup). Requires a `read_write` scope API\
-        \ key and, for team members, create access to Prompts."
+        \ ERR_INVALID_PARAM with error.meta.reason pitch_prompts_frozen for a launched\
+        \ pitch project, whose prompts are fixed, or ERR_QUOTA_EXCEEDED after 60 runs\
+        \ in an hour (the per-user prompt suggestion allowance, shared with project\
+        \ setup). Requires a `read_write` scope API key and, for team members, create\
+        \ access to Prompts."
       operationId: createPromptGeneration
       requestBody:
         content:
@@ -3275,7 +3319,9 @@ paths:
         \ or tag_names; create_missing creates a missing name when the team member\
         \ may create tags). Suggestions that are no longer pending come back in skipped.\
         \ When the new prompts would exceed the plan the call returns ERR_LIMIT_REACHED\
-        \ and accepts nothing. Requires a `read_write` scope API key and, for team\
+        \ and accepts nothing. The prompts of a launched pitch project are fixed,\
+        \ so accepting a suggestion returns ERR_INVALID_PARAM with error.meta.reason\
+        \ pitch_prompts_frozen. Requires a `read_write` scope API key and, for team\
         \ members, create access to Prompts."
       operationId: acceptSuggestedPrompts
       requestBody:
@@ -3394,8 +3440,9 @@ paths:
     delete:
       description: "Deletes a prompt (irreversible). The prompt disappears immediately\
         \ and frees a prompt slot; its historical data (executions, mentions, citations,\
-        \ sentiment) is purged by a background job. Requires a `read_write` scope\
-        \ API key."
+        \ sentiment) is purged by a background job. The prompts of a launched pitch\
+        \ project are fixed, so deleting one returns ERR_INVALID_PARAM with error.meta.reason\
+        \ pitch_prompts_frozen. Requires a `read_write` scope API key."
       operationId: deletePrompt
       parameters:
       - description: Project ID
@@ -3438,6 +3485,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
       summary: Delete a prompt
       tags:
       - Prompts
@@ -14463,8 +14521,9 @@ paths:
         \ which project the store belongs to: the live project whose domain equals\
         \ the store domain, else one whose domain is a parent or a subdomain of it,\
         \ else null. candidates lists every live project of the account so the app\
-        \ can offer a picker. Takes no project_id. Not available to accounts with\
-        \ a white-label portal or an embed (ERR_INTEGRATION_UNAVAILABLE)."
+        \ can offer a picker. Pitch projects are never matched or listed, since a\
+        \ store is a data connection a pitch project does not take. Takes no project_id.\
+        \ Not available to accounts with a white-label portal or an embed (ERR_INTEGRATION_UNAVAILABLE)."
       operationId: getStoreConnection
       parameters:
       - description: Store platform
@@ -14632,9 +14691,10 @@ paths:
         \ Every stored row of that project and platform inside the window is replaced,\
         \ so pushing the same window again converges instead of counting twice. Rows\
         \ are kept per project and platform, not per store, so one store reports per\
-        \ project. Requires a `read_write` scope API key and, for team members, update\
-        \ access to AI Traffic. Not available to accounts with a white-label portal\
-        \ or an embed (ERR_INTEGRATION_UNAVAILABLE)."
+        \ project. A pitch project takes no store data: pushing orders to one returns\
+        \ ERR_INVALID_PARAM. Requires a `read_write` scope API key and, for team members,\
+        \ update access to AI Traffic. Not available to accounts with a white-label\
+        \ portal or an embed (ERR_INTEGRATION_UNAVAILABLE)."
       operationId: replaceAiOrders
       requestBody:
         content:
@@ -14871,9 +14931,11 @@ paths:
         \ tagged with a collection named after its product. Suggestions that are no\
         \ longer pending come back in skipped. All accepted suggestions must share\
         \ one country and language. When the new prompts would exceed the plan, the\
-        \ call returns ERR_LIMIT_REACHED and accepts nothing. Requires a `read_write`\
-        \ scope API key and, for team members, create access to Prompts. Not available\
-        \ to accounts with a white-label portal or an embed (ERR_INTEGRATION_UNAVAILABLE)."
+        \ call returns ERR_LIMIT_REACHED and accepts nothing. The prompts of a launched\
+        \ pitch project are fixed, so accepting a suggestion returns ERR_INVALID_PARAM\
+        \ with error.meta.reason pitch_prompts_frozen. Requires a `read_write` scope\
+        \ API key and, for team members, create access to Prompts. Not available to\
+        \ accounts with a white-label portal or an embed (ERR_INTEGRATION_UNAVAILABLE)."
       operationId: acceptCatalogPromptSuggestions
       requestBody:
         content:
@@ -16054,6 +16116,51 @@ components:
           description: Reset window for quotas that reset (e.g. month)
           type: string
       type: object
+    AccountPitchQuota:
+      description: "Pitch projects created this calendar month (Europe/Madrid) against\
+        \ the monthly allowance, which pitch projects use instead of a project slot.\
+        \ limit and remaining are null when unlimited is true."
+      example:
+        limit: 2
+        used: 7
+        remaining: 9
+        unlimited: true
+        period: period
+        resets_on: 2000-01-23
+        access: none
+      properties:
+        limit:
+          nullable: true
+          type: integer
+        used:
+          type: integer
+        remaining:
+          nullable: true
+          type: integer
+        unlimited:
+          type: boolean
+        period:
+          description: Always month
+          type: string
+        resets_on:
+          description: "The first day of next month, when the allowance starts again"
+          format: date
+          type: string
+        access:
+          description: "Whether the account may create pitch projects. The account\
+            \ owner or an account admin (co-owner) requests access in Account Settings\
+            \ > Pitch projects and our team reviews it; approved access goes dormant\
+            \ while the account is below the Scale tier, on a trial, has a payment\
+            \ problem, is set to cancel or has an allowance of 0"
+          enum:
+          - none
+          - pending
+          - approved
+          - dormant
+          - rejected
+          - revoked
+          type: string
+      type: object
     AccountCapacity:
       description: A ceiling with no usage counter attached. limit is null when unlimited
         is true.
@@ -16074,6 +16181,8 @@ components:
         brand_name: brand_name
         tracked: true
         untracked_reason: untracked_reason
+        pitch: true
+        pitch_expires_at: 2000-01-23T04:56:07.000+00:00
       properties:
         id:
           type: integer
@@ -16087,11 +16196,24 @@ components:
           type: string
         tracked:
           description: "Whether scheduled runs include this project. False when it\
-            \ is paused, or when the plan's project limit leaves it out (the oldest\
-            \ projects up to the limit run), so its prompts do not run"
+            \ is a pitch project, which runs once, when it is paused, or when the\
+            \ plan's project limit leaves it out (the oldest projects up to the limit\
+            \ run), so its prompts do not run"
           type: boolean
         untracked_reason:
-          description: "Why tracked is false: paused or project_limit. Null when tracked"
+          description: "Why tracked is false: pitch_project, paused or project_limit.\
+            \ Null when tracked"
+          nullable: true
+          type: string
+        pitch:
+          description: "Whether this is a pitch project, a one-off snapshot that runs\
+            \ its prompts once, takes no project slot and is deleted at pitch_expires_at\
+            \ unless it is converted (PATCH /projects/{id} with pitch false)"
+          type: boolean
+        pitch_expires_at:
+          description: "When a pitch project is deleted, with its data, unless it\
+            \ is converted first. Null for a tracked project"
+          format: date-time
           nullable: true
           type: string
       type: object
@@ -16161,6 +16283,8 @@ components:
             type: integer
           stats:
             $ref: "#/components/schemas/ProjectDetails_allOf_stats"
+          pitch_run:
+            $ref: "#/components/schemas/ProjectDetails_allOf_pitch_run"
           data_coverage:
             $ref: "#/components/schemas/ProjectDetails_allOf_data_coverage"
           search_console:
@@ -16181,6 +16305,8 @@ components:
         brand_name: brand_name
         tracked: true
         untracked_reason: untracked_reason
+        pitch: true
+        pitch_expires_at: 2000-01-23T04:56:07.000+00:00
         url: https://openapi-generator.tech
         description: description
         matching_names:
@@ -16214,6 +16340,15 @@ components:
           competitors_count: 7
           collections_count: 9
           prompts_available: 3
+        pitch_run:
+          status: starting
+          launched_at: 2000-01-23T04:56:07.000+00:00
+          settled_at: 2000-01-23T04:56:07.000+00:00
+          models:
+          - chatgpt
+          - chatgpt
+          answers_expected: 2
+          answers_received: 4
         data_coverage:
           models:
           - chatgpt
@@ -16228,7 +16363,7 @@ components:
           status: connected
           property: property
           connect_url: https://openapi-generator.tech
-          properties_count: 2
+          properties_count: 7
         ai_traffic:
           status: connected
           provider: provider
@@ -16374,7 +16509,8 @@ components:
         note:
           description: "What the change does to mention detection, citation ownership\
             \ and historical numbers, and, when prompt_limit was sent, how many prompts\
-            \ the project holds and how many more can be added"
+            \ the project holds and how many more can be added; after pitch false,\
+            \ what the converted project now uses"
           type: string
         request_id:
           type: string
@@ -17850,6 +17986,7 @@ components:
         weekly_email_subscribed: false
         external_identifier: external_identifier
         execute_prompts_immediately: true
+        pitch: false
       properties:
         website_url:
           description: "Public HTTP(S) URL with a DNS hostname or public IP address.\
@@ -17951,6 +18088,19 @@ components:
           type: string
         execute_prompts_immediately:
           default: true
+          type: boolean
+        pitch:
+          default: false
+          description: "Create a pitch project, a one-off snapshot for a prospect.\
+            \ It runs its prompts once across the account's AI models right away,\
+            \ takes no project slot and its prompts do not count against the prompt\
+            \ quota, and it is deleted 90 days later unless converted by sending pitch\
+            \ false to PATCH /projects/{id}. It uses one of the month's pitch projects\
+            \ (GET /account, limits.pitch_projects), needs access approved for the\
+            \ account and a paid subscription on the Scale tier or higher, takes 1\
+            \ to 100 prompts, and cannot use a domain the account already tracks or\
+            \ pitched in the last 90 days. execute_prompts_immediately must not be\
+            \ false"
           type: boolean
       required:
       - main_country
@@ -18091,7 +18241,8 @@ components:
             \ so the new prompts do not run until that changes"
           type: boolean
         untracked_reason:
-          description: "Why tracked is false: paused or project_limit. Null when tracked"
+          description: "Why tracked is false: pitch_project, paused or project_limit.\
+            \ Null when tracked"
           nullable: true
           type: string
         warning:
@@ -21843,8 +21994,8 @@ components:
             \ run)"
           type: boolean
         untracked_reason:
-          description: "Why tracked is false: paused, project_limit or prompt_limit.\
-            \ Null when tracked"
+          description: "Why tracked is false: pitch_project, paused, project_limit\
+            \ or prompt_limit. Null when tracked"
           nullable: true
           type: string
         app_url:
@@ -24005,7 +24156,8 @@ components:
             \ limit, so the new prompts do not run until that changes"
           type: boolean
         untracked_reason:
-          description: "Why tracked is false: paused or project_limit. Null when tracked"
+          description: "Why tracked is false: pitch_project, paused or project_limit.\
+            \ Null when tracked"
           nullable: true
           type: string
         warning:
@@ -25154,6 +25306,8 @@ components:
           brand_name: brand_name
           tracked: true
           untracked_reason: untracked_reason
+          pitch: true
+          pitch_expires_at: 2000-01-23T04:56:07.000+00:00
         request_id: request_id
       properties:
         ok:
@@ -25220,6 +25374,14 @@ components:
           remaining: 5
           unlimited: true
           period: period
+        pitch_projects:
+          limit: 2
+          used: 7
+          remaining: 9
+          unlimited: true
+          period: period
+          resets_on: 2000-01-23
+          access: none
       properties:
         prompts:
           $ref: "#/components/schemas/AccountQuota"
@@ -25235,11 +25397,13 @@ components:
           $ref: "#/components/schemas/AccountQuota"
         geo_audit_manual_runs:
           $ref: "#/components/schemas/AccountQuota"
+        pitch_projects:
+          $ref: "#/components/schemas/AccountPitchQuota"
       type: object
     getAccount_200_response_rate_limits:
       example:
-        requests_per_minute: 2
-        write_requests_per_minute: 7
+        requests_per_minute: 3
+        write_requests_per_minute: 2
       properties:
         requests_per_minute:
           description: "The ceiling enforced for the API key used on this call, which\
@@ -25299,9 +25463,17 @@ components:
             remaining: 5
             unlimited: true
             period: period
+          pitch_projects:
+            limit: 2
+            used: 7
+            remaining: 9
+            unlimited: true
+            period: period
+            resets_on: 2000-01-23
+            access: none
         rate_limits:
-          requests_per_minute: 2
-          write_requests_per_minute: 7
+          requests_per_minute: 3
+          write_requests_per_minute: 2
         request_id: request_id
       properties:
         plan:
@@ -25345,11 +25517,15 @@ components:
           brand_name: brand_name
           tracked: true
           untracked_reason: untracked_reason
+          pitch: true
+          pitch_expires_at: 2000-01-23T04:56:07.000+00:00
         - id: 6
           name: name
           brand_name: brand_name
           tracked: true
           untracked_reason: untracked_reason
+          pitch: true
+          pitch_expires_at: 2000-01-23T04:56:07.000+00:00
         request_id: request_id
       properties:
         projects:
@@ -25536,6 +25712,10 @@ components:
           minimum: 1
           nullable: true
           type: integer
+        pitch:
+          description: "false converts a pitch project into a tracked project. Send\
+            \ it on its own, without other fields; true is rejected"
+          type: boolean
       type: object
     listCompetitors_200_response:
       example:
@@ -26573,6 +26753,65 @@ components:
           nullable: true
           type: integer
       type: object
+    ProjectDetails_allOf_pitch_run:
+      description: "The one run of a pitch project; null for a tracked project. Its\
+        \ answers are dated between launched_at and settled_at, so read its metrics\
+        \ with from set to the launched_at date (the default ranges leave out a pitch\
+        \ older than a few weeks)"
+      example:
+        status: starting
+        launched_at: 2000-01-23T04:56:07.000+00:00
+        settled_at: 2000-01-23T04:56:07.000+00:00
+        models:
+        - chatgpt
+        - chatgpt
+        answers_expected: 2
+        answers_received: 4
+      nullable: true
+      properties:
+        status:
+          description: "starting before the run begins, running while answers arrive,\
+            \ ready once every AI model has answered or stopped trying"
+          enum:
+          - starting
+          - running
+          - ready
+          type: string
+        launched_at:
+          format: date-time
+          nullable: true
+          type: string
+        settled_at:
+          format: date-time
+          nullable: true
+          type: string
+        models:
+          description: "The AI models the run asks, fixed when it starts"
+          items:
+            enum:
+            - chatgpt
+            - perplexity
+            - ai_mode
+            - ai_overview
+            - gemini
+            - copilot
+            - amazon_rufus
+            - claude
+            - grok
+            - deepseek
+            - naver_ai
+            - baidu_ai
+            - meta_ai
+            - naver_ai_tab
+            - qwen
+            - doubao
+            type: string
+          type: array
+        answers_expected:
+          type: integer
+        answers_received:
+          type: integer
+      type: object
     ProjectDetails_allOf_data_coverage:
       description: "AI models, countries and languages the project has data for"
       example:
@@ -26628,7 +26867,7 @@ components:
         status: connected
         property: property
         connect_url: https://openapi-generator.tech
-        properties_count: 2
+        properties_count: 7
       properties:
         status:
           enum:
@@ -27945,7 +28184,8 @@ components:
           description: "Extra detail for some codes. A not-connected or access-revoked\
             \ error from the Search Console, AI traffic, web analytics or agent traffic\
             \ endpoints carries connect_url, the in-app page where the user connects\
-            \ or reconnects the source."
+            \ or reconnects the source. A prompt write refused because a launched\
+            \ pitch project's prompts are fixed carries reason pitch_prompts_frozen."
           type: object
       type: object
   securitySchemes:

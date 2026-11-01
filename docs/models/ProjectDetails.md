@@ -4,11 +4,13 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Tracked** | **bool** | Whether scheduled runs include this project. False when it is paused, or when the plan&#39;s project limit leaves it out (the oldest projects up to the limit run), so its prompts do not run | 
+**Tracked** | **bool** | Whether scheduled runs include this project. False when it is a pitch project, which runs once, when it is paused, or when the plan&#39;s project limit leaves it out (the oldest projects up to the limit run), so its prompts do not run | 
 **Id** | **int** |  | [optional] 
 **Name** | **string** | Internal project label (sidebar, settings, admin) | [optional] 
 **BrandName** | **string** | LLM-facing brand label (used in prompts and customer-facing charts). Null when not set, in which case prompts and charts use &#x60;name&#x60;. | [optional] 
-**UntrackedReason** | **string** | Why tracked is false: paused or project_limit. Null when tracked | 
+**UntrackedReason** | **string** | Why tracked is false: pitch_project, paused or project_limit. Null when tracked | 
+**Pitch** | **bool** | Whether this is a pitch project, a one-off snapshot that runs its prompts once, takes no project slot and is deleted at pitch_expires_at unless it is converted (PATCH /projects/{id} with pitch false) | [optional] 
+**PitchExpiresAt** | **DateTime** | When a pitch project is deleted, with its data, unless it is converted first. Null for a tracked project | [optional] 
 **Url** | **string** |  | [optional] 
 **Description** | **string** |  | [optional] 
 **MatchingNames** | **List&lt;string&gt;** |  | [optional] 
@@ -28,6 +30,7 @@ Name | Type | Description | Notes
 **CreatedAt** | **DateTime** |  | [optional] 
 **PromptLimit** | **int** | The most prompts this project can hold, set by the account owner or a co-owner (Account Settings &gt; Prompt Limits). Null when the project has no limit of its own; the account&#39;s plan allowance applies either way | [optional] 
 **Stats** | [**ProjectDetailsAllOfStats**](ProjectDetailsAllOfStats.md) |  | [optional] 
+**PitchRun** | [**ProjectDetailsAllOfPitchRun**](ProjectDetailsAllOfPitchRun.md) |  | [optional] 
 **DataCoverage** | [**ProjectDetailsAllOfDataCoverage**](ProjectDetailsAllOfDataCoverage.md) |  | [optional] 
 **SearchConsole** | [**ProjectDetailsAllOfSearchConsole**](ProjectDetailsAllOfSearchConsole.md) |  | [optional] 
 **AiTraffic** | [**ProjectDetailsAllOfAiTraffic**](ProjectDetailsAllOfAiTraffic.md) |  | [optional] 
