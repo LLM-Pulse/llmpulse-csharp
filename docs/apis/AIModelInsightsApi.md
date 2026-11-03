@@ -10,11 +10,11 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 
 <a id="getaimodelinsightssummary"></a>
 # **GetAiModelInsightsSummary**
-> void GetAiModelInsightsSummary (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, string collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, string competitors = null)
+> AiModelInsightsSummaryResponse GetAiModelInsightsSummary (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, string collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, string competitors = null)
 
 AI Model Insights summary
 
-Per-model mentions, citations, brand net sentiment with raw counts, weighted visibility totals/shares, plus actor matrices. All actor entries use the standard shape `{ type, id, competitor_id, name, domain }` with bare (scheme-less) domains.
+Per-model mentions, citations, brand net sentiment with raw counts, weighted visibility totals/shares, plus actor matrices. All actor entries use the standard shape `{ type, id, competitor_id, name, domain }` with bare (scheme-less) domains. Rows cover the AI models the account has enabled or that answered in the window. A share, net sentiment or market share value with nothing behind it is null; counts, totals and weighted visibility scores stay 0.
 
 
 ### Parameters
@@ -35,7 +35,7 @@ Per-model mentions, citations, brand net sentiment with raw counts, weighted vis
 
 ### Return type
 
-void (empty response body)
+[**AiModelInsightsSummaryResponse**](AiModelInsightsSummaryResponse.md)
 
 ### Authorization
 
@@ -44,7 +44,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details

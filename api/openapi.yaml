@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.77.0
+  version: 1.78.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -756,6 +756,9 @@ paths:
         \ with error.meta.limit, when the account has no project slot or prompts left\
         \ or the project has more prompts or competitors than the plan allows per\
         \ project, and ERR_INVALID_PARAM when the project is not a live pitch project.\
+        \ A pitch project's website, brand name, matching names, country, language\
+        \ and prompt limit (and name while it has no brand name) are fixed from creation:\
+        \ changing one returns ERR_INVALID_PARAM, so convert it with pitch false first.\
         \ Requires a `read_write` scope API key."
       operationId: updateProject
       parameters:
@@ -6963,7 +6966,10 @@ paths:
       description: "Per-model mentions, citations, brand net sentiment with raw counts,\
         \ weighted visibility totals/shares, plus actor matrices. All actor entries\
         \ use the standard shape `{ type, id, competitor_id, name, domain }` with\
-        \ bare (scheme-less) domains."
+        \ bare (scheme-less) domains. Rows cover the AI models the account has enabled\
+        \ or that answered in the window. A share, net sentiment or market share value\
+        \ with nothing behind it is null; counts, totals and weighted visibility scores\
+        \ stay 0."
       operationId: getAiModelInsightsSummary
       parameters:
       - description: Project ID
@@ -7075,6 +7081,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiModelInsightsSummaryResponse"
           description: Summary
       summary: AI Model Insights summary
       tags:
@@ -13694,9 +13704,9 @@ paths:
   /annotations:
     get:
       description: "Lists project timeline annotations, newest first. Rows can come\
-        \ from manual notes, project automations, GEO tests, or platform events. The\
-        \ origin field distinguishes them; editable says whether the requesting user\
-        \ may modify the row. Available on every plan."
+        \ from manual notes, project automations, or platform events. The origin field\
+        \ distinguishes them; editable says whether the requesting user may modify\
+        \ the row. Available on every plan."
       operationId: listAnnotations
       parameters:
       - description: Project ID
@@ -17497,6 +17507,552 @@ components:
         query:
           description: Only present when a query filter was given
           type: string
+      type: object
+    AiModelInsightsSummaryResponse:
+      description: "One entry per AI model the account has enabled or that answered\
+        \ in the window, in the in-app column order: the models list, which every\
+        \ per-model list and map in summary follows. A share, net sentiment or market\
+        \ share value with nothing behind it is null, because 0 is a real value; counts,\
+        \ totals and weighted visibility scores stay 0."
+      example:
+        project_id: 0
+        from: 2000-01-23T04:56:07.000+00:00
+        to: 2000-01-23T04:56:07.000+00:00
+        filters:
+          from: 2000-01-23T04:56:07.000+00:00
+          to: 2000-01-23T04:56:07.000+00:00
+          granularity: granularity
+          country_code: country_code
+          language_code: language_code
+          collection_id: collection_id
+          prompt_type: prompt_type
+          brand_kind: brand_kind
+          competitors:
+          - 6
+          - 6
+        models:
+        - model: model
+          label: label
+          color: color
+        - model: model
+          label: label
+          color: color
+        summary:
+          mentions_by_model:
+            total_mentions: 1
+            models:
+            - mentions_count: 5
+              share_of_total: 5.637376656633329
+            - mentions_count: 5
+              share_of_total: 5.637376656633329
+          citations_by_model:
+            total_citations: 2
+            models:
+            - citations_count: 7
+              share_of_total: 9.301444243932576
+            - citations_count: 7
+              share_of_total: 9.301444243932576
+          brand_net_sentiment_by_model:
+            total_sentiments: 3
+            models:
+            - sentiments_count: 2
+              positive_count: 4
+              negative_count: 7
+              net_sentiment: 1.2315135367772556
+            - sentiments_count: 2
+              positive_count: 4
+              negative_count: 7
+              net_sentiment: 1.2315135367772556
+          weighted_visibility_by_model:
+            total_weighted_visibility_score: 1.0246457001441578
+            models:
+            - weighted_visibility_score: 1.4894159098541704
+              share_of_total: 6.84685269835264
+            - weighted_visibility_score: 1.4894159098541704
+              share_of_total: 6.84685269835264
+          mentions_market_share:
+            denominators_by_model:
+              key: 7
+            actors:
+            - type: project
+              id: 1
+              competitor_id: 4
+              name: name
+              domain: domain
+              total: 5
+              models:
+                key:
+                  value: 9.965781217890562
+                  numerator: 9
+                  denominator: 6
+            - type: project
+              id: 1
+              competitor_id: 4
+              name: name
+              domain: domain
+              total: 5
+              models:
+                key:
+                  value: 9.965781217890562
+                  numerator: 9
+                  denominator: 6
+          citations_market_share:
+            denominators_by_model:
+              key: 7
+            actors:
+            - type: project
+              id: 1
+              competitor_id: 4
+              name: name
+              domain: domain
+              total: 5
+              models:
+                key:
+                  value: 9.965781217890562
+                  numerator: 9
+                  denominator: 6
+            - type: project
+              id: 1
+              competitor_id: 4
+              name: name
+              domain: domain
+              total: 5
+              models:
+                key:
+                  value: 9.965781217890562
+                  numerator: 9
+                  denominator: 6
+          sentiment_market_share:
+            actors:
+            - type: project
+              id: 8
+              competitor_id: 9
+              name: name
+              domain: domain
+              total_sentiments: 6
+              models:
+                key:
+                  value: 3.5571952270680973
+                  total_sentiments: 6
+                  positive_count: 1
+                  negative_count: 2
+            - type: project
+              id: 8
+              competitor_id: 9
+              name: name
+              domain: domain
+              total_sentiments: 6
+              models:
+                key:
+                  value: 3.5571952270680973
+                  total_sentiments: 6
+                  positive_count: 1
+                  negative_count: 2
+          weighted_visibility_market_share:
+            actors:
+            - type: project
+              id: 6
+              competitor_id: 6
+              name: name
+              domain: domain
+              total_weighted_visibility_score: 5.944895607614016
+              models:
+                key:
+                  value: 6.704019297950036
+            - type: project
+              id: 6
+              competitor_id: 6
+              name: name
+              domain: domain
+              total_weighted_visibility_score: 5.944895607614016
+              models:
+                key:
+                  value: 6.704019297950036
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        from:
+          format: date-time
+          type: string
+        to:
+          format: date-time
+          type: string
+        filters:
+          $ref: "#/components/schemas/AiModelInsightsFiltersEcho"
+        models:
+          description: "The AI models the account has enabled or that answered in\
+            \ the window, in the in-app column order"
+          items:
+            $ref: "#/components/schemas/AiModelInsightsModel"
+          type: array
+        summary:
+          $ref: "#/components/schemas/AiModelInsightsSummaryResponse_summary"
+        request_id:
+          type: string
+      type: object
+    AiModelInsightsFiltersEcho:
+      description: "The filters the summary was computed with, as the server resolved\
+        \ them. A filter that was not given is left out, except granularity and competitors."
+      example:
+        from: 2000-01-23T04:56:07.000+00:00
+        to: 2000-01-23T04:56:07.000+00:00
+        granularity: granularity
+        country_code: country_code
+        language_code: language_code
+        collection_id: collection_id
+        prompt_type: prompt_type
+        brand_kind: brand_kind
+        competitors:
+        - 6
+        - 6
+      properties:
+        from:
+          format: date-time
+          type: string
+        to:
+          format: date-time
+          type: string
+        granularity:
+          description: "day, week or month; day when not given"
+          type: string
+        country_code:
+          description: Comma-separated country codes
+          type: string
+        language_code:
+          description: Comma-separated language codes
+          type: string
+        collection_id:
+          description: Comma-separated collection ids
+          type: string
+        prompt_type:
+          description: Comma-separated prompt types
+          type: string
+        brand_kind:
+          type: string
+        competitors:
+          description: Competitor ids from the competitors parameter; empty when it
+            was not given
+          items:
+            type: integer
+          type: array
+      type: object
+    AiModelInsightsModel:
+      example:
+        model: model
+        label: label
+        color: color
+      properties:
+        model:
+          description: "AI model key, as /dimensions/models lists it"
+          type: string
+        label:
+          description: Display name of the model
+          type: string
+        color:
+          description: Hex color the app charts the model with
+          type: string
+      type: object
+    AiModelMentionsRow:
+      allOf:
+      - $ref: "#/components/schemas/AiModelInsightsModel"
+      - properties:
+          mentions_count:
+            description: Brand mentions in the model's answers; 0 when it has none
+            type: integer
+          share_of_total:
+            description: The model's percentage (0-100) of total_mentions; null when
+              total_mentions is 0
+            nullable: true
+            type: number
+        type: object
+      example:
+        mentions_count: 5
+        share_of_total: 5.637376656633329
+    AiModelCitationsRow:
+      allOf:
+      - $ref: "#/components/schemas/AiModelInsightsModel"
+      - properties:
+          citations_count:
+            description: Citations of the brand's URLs in the model's answers; 0 when
+              it has none
+            type: integer
+          share_of_total:
+            description: The model's percentage (0-100) of total_citations; null when
+              total_citations is 0
+            nullable: true
+            type: number
+        type: object
+      example:
+        citations_count: 7
+        share_of_total: 9.301444243932576
+    AiModelSentimentRow:
+      allOf:
+      - $ref: "#/components/schemas/AiModelInsightsModel"
+      - properties:
+          sentiments_count:
+            description: Brand sentiment verdicts in the model's answers
+            type: integer
+          positive_count:
+            description: Positive and very positive verdicts
+            type: integer
+          negative_count:
+            description: Negative and very negative verdicts
+            type: integer
+          net_sentiment:
+            description: "positive_count minus negative_count as a percentage (-100\
+              \ to 100) of sentiments_count, neutral verdicts counted in the base;\
+              \ null when sentiments_count is 0"
+            nullable: true
+            type: number
+        type: object
+      example:
+        sentiments_count: 2
+        positive_count: 4
+        negative_count: 7
+        net_sentiment: 1.2315135367772556
+    AiModelWeightedVisibilityRow:
+      allOf:
+      - $ref: "#/components/schemas/AiModelInsightsModel"
+      - properties:
+          weighted_visibility_score:
+            description: The brand's AI Visibility Score points in the model; 0 when
+              it has none
+            type: number
+          share_of_total:
+            description: The model's percentage (0-100) of total_weighted_visibility_score;
+              null when that total is 0
+            nullable: true
+            type: number
+        type: object
+      example:
+        weighted_visibility_score: 1.4894159098541704
+        share_of_total: 6.84685269835264
+    AiModelRateMatrix:
+      description: "Each actor's rate within each model: mentions of the actor (mentions_market_share),\
+        \ or answers citing it (citations_market_share), per answer of the model.\
+        \ Rates are independent, so the actors of a model can add up to more or less\
+        \ than 100."
+      example:
+        denominators_by_model:
+          key: 7
+        actors:
+        - type: project
+          id: 1
+          competitor_id: 4
+          name: name
+          domain: domain
+          total: 5
+          models:
+            key:
+              value: 9.965781217890562
+              numerator: 9
+              denominator: 6
+        - type: project
+          id: 1
+          competitor_id: 4
+          name: name
+          domain: domain
+          total: 5
+          models:
+            key:
+              value: 9.965781217890562
+              numerator: 9
+              denominator: 6
+      properties:
+        denominators_by_model:
+          additionalProperties:
+            type: integer
+          description: "Answers of each model in the window, keyed by model"
+          type: object
+        actors:
+          description: "The project and each competitor with a mention (or citation)\
+            \ in the window (only the competitors given in competitors, when it is\
+            \ given), by total descending"
+          items:
+            $ref: "#/components/schemas/AiModelRateMatrixActor"
+          type: array
+      type: object
+    AiModelRateMatrixActor:
+      description: An actor (the standard actor shape) with one rate cell per model
+      example:
+        type: project
+        id: 1
+        competitor_id: 4
+        name: name
+        domain: domain
+        total: 5
+        models:
+          key:
+            value: 9.965781217890562
+            numerator: 9
+            denominator: 6
+      properties:
+        type:
+          enum:
+          - project
+          - competitor
+          type: string
+        id:
+          description: "Project id, or competitor id"
+          type: integer
+        competitor_id:
+          description: "Null for the project, the competitor id otherwise"
+          nullable: true
+          type: integer
+        name:
+          type: string
+        domain:
+          description: Bare (scheme-less) domain. Null for the project actor when
+            the project has no URL.
+          nullable: true
+          type: string
+        total:
+          description: The actor's numerators summed over the models
+          type: integer
+        models:
+          additionalProperties:
+            $ref: "#/components/schemas/AiModelRateCell"
+          description: "One cell per model, keyed by model"
+          type: object
+      type: object
+    AiModelRateCell:
+      example:
+        value: 9.965781217890562
+        numerator: 9
+        denominator: 6
+      properties:
+        value:
+          description: numerator as a percentage (0-100) of denominator; null when
+            the model has no answers in the window
+          nullable: true
+          type: number
+        numerator:
+          description: Mentions of the actor (or answers citing it) in the model's
+            answers
+          type: integer
+        denominator:
+          description: Answers of the model in the window
+          type: integer
+      type: object
+    AiModelSentimentMatrixActor:
+      description: An actor (the standard actor shape) with one net sentiment cell
+        per model
+      example:
+        type: project
+        id: 8
+        competitor_id: 9
+        name: name
+        domain: domain
+        total_sentiments: 6
+        models:
+          key:
+            value: 3.5571952270680973
+            total_sentiments: 6
+            positive_count: 1
+            negative_count: 2
+      properties:
+        type:
+          enum:
+          - project
+          - competitor
+          type: string
+        id:
+          description: "Project id, or competitor id"
+          type: integer
+        competitor_id:
+          description: "Null for the project, the competitor id otherwise"
+          nullable: true
+          type: integer
+        name:
+          type: string
+        domain:
+          description: Bare (scheme-less) domain. Null for the project actor when
+            the project has no URL.
+          nullable: true
+          type: string
+        total_sentiments:
+          description: The actor's sentiment verdicts summed over the models
+          type: integer
+        models:
+          additionalProperties:
+            $ref: "#/components/schemas/AiModelSentimentCell"
+          description: "One cell per model, keyed by model"
+          type: object
+      type: object
+    AiModelSentimentCell:
+      example:
+        value: 3.5571952270680973
+        total_sentiments: 6
+        positive_count: 1
+        negative_count: 2
+      properties:
+        value:
+          description: "The actor's net sentiment in the model, positive_count minus\
+            \ negative_count as a percentage (-100 to 100) of total_sentiments; null\
+            \ when total_sentiments is 0"
+          nullable: true
+          type: number
+        total_sentiments:
+          description: The actor's sentiment verdicts in the model's answers
+          type: integer
+        positive_count:
+          description: Positive and very positive verdicts
+          type: integer
+        negative_count:
+          description: Negative and very negative verdicts
+          type: integer
+      type: object
+    AiModelWeightedVisibilityMatrixActor:
+      description: An actor (the standard actor shape) with one AI Visibility Score
+        cell per model
+      example:
+        type: project
+        id: 6
+        competitor_id: 6
+        name: name
+        domain: domain
+        total_weighted_visibility_score: 5.944895607614016
+        models:
+          key:
+            value: 6.704019297950036
+      properties:
+        type:
+          enum:
+          - project
+          - competitor
+          type: string
+        id:
+          description: "Project id, or competitor id"
+          type: integer
+        competitor_id:
+          description: "Null for the project, the competitor id otherwise"
+          nullable: true
+          type: integer
+        name:
+          type: string
+        domain:
+          description: Bare (scheme-less) domain. Null for the project actor when
+            the project has no URL.
+          nullable: true
+          type: string
+        total_weighted_visibility_score:
+          description: The actor's AI Visibility Score points summed over the models
+          type: number
+        models:
+          additionalProperties:
+            $ref: "#/components/schemas/AiModelWeightedVisibilityCell"
+          description: "One cell per model, keyed by model"
+          type: object
+      type: object
+    AiModelWeightedVisibilityCell:
+      example:
+        value: 6.704019297950036
+      properties:
+        value:
+          description: The actor's AI Visibility Score points in the model; 0 when
+            it has none
+          type: number
       type: object
     WebAnalyticsSchemaResponse:
       example:
@@ -27158,6 +27714,295 @@ components:
           type: number
         avg_mention_rate:
           type: number
+      type: object
+    AiModelInsightsSummaryResponse_summary_mentions_by_model:
+      example:
+        total_mentions: 1
+        models:
+        - mentions_count: 5
+          share_of_total: 5.637376656633329
+        - mentions_count: 5
+          share_of_total: 5.637376656633329
+      properties:
+        total_mentions:
+          description: Brand mentions across the models
+          type: integer
+        models:
+          items:
+            $ref: "#/components/schemas/AiModelMentionsRow"
+          type: array
+      type: object
+    AiModelInsightsSummaryResponse_summary_citations_by_model:
+      example:
+        total_citations: 2
+        models:
+        - citations_count: 7
+          share_of_total: 9.301444243932576
+        - citations_count: 7
+          share_of_total: 9.301444243932576
+      properties:
+        total_citations:
+          description: Citations of the brand's URLs across the models
+          type: integer
+        models:
+          items:
+            $ref: "#/components/schemas/AiModelCitationsRow"
+          type: array
+      type: object
+    AiModelInsightsSummaryResponse_summary_brand_net_sentiment_by_model:
+      example:
+        total_sentiments: 3
+        models:
+        - sentiments_count: 2
+          positive_count: 4
+          negative_count: 7
+          net_sentiment: 1.2315135367772556
+        - sentiments_count: 2
+          positive_count: 4
+          negative_count: 7
+          net_sentiment: 1.2315135367772556
+      properties:
+        total_sentiments:
+          description: Brand sentiment verdicts across the models
+          type: integer
+        models:
+          items:
+            $ref: "#/components/schemas/AiModelSentimentRow"
+          type: array
+      type: object
+    AiModelInsightsSummaryResponse_summary_weighted_visibility_by_model:
+      example:
+        total_weighted_visibility_score: 1.0246457001441578
+        models:
+        - weighted_visibility_score: 1.4894159098541704
+          share_of_total: 6.84685269835264
+        - weighted_visibility_score: 1.4894159098541704
+          share_of_total: 6.84685269835264
+      properties:
+        total_weighted_visibility_score:
+          description: The brand's AI Visibility Score points across the models; 0
+            when it has none
+          type: number
+        models:
+          items:
+            $ref: "#/components/schemas/AiModelWeightedVisibilityRow"
+          type: array
+      type: object
+    AiModelInsightsSummaryResponse_summary_sentiment_market_share:
+      example:
+        actors:
+        - type: project
+          id: 8
+          competitor_id: 9
+          name: name
+          domain: domain
+          total_sentiments: 6
+          models:
+            key:
+              value: 3.5571952270680973
+              total_sentiments: 6
+              positive_count: 1
+              negative_count: 2
+        - type: project
+          id: 8
+          competitor_id: 9
+          name: name
+          domain: domain
+          total_sentiments: 6
+          models:
+            key:
+              value: 3.5571952270680973
+              total_sentiments: 6
+              positive_count: 1
+              negative_count: 2
+      properties:
+        actors:
+          description: "The project and each competitor with a sentiment verdict in\
+            \ the window (only the competitors given in competitors, when it is given),\
+            \ by total_sentiments descending"
+          items:
+            $ref: "#/components/schemas/AiModelSentimentMatrixActor"
+          type: array
+      type: object
+    AiModelInsightsSummaryResponse_summary_weighted_visibility_market_share:
+      example:
+        actors:
+        - type: project
+          id: 6
+          competitor_id: 6
+          name: name
+          domain: domain
+          total_weighted_visibility_score: 5.944895607614016
+          models:
+            key:
+              value: 6.704019297950036
+        - type: project
+          id: 6
+          competitor_id: 6
+          name: name
+          domain: domain
+          total_weighted_visibility_score: 5.944895607614016
+          models:
+            key:
+              value: 6.704019297950036
+      properties:
+        actors:
+          description: "The project and each competitor with an AI Visibility Score\
+            \ in the window, 0 included (only the competitors given in competitors,\
+            \ when it is given), by total_weighted_visibility_score descending"
+          items:
+            $ref: "#/components/schemas/AiModelWeightedVisibilityMatrixActor"
+          type: array
+      type: object
+    AiModelInsightsSummaryResponse_summary:
+      example:
+        mentions_by_model:
+          total_mentions: 1
+          models:
+          - mentions_count: 5
+            share_of_total: 5.637376656633329
+          - mentions_count: 5
+            share_of_total: 5.637376656633329
+        citations_by_model:
+          total_citations: 2
+          models:
+          - citations_count: 7
+            share_of_total: 9.301444243932576
+          - citations_count: 7
+            share_of_total: 9.301444243932576
+        brand_net_sentiment_by_model:
+          total_sentiments: 3
+          models:
+          - sentiments_count: 2
+            positive_count: 4
+            negative_count: 7
+            net_sentiment: 1.2315135367772556
+          - sentiments_count: 2
+            positive_count: 4
+            negative_count: 7
+            net_sentiment: 1.2315135367772556
+        weighted_visibility_by_model:
+          total_weighted_visibility_score: 1.0246457001441578
+          models:
+          - weighted_visibility_score: 1.4894159098541704
+            share_of_total: 6.84685269835264
+          - weighted_visibility_score: 1.4894159098541704
+            share_of_total: 6.84685269835264
+        mentions_market_share:
+          denominators_by_model:
+            key: 7
+          actors:
+          - type: project
+            id: 1
+            competitor_id: 4
+            name: name
+            domain: domain
+            total: 5
+            models:
+              key:
+                value: 9.965781217890562
+                numerator: 9
+                denominator: 6
+          - type: project
+            id: 1
+            competitor_id: 4
+            name: name
+            domain: domain
+            total: 5
+            models:
+              key:
+                value: 9.965781217890562
+                numerator: 9
+                denominator: 6
+        citations_market_share:
+          denominators_by_model:
+            key: 7
+          actors:
+          - type: project
+            id: 1
+            competitor_id: 4
+            name: name
+            domain: domain
+            total: 5
+            models:
+              key:
+                value: 9.965781217890562
+                numerator: 9
+                denominator: 6
+          - type: project
+            id: 1
+            competitor_id: 4
+            name: name
+            domain: domain
+            total: 5
+            models:
+              key:
+                value: 9.965781217890562
+                numerator: 9
+                denominator: 6
+        sentiment_market_share:
+          actors:
+          - type: project
+            id: 8
+            competitor_id: 9
+            name: name
+            domain: domain
+            total_sentiments: 6
+            models:
+              key:
+                value: 3.5571952270680973
+                total_sentiments: 6
+                positive_count: 1
+                negative_count: 2
+          - type: project
+            id: 8
+            competitor_id: 9
+            name: name
+            domain: domain
+            total_sentiments: 6
+            models:
+              key:
+                value: 3.5571952270680973
+                total_sentiments: 6
+                positive_count: 1
+                negative_count: 2
+        weighted_visibility_market_share:
+          actors:
+          - type: project
+            id: 6
+            competitor_id: 6
+            name: name
+            domain: domain
+            total_weighted_visibility_score: 5.944895607614016
+            models:
+              key:
+                value: 6.704019297950036
+          - type: project
+            id: 6
+            competitor_id: 6
+            name: name
+            domain: domain
+            total_weighted_visibility_score: 5.944895607614016
+            models:
+              key:
+                value: 6.704019297950036
+      properties:
+        mentions_by_model:
+          $ref: "#/components/schemas/AiModelInsightsSummaryResponse_summary_mentions_by_model"
+        citations_by_model:
+          $ref: "#/components/schemas/AiModelInsightsSummaryResponse_summary_citations_by_model"
+        brand_net_sentiment_by_model:
+          $ref: "#/components/schemas/AiModelInsightsSummaryResponse_summary_brand_net_sentiment_by_model"
+        weighted_visibility_by_model:
+          $ref: "#/components/schemas/AiModelInsightsSummaryResponse_summary_weighted_visibility_by_model"
+        mentions_market_share:
+          $ref: "#/components/schemas/AiModelRateMatrix"
+        citations_market_share:
+          $ref: "#/components/schemas/AiModelRateMatrix"
+        sentiment_market_share:
+          $ref: "#/components/schemas/AiModelInsightsSummaryResponse_summary_sentiment_market_share"
+        weighted_visibility_market_share:
+          $ref: "#/components/schemas/AiModelInsightsSummaryResponse_summary_weighted_visibility_market_share"
       type: object
     WebAnalyticsQueryResponse_columns_inner:
       example:
