@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.80.0
+  version: 1.81.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -11666,6 +11666,1378 @@ paths:
         \ paginated; at most 25,000 rows per request, start_row reads the next block\
         \ (Growth+)."
       x-mcp-tool: get_search_console_rows
+      x-plan: growth
+  /search_console/opportunities:
+    get:
+      description: "Queries whose average position is between min_position and max_position\
+        \ (default 4 to 20) with at least min_impressions impressions, ranked by potential_clicks:\
+        \ the clicks a move into the top 3 would add at top_ctr, the CTR the property's\
+        \ own queries averaging position 3 or better get in the same window. Use it\
+        \ to find the queries where a small ranking gain would add the most traffic.\
+        \ No outside CTR curve is used: with no top-3 query in the window, top_ctr\
+        \ and potential_clicks are null. Reads Google's top 25,000 queries per property\
+        \ (truncated: true when reached) and excludes anonymized queries. Requires\
+        \ a connected Search Console property (Growth+). Live reads only: under stored\
+        \ reads it returns ERR_INVALID_PARAM. Live reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED\
+        \ (403) for revoked Google access; reconnect the property in Preferences >\
+        \ Project Settings > Data Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM\
+        \ (503) when Google Search Console is unavailable or over quota; wait for\
+        \ the number of seconds in Retry-After before retrying."
+      operationId: getSearchConsoleOpportunities
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: "Which Search Console properties to read; /search_console/properties\
+          \ lists them. Omit it for the primary property, or pass one property id\
+          \ (e.g. sc-domain:example.com) to read that one; both answer with property.\
+          \ A comma-separated list of ids, or all, combines several and answers with\
+          \ properties, excluded_properties and property_errors instead: excluded_properties\
+          \ are left out because another selected property already counts them (a\
+          \ URL-prefix property under a domain property), so no click is counted twice;\
+          \ property_errors are properties Google refused, left out of the figures\
+          \ and also named in the X-Search-Console-Property-Errors header. When Google\
+          \ refuses every property, the request fails as a single-property read would."
+        example: all
+        explode: true
+        in: query
+        name: property
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Number of days to look back, today included (alternative to\
+          \ from/to). At most 487, Google's retention."
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          maximum: 487
+          minimum: 1
+          type: integer
+        style: form
+      - description: Start date (YYYY-MM-DD). Defaults to 30 days ago.
+        explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: "End date (YYYY-MM-DD), inclusive. Defaults to today. Google\
+          \ publishes data with a 2-3 day lag, so data_through in the response says\
+          \ how far it reaches."
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: Smallest impressions a query needs.
+        explode: true
+        in: query
+        name: min_impressions
+        required: false
+        schema:
+          default: 100
+          maximum: 1000000
+          minimum: 1
+          type: integer
+        style: form
+      - description: Best average position to include.
+        explode: true
+        in: query
+        name: min_position
+        required: false
+        schema:
+          default: 4
+          maximum: 100
+          minimum: 1
+          type: number
+        style: form
+      - description: Worst average position to include; at least min_position.
+        explode: true
+        in: query
+        name: max_position
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: number
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      - description: "Which search surface to measure. Defaults to web. discover and\
+          \ googleNews carry no query dimension, so Google rejects /search_console/queries\
+          \ for them."
+        explode: true
+        in: query
+        name: search_type
+        required: false
+        schema:
+          default: web
+          enum:
+          - web
+          - image
+          - video
+          - news
+          - discover
+          - googleNews
+          type: string
+        style: form
+      - description: "Narrow the query; every entry must match (AND). Send the whole\
+          \ list as one JSON value: filters=[{\"dimension\":\"page\",\"operator\"\
+          :\"contains\",\"expression\":\"/blog/\"}] (URL-encoded). An array of objects\
+          \ has no query-parameter form a generated client can produce, so the string\
+          \ is what the official SDKs send; see the SearchConsoleFilters schema for\
+          \ the shape it encodes. includingRegex and excludingRegex take RE2 syntax.\
+          \ At most 10 entries, expression at most 500 characters. The bracket form\
+          \ filters[][dimension]=page&filters[][operator]=contains&filters[][expression]=/blog/\
+          \ is also accepted."
+        example: "[{\"dimension\":\"page\",\"operator\":\"contains\",\"expression\"\
+          :\"/blog/\"}]"
+        explode: true
+        in: query
+        name: filters
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "final (default) counts only rows Google has finalized. all also\
+          \ counts the most recent days, which are still being filled in and will\
+          \ change."
+        explode: true
+        in: query
+        name: data_state
+        required: false
+        schema:
+          default: final
+          enum:
+          - final
+          - all
+          type: string
+        style: form
+      - description: "How Google counts impressions. auto (default) is what Search\
+          \ Console shows (by page when page is grouped or filtered, else by property).\
+          \ Google rejects byProperty with a page dimension or filter."
+        explode: true
+        in: query
+        name: aggregation_type
+        required: false
+        schema:
+          default: auto
+          enum:
+          - auto
+          - byPage
+          - byProperty
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchConsoleOpportunitiesResponse"
+          description: Ranking opportunities
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+                  message: Google Search Console access was revoked. Reconnect the
+                    property in Preferences > Project Settings > Data Connections.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Plan below Growth (ERR_PLAN_REQUIRED), or Google revoked the\
+            \ project's Search Console access (ERR_SEARCH_CONSOLE_ACCESS_REVOKED):\
+            \ reconnect the property"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+        "503":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_UPSTREAM
+                  message: Google Search Console is temporarily unavailable. Retry
+                    in a few minutes.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Upstream provider unavailable, retry after the number of seconds\
+            \ in the Retry-After header: Google's own value when it sent one, otherwise\
+            \ 900 after a quota error and 60 after an outage"
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying
+              explode: false
+              schema:
+                type: integer
+              style: simple
+      summary: Search Console ranking opportunities (Growth+)
+      tags:
+      - Search Console
+      x-llms-description: "Queries ranking just below the top 3 (position 4-20 by\
+        \ default) with enough impressions, ranked by the clicks a top-3 move would\
+        \ add at the property's own top-3 CTR (Growth+)."
+      x-mcp-tool: get_search_console_opportunities
+      x-plan: growth
+  /search_console/cannibalization:
+    get:
+      description: "Queries with at least min_impressions impressions for which two\
+        \ or more pages each take at least min_share (default 0.1) of the query's\
+        \ impressions, most impressions first, each with its competing pages (share,\
+        \ impressions, clicks, ctr, position). Use it to find the keywords several\
+        \ of the site's pages fight over, and decide which pages to merge, redirect\
+        \ or differentiate. Google counts page-by-query impressions per page, so a\
+        \ query's impressions here can exceed its property-wide figure. Reads Google's\
+        \ top 25,000 page-query rows per property (truncated: true when reached).\
+        \ With output=flat or csv, each competing page is its own row, with its URL\
+        \ in page_url. Requires a connected Search Console property (Growth+). Live\
+        \ reads only: under stored reads it returns ERR_INVALID_PARAM. Live reads\
+        \ return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked Google access;\
+        \ reconnect the property in Preferences > Project Settings > Data Connections.\
+        \ They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search Console\
+        \ is unavailable or over quota; wait for the number of seconds in Retry-After\
+        \ before retrying."
+      operationId: getSearchConsoleCannibalization
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: "Which Search Console properties to read; /search_console/properties\
+          \ lists them. Omit it for the primary property, or pass one property id\
+          \ (e.g. sc-domain:example.com) to read that one; both answer with property.\
+          \ A comma-separated list of ids, or all, combines several and answers with\
+          \ properties, excluded_properties and property_errors instead: excluded_properties\
+          \ are left out because another selected property already counts them (a\
+          \ URL-prefix property under a domain property), so no click is counted twice;\
+          \ property_errors are properties Google refused, left out of the figures\
+          \ and also named in the X-Search-Console-Property-Errors header. When Google\
+          \ refuses every property, the request fails as a single-property read would."
+        example: all
+        explode: true
+        in: query
+        name: property
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Number of days to look back, today included (alternative to\
+          \ from/to). At most 487, Google's retention."
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          maximum: 487
+          minimum: 1
+          type: integer
+        style: form
+      - description: Start date (YYYY-MM-DD). Defaults to 30 days ago.
+        explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: "End date (YYYY-MM-DD), inclusive. Defaults to today. Google\
+          \ publishes data with a 2-3 day lag, so data_through in the response says\
+          \ how far it reaches."
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: Smallest impressions a query needs.
+        explode: true
+        in: query
+        name: min_impressions
+        required: false
+        schema:
+          default: 100
+          maximum: 1000000
+          minimum: 1
+          type: integer
+        style: form
+      - description: Smallest fraction (0.01 to 0.5) of the query's impressions a
+          page needs to count as competing.
+        explode: true
+        in: query
+        name: min_share
+        required: false
+        schema:
+          default: 0.1
+          maximum: 0.5
+          minimum: 0.01
+          type: number
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      - description: "Which search surface to measure. Defaults to web. discover and\
+          \ googleNews carry no query dimension, so Google rejects /search_console/queries\
+          \ for them."
+        explode: true
+        in: query
+        name: search_type
+        required: false
+        schema:
+          default: web
+          enum:
+          - web
+          - image
+          - video
+          - news
+          - discover
+          - googleNews
+          type: string
+        style: form
+      - description: "Narrow the query; every entry must match (AND). Send the whole\
+          \ list as one JSON value: filters=[{\"dimension\":\"page\",\"operator\"\
+          :\"contains\",\"expression\":\"/blog/\"}] (URL-encoded). An array of objects\
+          \ has no query-parameter form a generated client can produce, so the string\
+          \ is what the official SDKs send; see the SearchConsoleFilters schema for\
+          \ the shape it encodes. includingRegex and excludingRegex take RE2 syntax.\
+          \ At most 10 entries, expression at most 500 characters. The bracket form\
+          \ filters[][dimension]=page&filters[][operator]=contains&filters[][expression]=/blog/\
+          \ is also accepted."
+        example: "[{\"dimension\":\"page\",\"operator\":\"contains\",\"expression\"\
+          :\"/blog/\"}]"
+        explode: true
+        in: query
+        name: filters
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "final (default) counts only rows Google has finalized. all also\
+          \ counts the most recent days, which are still being filled in and will\
+          \ change."
+        explode: true
+        in: query
+        name: data_state
+        required: false
+        schema:
+          default: final
+          enum:
+          - final
+          - all
+          type: string
+        style: form
+      - description: "How Google counts impressions. auto (default) is what Search\
+          \ Console shows (by page when page is grouped or filtered, else by property).\
+          \ Google rejects byProperty with a page dimension or filter."
+        explode: true
+        in: query
+        name: aggregation_type
+        required: false
+        schema:
+          default: auto
+          enum:
+          - auto
+          - byPage
+          - byProperty
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchConsoleCannibalizationResponse"
+          description: Competing pages per query
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+                  message: Google Search Console access was revoked. Reconnect the
+                    property in Preferences > Project Settings > Data Connections.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Plan below Growth (ERR_PLAN_REQUIRED), or Google revoked the\
+            \ project's Search Console access (ERR_SEARCH_CONSOLE_ACCESS_REVOKED):\
+            \ reconnect the property"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+        "503":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_UPSTREAM
+                  message: Google Search Console is temporarily unavailable. Retry
+                    in a few minutes.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Upstream provider unavailable, retry after the number of seconds\
+            \ in the Retry-After header: Google's own value when it sent one, otherwise\
+            \ 900 after a quota error and 60 after an outage"
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying
+              explode: false
+              schema:
+                type: integer
+              style: simple
+      summary: Search Console keyword cannibalization (Growth+)
+      tags:
+      - Search Console
+      x-llms-description: "Queries for which two or more of the site's pages each\
+        \ take at least min_share of the impressions, with each competing page (Growth+)."
+      x-mcp-tool: get_search_console_cannibalization
+      x-plan: growth
+  /search_console/decay:
+    get:
+      description: "Pages (or queries, with dimension=query) that had at least min_clicks\
+        \ clicks in the window just before the requested one (previous_from to previous_to,\
+        \ the same length) and lost clicks since, biggest loss first, with clicks,\
+        \ impressions and average position in both windows. Use it to find the pages\
+        \ losing traffic and to tell lost rankings (a worse position) from lost demand\
+        \ (fewer impressions at a stable position). The requested window ends at compared_through,\
+        \ the last day Google has published when that is before to, so days Google\
+        \ has not filled in yet never read as a loss. Both windows must fit in Google's\
+        \ 487-day retention, or the request returns ERR_INVALID_PARAM. Reads Google's\
+        \ top 25,000 rows per window and property (truncated: true when reached);\
+        \ when the requested window reaches that cap, a page or query missing from\
+        \ it is left out rather than read as a loss. Requires a connected Search Console\
+        \ property (Growth+). Live reads only: under stored reads it returns ERR_INVALID_PARAM.\
+        \ Live reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked Google\
+        \ access; reconnect the property in Preferences > Project Settings > Data\
+        \ Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search\
+        \ Console is unavailable or over quota; wait for the number of seconds in\
+        \ Retry-After before retrying."
+      operationId: getSearchConsoleDecay
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: "Which Search Console properties to read; /search_console/properties\
+          \ lists them. Omit it for the primary property, or pass one property id\
+          \ (e.g. sc-domain:example.com) to read that one; both answer with property.\
+          \ A comma-separated list of ids, or all, combines several and answers with\
+          \ properties, excluded_properties and property_errors instead: excluded_properties\
+          \ are left out because another selected property already counts them (a\
+          \ URL-prefix property under a domain property), so no click is counted twice;\
+          \ property_errors are properties Google refused, left out of the figures\
+          \ and also named in the X-Search-Console-Property-Errors header. When Google\
+          \ refuses every property, the request fails as a single-property read would."
+        example: all
+        explode: true
+        in: query
+        name: property
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Number of days to look back, today included (alternative to\
+          \ from/to). At most 487, Google's retention."
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          maximum: 487
+          minimum: 1
+          type: integer
+        style: form
+      - description: Start date (YYYY-MM-DD). Defaults to 30 days ago.
+        explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: "End date (YYYY-MM-DD), inclusive. Defaults to today. Google\
+          \ publishes data with a 2-3 day lag, so data_through in the response says\
+          \ how far it reaches."
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: Compare pages or queries.
+        explode: true
+        in: query
+        name: dimension
+        required: false
+        schema:
+          default: page
+          enum:
+          - page
+          - query
+          type: string
+        style: form
+      - description: Smallest clicks in the previous window.
+        explode: true
+        in: query
+        name: min_clicks
+        required: false
+        schema:
+          default: 10
+          maximum: 1000000
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      - description: "Which search surface to measure. Defaults to web. discover and\
+          \ googleNews carry no query dimension, so Google rejects /search_console/queries\
+          \ for them."
+        explode: true
+        in: query
+        name: search_type
+        required: false
+        schema:
+          default: web
+          enum:
+          - web
+          - image
+          - video
+          - news
+          - discover
+          - googleNews
+          type: string
+        style: form
+      - description: "Narrow the query; every entry must match (AND). Send the whole\
+          \ list as one JSON value: filters=[{\"dimension\":\"page\",\"operator\"\
+          :\"contains\",\"expression\":\"/blog/\"}] (URL-encoded). An array of objects\
+          \ has no query-parameter form a generated client can produce, so the string\
+          \ is what the official SDKs send; see the SearchConsoleFilters schema for\
+          \ the shape it encodes. includingRegex and excludingRegex take RE2 syntax.\
+          \ At most 10 entries, expression at most 500 characters. The bracket form\
+          \ filters[][dimension]=page&filters[][operator]=contains&filters[][expression]=/blog/\
+          \ is also accepted."
+        example: "[{\"dimension\":\"page\",\"operator\":\"contains\",\"expression\"\
+          :\"/blog/\"}]"
+        explode: true
+        in: query
+        name: filters
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "final (default) counts only rows Google has finalized. all also\
+          \ counts the most recent days, which are still being filled in and will\
+          \ change."
+        explode: true
+        in: query
+        name: data_state
+        required: false
+        schema:
+          default: final
+          enum:
+          - final
+          - all
+          type: string
+        style: form
+      - description: "How Google counts impressions. auto (default) is what Search\
+          \ Console shows (by page when page is grouped or filtered, else by property).\
+          \ Google rejects byProperty with a page dimension or filter."
+        explode: true
+        in: query
+        name: aggregation_type
+        required: false
+        schema:
+          default: auto
+          enum:
+          - auto
+          - byPage
+          - byProperty
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchConsoleDecayResponse"
+          description: Pages or queries losing clicks
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+                  message: Google Search Console access was revoked. Reconnect the
+                    property in Preferences > Project Settings > Data Connections.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Plan below Growth (ERR_PLAN_REQUIRED), or Google revoked the\
+            \ project's Search Console access (ERR_SEARCH_CONSOLE_ACCESS_REVOKED):\
+            \ reconnect the property"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+        "503":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_UPSTREAM
+                  message: Google Search Console is temporarily unavailable. Retry
+                    in a few minutes.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Upstream provider unavailable, retry after the number of seconds\
+            \ in the Retry-After header: Google's own value when it sent one, otherwise\
+            \ 900 after a quota error and 60 after an outage"
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying
+              explode: false
+              schema:
+                type: integer
+              style: simple
+      summary: Search Console content decay (Growth+)
+      tags:
+      - Search Console
+      x-llms-description: "Pages or queries that lost the most clicks against the\
+        \ window of the same length just before the requested one, up to the last\
+        \ day Google has published; when Google's 25,000-row cap is reached, keys\
+        \ missing from the requested window are left out, not read as lost (Growth+)."
+      x-mcp-tool: get_search_console_decay
+      x-plan: growth
+  /search_console/brand_split:
+    get:
+      description: "Splits the property's impressions and clicks into branded queries,\
+        \ which contain one of the project's brand terms as a whole word, case-insensitively\
+        \ (brand_terms: its brand name, matching names, app names and domain, each\
+        \ also matched with its accents folded and with either apostrophe, so Nestlé\
+        \ also matches nestle and L’Oréal matches l'oreal), and non-branded ones,\
+        \ next to the unfiltered totals. Google applies the split itself as a regular-expression\
+        \ query filter, so it covers every query Google counts, not only the 25,000\
+        \ rows one read lists. Use it to see how much search traffic comes from people\
+        \ who already know the brand and how much from discovery searches, and how\
+        \ each side evolves across date ranges. Google leaves anonymized queries out\
+        \ of any query filter, so unclassified holds the impressions and clicks neither\
+        \ side counts. Returns ERR_INVALID_PARAM when the brand terms are too long\
+        \ for one Google filter (4,096 characters, Google's documented limit), and\
+        \ ERR_SEARCH_CONSOLE_UPSTREAM (503) if Google refuses the filter built from\
+        \ them; our team is alerted in that case. Requires a connected Search Console\
+        \ property (Growth+). Live reads only: under stored reads it returns ERR_INVALID_PARAM.\
+        \ Live reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked Google\
+        \ access; reconnect the property in Preferences > Project Settings > Data\
+        \ Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search\
+        \ Console is unavailable or over quota; wait for the number of seconds in\
+        \ Retry-After before retrying."
+      operationId: getSearchConsoleBrandSplit
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: "Which Search Console properties to read; /search_console/properties\
+          \ lists them. Omit it for the primary property, or pass one property id\
+          \ (e.g. sc-domain:example.com) to read that one; both answer with property.\
+          \ A comma-separated list of ids, or all, combines several and answers with\
+          \ properties, excluded_properties and property_errors instead: excluded_properties\
+          \ are left out because another selected property already counts them (a\
+          \ URL-prefix property under a domain property), so no click is counted twice;\
+          \ property_errors are properties Google refused, left out of the figures\
+          \ and also named in the X-Search-Console-Property-Errors header. When Google\
+          \ refuses every property, the request fails as a single-property read would."
+        example: all
+        explode: true
+        in: query
+        name: property
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Number of days to look back, today included (alternative to\
+          \ from/to). At most 487, Google's retention."
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          maximum: 487
+          minimum: 1
+          type: integer
+        style: form
+      - description: Start date (YYYY-MM-DD). Defaults to 30 days ago.
+        explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: "End date (YYYY-MM-DD), inclusive. Defaults to today. Google\
+          \ publishes data with a 2-3 day lag, so data_through in the response says\
+          \ how far it reaches."
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: "Which search surface to measure. Defaults to web. discover and\
+          \ googleNews carry no query dimension, so Google rejects /search_console/queries\
+          \ for them."
+        explode: true
+        in: query
+        name: search_type
+        required: false
+        schema:
+          default: web
+          enum:
+          - web
+          - image
+          - video
+          - news
+          - discover
+          - googleNews
+          type: string
+        style: form
+      - description: "Narrow the query; every entry must match (AND). Send the whole\
+          \ list as one JSON value: filters=[{\"dimension\":\"page\",\"operator\"\
+          :\"contains\",\"expression\":\"/blog/\"}] (URL-encoded). An array of objects\
+          \ has no query-parameter form a generated client can produce, so the string\
+          \ is what the official SDKs send; see the SearchConsoleFilters schema for\
+          \ the shape it encodes. includingRegex and excludingRegex take RE2 syntax.\
+          \ At most 10 entries, expression at most 500 characters. The bracket form\
+          \ filters[][dimension]=page&filters[][operator]=contains&filters[][expression]=/blog/\
+          \ is also accepted."
+        example: "[{\"dimension\":\"page\",\"operator\":\"contains\",\"expression\"\
+          :\"/blog/\"}]"
+        explode: true
+        in: query
+        name: filters
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "final (default) counts only rows Google has finalized. all also\
+          \ counts the most recent days, which are still being filled in and will\
+          \ change."
+        explode: true
+        in: query
+        name: data_state
+        required: false
+        schema:
+          default: final
+          enum:
+          - final
+          - all
+          type: string
+        style: form
+      - description: "How Google counts impressions. auto (default) is what Search\
+          \ Console shows (by page when page is grouped or filtered, else by property).\
+          \ Google rejects byProperty with a page dimension or filter."
+        explode: true
+        in: query
+        name: aggregation_type
+        required: false
+        schema:
+          default: auto
+          enum:
+          - auto
+          - byPage
+          - byProperty
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchConsoleBrandSplitResponse"
+          description: Branded and non-branded totals
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+                  message: Google Search Console access was revoked. Reconnect the
+                    property in Preferences > Project Settings > Data Connections.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Plan below Growth (ERR_PLAN_REQUIRED), or Google revoked the\
+            \ project's Search Console access (ERR_SEARCH_CONSOLE_ACCESS_REVOKED):\
+            \ reconnect the property"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+        "503":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_UPSTREAM
+                  message: Google Search Console is temporarily unavailable. Retry
+                    in a few minutes.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Upstream provider unavailable, retry after the number of seconds\
+            \ in the Retry-After header: Google's own value when it sent one, otherwise\
+            \ 900 after a quota error and 60 after an outage"
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying
+              explode: false
+              schema:
+                type: integer
+              style: simple
+      summary: Search Console branded vs non-branded split (Growth+)
+      tags:
+      - Search Console
+      x-llms-description: "Impressions and clicks of queries that name the brand (its\
+        \ brand name, matching names, app names or domain, as a whole word) and of\
+        \ those that do not, with what neither side counts (Growth+)."
+      x-mcp-tool: get_search_console_brand_split
+      x-plan: growth
+  /search_console/ai_visibility_gaps:
+    get:
+      description: "The property's queries with at least min_impressions impressions,\
+        \ most impressions first, each matched against the project's prompts. The\
+        \ match is exact and deliberately conservative: a query matches a prompt with\
+        \ the same text once both are lowercased, accents and similar letters folded\
+        \ the way AI answers are matched for brand mentions, spacing squeezed and\
+        \ leading or trailing punctuation dropped (best crm for agencies matches Best\
+        \ CRM for agencies?, but not What is the best CRM for agencies). When two\
+        \ prompts share a text (other countries or languages), the oldest is the match.\
+        \ A matched query carries its prompt_id, responses (the prompt's AI answers\
+        \ in the same window, over the account's enabled models) and brand_visibility,\
+        \ the percent of those answers that mention the brand (null before any answer),\
+        \ as /metrics/prompt_summary computes it. unmatched_only=true lists only the\
+        \ queries no prompt matches: search demand the AI tracking does not cover\
+        \ yet, the strongest candidates to add as prompts. Rows with a prompt and\
+        \ a low brand_visibility are queries people search for where AI answers rarely\
+        \ mention the brand; how low is low is the caller's choice. matched_count\
+        \ counts the qualifying queries a prompt matches. A team member also needs\
+        \ read access to the Overview, which holds prompt-level Brand Visibility,\
+        \ or gets ERR_INSUFFICIENT_PERMISSION. Reads Google's top 25,000 queries per\
+        \ property (truncated: true when reached) and excludes anonymized queries.\
+        \ Requires a connected Search Console property (Growth+). Live reads only:\
+        \ under stored reads it returns ERR_INVALID_PARAM. Live reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED\
+        \ (403) for revoked Google access; reconnect the property in Preferences >\
+        \ Project Settings > Data Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM\
+        \ (503) when Google Search Console is unavailable or over quota; wait for\
+        \ the number of seconds in Retry-After before retrying."
+      operationId: getSearchConsoleAiVisibilityGaps
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: "Which Search Console properties to read; /search_console/properties\
+          \ lists them. Omit it for the primary property, or pass one property id\
+          \ (e.g. sc-domain:example.com) to read that one; both answer with property.\
+          \ A comma-separated list of ids, or all, combines several and answers with\
+          \ properties, excluded_properties and property_errors instead: excluded_properties\
+          \ are left out because another selected property already counts them (a\
+          \ URL-prefix property under a domain property), so no click is counted twice;\
+          \ property_errors are properties Google refused, left out of the figures\
+          \ and also named in the X-Search-Console-Property-Errors header. When Google\
+          \ refuses every property, the request fails as a single-property read would."
+        example: all
+        explode: true
+        in: query
+        name: property
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Number of days to look back, today included (alternative to\
+          \ from/to). At most 487, Google's retention."
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          maximum: 487
+          minimum: 1
+          type: integer
+        style: form
+      - description: Start date (YYYY-MM-DD). Defaults to 30 days ago.
+        explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: "End date (YYYY-MM-DD), inclusive. Defaults to today. Google\
+          \ publishes data with a 2-3 day lag, so data_through in the response says\
+          \ how far it reaches."
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: Smallest impressions a query needs.
+        explode: true
+        in: query
+        name: min_impressions
+        required: false
+        schema:
+          default: 100
+          maximum: 1000000
+          minimum: 1
+          type: integer
+        style: form
+      - description: List only the queries no prompt of the project matches (true
+          or false).
+        explode: true
+        in: query
+        name: unmatched_only
+        required: false
+        schema:
+          default: false
+          type: boolean
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      - description: "Which search surface to measure. Defaults to web. discover and\
+          \ googleNews carry no query dimension, so Google rejects /search_console/queries\
+          \ for them."
+        explode: true
+        in: query
+        name: search_type
+        required: false
+        schema:
+          default: web
+          enum:
+          - web
+          - image
+          - video
+          - news
+          - discover
+          - googleNews
+          type: string
+        style: form
+      - description: "Narrow the query; every entry must match (AND). Send the whole\
+          \ list as one JSON value: filters=[{\"dimension\":\"page\",\"operator\"\
+          :\"contains\",\"expression\":\"/blog/\"}] (URL-encoded). An array of objects\
+          \ has no query-parameter form a generated client can produce, so the string\
+          \ is what the official SDKs send; see the SearchConsoleFilters schema for\
+          \ the shape it encodes. includingRegex and excludingRegex take RE2 syntax.\
+          \ At most 10 entries, expression at most 500 characters. The bracket form\
+          \ filters[][dimension]=page&filters[][operator]=contains&filters[][expression]=/blog/\
+          \ is also accepted."
+        example: "[{\"dimension\":\"page\",\"operator\":\"contains\",\"expression\"\
+          :\"/blog/\"}]"
+        explode: true
+        in: query
+        name: filters
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "final (default) counts only rows Google has finalized. all also\
+          \ counts the most recent days, which are still being filled in and will\
+          \ change."
+        explode: true
+        in: query
+        name: data_state
+        required: false
+        schema:
+          default: final
+          enum:
+          - final
+          - all
+          type: string
+        style: form
+      - description: "How Google counts impressions. auto (default) is what Search\
+          \ Console shows (by page when page is grouped or filtered, else by property).\
+          \ Google rejects byProperty with a page dimension or filter."
+        explode: true
+        in: query
+        name: aggregation_type
+        required: false
+        schema:
+          default: auto
+          enum:
+          - auto
+          - byPage
+          - byProperty
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SearchConsoleAiVisibilityGapsResponse"
+          description: Queries matched against the project's prompts
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+                  message: Google Search Console access was revoked. Reconnect the
+                    property in Preferences > Project Settings > Data Connections.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Plan below Growth (ERR_PLAN_REQUIRED), or Google revoked the\
+            \ project's Search Console access (ERR_SEARCH_CONSOLE_ACCESS_REVOKED):\
+            \ reconnect the property"
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+        "503":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_SEARCH_CONSOLE_UPSTREAM
+                  message: Google Search Console is temporarily unavailable. Retry
+                    in a few minutes.
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: "Upstream provider unavailable, retry after the number of seconds\
+            \ in the Retry-After header: Google's own value when it sent one, otherwise\
+            \ 900 after a quota error and 60 after an outage"
+          headers:
+            Retry-After:
+              description: Seconds to wait before retrying
+              explode: false
+              schema:
+                type: integer
+              style: simple
+      summary: Search Console queries vs AI tracking (Growth+)
+      tags:
+      - Search Console
+      x-llms-description: "Top Google queries matched against the project's prompts\
+        \ by exact text, with each matched prompt's Brand Visibility; unmatched_only\
+        \ lists the demand no prompt tracks (Growth+)."
+      x-mcp-tool: get_search_console_ai_visibility_gaps
       x-plan: growth
   /custom_reports:
     get:
@@ -23977,6 +25349,620 @@ components:
             $ref: "#/components/schemas/SearchConsolePropertyError"
           type: array
       type: object
+    SearchConsoleOpportunitiesResponse:
+      example:
+        project_id: 0
+        property:
+          id: id
+          name: name
+        properties:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        excluded_properties:
+        - id: id
+          name: name
+          covered_by: covered_by
+        - id: id
+          name: name
+          covered_by: covered_by
+        property_errors:
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
+        from: 2000-01-23
+        to: 2000-01-23
+        data_through: 2000-01-23
+        min_impressions: 6
+        min_position: 1.4658129805029452
+        max_position: 5.962133916683182
+        top_ctr: 5.637376656633329
+        page: 2
+        per_page: 7
+        total: 9
+        truncated: true
+        data:
+        - query: query
+          impressions: 3
+          clicks: 2
+          ctr: 4.145608029883936
+          position: 7.386281948385884
+          potential_clicks: 1
+        - query: query
+          impressions: 3
+          clicks: 2
+          ctr: 4.145608029883936
+          position: 7.386281948385884
+          potential_clicks: 1
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        property:
+          $ref: "#/components/schemas/SearchConsoleProperty"
+        properties:
+          description: "With a list or all in the property parameter, the properties\
+            \ whose data the response holds (instead of property)"
+          items:
+            $ref: "#/components/schemas/SearchConsoleProperty"
+          type: array
+        excluded_properties:
+          description: "With a list or all, selected properties left out because another\
+            \ selected property already counts them"
+          items:
+            $ref: "#/components/schemas/SearchConsoleExcludedProperty"
+          type: array
+        property_errors:
+          description: "With a list or all, selected properties Google refused, left\
+            \ out of the figures"
+          items:
+            $ref: "#/components/schemas/SearchConsolePropertyError"
+          type: array
+        from:
+          format: date
+          type: string
+        to:
+          format: date
+          type: string
+        data_through:
+          description: "Latest date Google has published for the property, or for\
+            \ every combined property (it lags 2-3 days). Later days are missing,\
+            \ not zero."
+          format: date
+          nullable: true
+          type: string
+        min_impressions:
+          type: integer
+        min_position:
+          type: number
+        max_position:
+          type: number
+        top_ctr:
+          description: "CTR (0..1) of the property's queries averaging position 3\
+            \ or better in the window; null when there are none, and then no potential_clicks"
+          nullable: true
+          type: number
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          description: Rows in the report before paging
+          type: integer
+        truncated:
+          description: "Present (true) when Google returned its 25,000-row maximum\
+            \ for a property, so the report covers its top rows only"
+          type: boolean
+        data:
+          items:
+            $ref: "#/components/schemas/SearchConsoleOpportunitiesResponse_data_inner"
+          type: array
+        request_id:
+          type: string
+      type: object
+    SearchConsoleCannibalizationResponse:
+      example:
+        project_id: 0
+        property:
+          id: id
+          name: name
+        properties:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        excluded_properties:
+        - id: id
+          name: name
+          covered_by: covered_by
+        - id: id
+          name: name
+          covered_by: covered_by
+        property_errors:
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
+        from: 2000-01-23
+        to: 2000-01-23
+        data_through: 2000-01-23
+        min_impressions: 6
+        min_share: 1.4658129805029452
+        page: 5
+        per_page: 5
+        total: 2
+        truncated: true
+        data:
+        - query: query
+          impressions: 7
+          clicks: 9
+          ctr: 3.616076749251911
+          position: 2.027123023002322
+          pages:
+          - page: page
+            share: 4.145608029883936
+            impressions: 7
+            clicks: 1
+            ctr: 1.0246457001441578
+            position: 1.4894159098541704
+          - page: page
+            share: 4.145608029883936
+            impressions: 7
+            clicks: 1
+            ctr: 1.0246457001441578
+            position: 1.4894159098541704
+        - query: query
+          impressions: 7
+          clicks: 9
+          ctr: 3.616076749251911
+          position: 2.027123023002322
+          pages:
+          - page: page
+            share: 4.145608029883936
+            impressions: 7
+            clicks: 1
+            ctr: 1.0246457001441578
+            position: 1.4894159098541704
+          - page: page
+            share: 4.145608029883936
+            impressions: 7
+            clicks: 1
+            ctr: 1.0246457001441578
+            position: 1.4894159098541704
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        property:
+          $ref: "#/components/schemas/SearchConsoleProperty"
+        properties:
+          description: "With a list or all in the property parameter, the properties\
+            \ whose data the response holds (instead of property)"
+          items:
+            $ref: "#/components/schemas/SearchConsoleProperty"
+          type: array
+        excluded_properties:
+          description: "With a list or all, selected properties left out because another\
+            \ selected property already counts them"
+          items:
+            $ref: "#/components/schemas/SearchConsoleExcludedProperty"
+          type: array
+        property_errors:
+          description: "With a list or all, selected properties Google refused, left\
+            \ out of the figures"
+          items:
+            $ref: "#/components/schemas/SearchConsolePropertyError"
+          type: array
+        from:
+          format: date
+          type: string
+        to:
+          format: date
+          type: string
+        data_through:
+          description: "Latest date Google has published for the property, or for\
+            \ every combined property (it lags 2-3 days). Later days are missing,\
+            \ not zero."
+          format: date
+          nullable: true
+          type: string
+        min_impressions:
+          type: integer
+        min_share:
+          type: number
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          description: Rows in the report before paging
+          type: integer
+        truncated:
+          description: "Present (true) when Google returned its 25,000-row maximum\
+            \ for a property, so the report covers its top rows only"
+          type: boolean
+        data:
+          items:
+            $ref: "#/components/schemas/SearchConsoleCannibalizationResponse_data_inner"
+          type: array
+        request_id:
+          type: string
+      type: object
+    SearchConsoleDecayResponse:
+      example:
+        project_id: 0
+        property:
+          id: id
+          name: name
+        properties:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        excluded_properties:
+        - id: id
+          name: name
+          covered_by: covered_by
+        - id: id
+          name: name
+          covered_by: covered_by
+        property_errors:
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
+        from: 2000-01-23
+        to: 2000-01-23
+        data_through: 2000-01-23
+        dimension: page
+        compared_through: 2000-01-23
+        previous_from: 2000-01-23
+        previous_to: 2000-01-23
+        min_clicks: 6
+        page: 1
+        per_page: 5
+        total: 5
+        truncated: true
+        data:
+        - key: key
+          clicks: 2
+          clicks_previous: 7
+          clicks_change: 9
+          clicks_change_pct: 3.616076749251911
+          impressions: 2
+          impressions_previous: 4
+          position: 7.386281948385884
+          position_previous: 1.2315135367772556
+        - key: key
+          clicks: 2
+          clicks_previous: 7
+          clicks_change: 9
+          clicks_change_pct: 3.616076749251911
+          impressions: 2
+          impressions_previous: 4
+          position: 7.386281948385884
+          position_previous: 1.2315135367772556
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        property:
+          $ref: "#/components/schemas/SearchConsoleProperty"
+        properties:
+          description: "With a list or all in the property parameter, the properties\
+            \ whose data the response holds (instead of property)"
+          items:
+            $ref: "#/components/schemas/SearchConsoleProperty"
+          type: array
+        excluded_properties:
+          description: "With a list or all, selected properties left out because another\
+            \ selected property already counts them"
+          items:
+            $ref: "#/components/schemas/SearchConsoleExcludedProperty"
+          type: array
+        property_errors:
+          description: "With a list or all, selected properties Google refused, left\
+            \ out of the figures"
+          items:
+            $ref: "#/components/schemas/SearchConsolePropertyError"
+          type: array
+        from:
+          format: date
+          type: string
+        to:
+          format: date
+          type: string
+        data_through:
+          description: "Latest date Google has published for the property, or for\
+            \ every combined property (it lags 2-3 days). Later days are missing,\
+            \ not zero."
+          format: date
+          nullable: true
+          type: string
+        dimension:
+          enum:
+          - page
+          - query
+          type: string
+        compared_through:
+          description: "Last day of the requested window that is compared, to or the\
+            \ last day Google has published when that is earlier"
+          format: date
+          type: string
+        previous_from:
+          description: "Start of the window compared against, the same length as from..compared_through\
+            \ and just before it"
+          format: date
+          type: string
+        previous_to:
+          format: date
+          type: string
+        min_clicks:
+          type: integer
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          description: Rows in the report before paging
+          type: integer
+        truncated:
+          description: "Present (true) when Google returned its 25,000-row maximum\
+            \ for a property, so the report covers its top rows only"
+          type: boolean
+        data:
+          items:
+            $ref: "#/components/schemas/SearchConsoleDecayResponse_data_inner"
+          type: array
+        request_id:
+          type: string
+      type: object
+    SearchConsoleBrandSplitResponse:
+      example:
+        project_id: 0
+        property:
+          id: id
+          name: name
+        properties:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        excluded_properties:
+        - id: id
+          name: name
+          covered_by: covered_by
+        - id: id
+          name: name
+          covered_by: covered_by
+        property_errors:
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
+        from: 2000-01-23
+        to: 2000-01-23
+        data_through: 2000-01-23
+        brand_terms:
+        - brand_terms
+        - brand_terms
+        totals:
+          impressions: 6
+          clicks: 1
+          ctr: 5.962133916683182
+          position: 5.637376656633329
+        branded:
+          impressions: 6
+          clicks: 1
+          ctr: 5.962133916683182
+          position: 5.637376656633329
+        non_branded:
+          impressions: 6
+          clicks: 1
+          ctr: 5.962133916683182
+          position: 5.637376656633329
+        unclassified:
+          impressions: 6
+          clicks: 1
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        property:
+          $ref: "#/components/schemas/SearchConsoleProperty"
+        properties:
+          description: "With a list or all in the property parameter, the properties\
+            \ whose data the response holds (instead of property)"
+          items:
+            $ref: "#/components/schemas/SearchConsoleProperty"
+          type: array
+        excluded_properties:
+          description: "With a list or all, selected properties left out because another\
+            \ selected property already counts them"
+          items:
+            $ref: "#/components/schemas/SearchConsoleExcludedProperty"
+          type: array
+        property_errors:
+          description: "With a list or all, selected properties Google refused, left\
+            \ out of the figures"
+          items:
+            $ref: "#/components/schemas/SearchConsolePropertyError"
+          type: array
+        from:
+          format: date
+          type: string
+        to:
+          format: date
+          type: string
+        data_through:
+          description: "Latest date Google has published for the property, or for\
+            \ every combined property (it lags 2-3 days). Later days are missing,\
+            \ not zero."
+          format: date
+          nullable: true
+          type: string
+        brand_terms:
+          description: "The project's brand name, matching names, app names and domain,\
+            \ lowercased, each matched as a whole word"
+          items:
+            type: string
+          type: array
+        totals:
+          $ref: "#/components/schemas/SearchConsoleMetrics"
+        branded:
+          $ref: "#/components/schemas/SearchConsoleMetrics"
+        non_branded:
+          $ref: "#/components/schemas/SearchConsoleMetrics"
+        unclassified:
+          $ref: "#/components/schemas/SearchConsoleBrandSplitResponse_unclassified"
+        request_id:
+          type: string
+      type: object
+    SearchConsoleAiVisibilityGapsResponse:
+      example:
+        project_id: 0
+        property:
+          id: id
+          name: name
+        properties:
+        - id: id
+          name: name
+        - id: id
+          name: name
+        excluded_properties:
+        - id: id
+          name: name
+          covered_by: covered_by
+        - id: id
+          name: name
+          covered_by: covered_by
+        property_errors:
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
+        - id: id
+          name: name
+          code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
+          message: message
+          retry_after: 2
+        from: 2000-01-23
+        to: 2000-01-23
+        data_through: 2000-01-23
+        min_impressions: 6
+        unmatched_only: true
+        matched_count: 1
+        page: 5
+        per_page: 5
+        total: 2
+        truncated: true
+        data:
+        - query: query
+          impressions: 7
+          clicks: 9
+          ctr: 3.616076749251911
+          position: 2.027123023002322
+          prompt_id: 4
+          responses: 7
+          brand_visibility: 1.2315135367772556
+        - query: query
+          impressions: 7
+          clicks: 9
+          ctr: 3.616076749251911
+          position: 2.027123023002322
+          prompt_id: 4
+          responses: 7
+          brand_visibility: 1.2315135367772556
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        property:
+          $ref: "#/components/schemas/SearchConsoleProperty"
+        properties:
+          description: "With a list or all in the property parameter, the properties\
+            \ whose data the response holds (instead of property)"
+          items:
+            $ref: "#/components/schemas/SearchConsoleProperty"
+          type: array
+        excluded_properties:
+          description: "With a list or all, selected properties left out because another\
+            \ selected property already counts them"
+          items:
+            $ref: "#/components/schemas/SearchConsoleExcludedProperty"
+          type: array
+        property_errors:
+          description: "With a list or all, selected properties Google refused, left\
+            \ out of the figures"
+          items:
+            $ref: "#/components/schemas/SearchConsolePropertyError"
+          type: array
+        from:
+          format: date
+          type: string
+        to:
+          format: date
+          type: string
+        data_through:
+          description: "Latest date Google has published for the property, or for\
+            \ every combined property (it lags 2-3 days). Later days are missing,\
+            \ not zero."
+          format: date
+          nullable: true
+          type: string
+        min_impressions:
+          type: integer
+        unmatched_only:
+          type: boolean
+        matched_count:
+          description: "Queries with at least min_impressions that match a prompt\
+            \ of the project, counted before unmatched_only leaves them out"
+          type: integer
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          description: Rows in the report before paging
+          type: integer
+        truncated:
+          description: "Present (true) when Google returned its 25,000-row maximum\
+            \ for a property, so the report covers its top rows only"
+          type: boolean
+        data:
+          items:
+            $ref: "#/components/schemas/SearchConsoleAiVisibilityGapsResponse_data_inner"
+          type: array
+        request_id:
+          type: string
+      type: object
     TeamPermissions:
       additionalProperties:
         items:
@@ -28963,6 +30949,186 @@ components:
         property:
           description: Present when grouped by property
           type: string
+      type: object
+    SearchConsoleOpportunitiesResponse_data_inner:
+      example:
+        query: query
+        impressions: 3
+        clicks: 2
+        ctr: 4.145608029883936
+        position: 7.386281948385884
+        potential_clicks: 1
+      properties:
+        query:
+          type: string
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        ctr:
+          description: 0..1 fraction
+          type: number
+        position:
+          description: Impression-weighted average position
+          type: number
+        potential_clicks:
+          description: Clicks a move into the top 3 would add at top_ctr (never negative);
+            null when top_ctr is null
+          nullable: true
+          type: integer
+      type: object
+    SearchConsoleCannibalizationResponse_data_inner_pages_inner:
+      example:
+        page: page
+        share: 4.145608029883936
+        impressions: 7
+        clicks: 1
+        ctr: 1.0246457001441578
+        position: 1.4894159098541704
+      properties:
+        page:
+          type: string
+        share:
+          description: The page's fraction (0..1) of the query's impressions
+          type: number
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        ctr:
+          description: 0..1 fraction
+          type: number
+        position:
+          description: Impression-weighted average position
+          type: number
+      type: object
+    SearchConsoleCannibalizationResponse_data_inner:
+      example:
+        query: query
+        impressions: 7
+        clicks: 9
+        ctr: 3.616076749251911
+        position: 2.027123023002322
+        pages:
+        - page: page
+          share: 4.145608029883936
+          impressions: 7
+          clicks: 1
+          ctr: 1.0246457001441578
+          position: 1.4894159098541704
+        - page: page
+          share: 4.145608029883936
+          impressions: 7
+          clicks: 1
+          ctr: 1.0246457001441578
+          position: 1.4894159098541704
+      properties:
+        query:
+          type: string
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        ctr:
+          description: 0..1 fraction
+          type: number
+        position:
+          description: Impression-weighted average position
+          type: number
+        pages:
+          description: "Pages taking at least min_share of the query's impressions,\
+            \ most impressions first"
+          items:
+            $ref: "#/components/schemas/SearchConsoleCannibalizationResponse_data_inner_pages_inner"
+          type: array
+      type: object
+    SearchConsoleDecayResponse_data_inner:
+      example:
+        key: key
+        clicks: 2
+        clicks_previous: 7
+        clicks_change: 9
+        clicks_change_pct: 3.616076749251911
+        impressions: 2
+        impressions_previous: 4
+        position: 7.386281948385884
+        position_previous: 1.2315135367772556
+      properties:
+        key:
+          description: The page URL or query
+          type: string
+        clicks:
+          type: integer
+        clicks_previous:
+          type: integer
+        clicks_change:
+          description: clicks minus clicks_previous (negative)
+          type: integer
+        clicks_change_pct:
+          type: number
+        impressions:
+          type: integer
+        impressions_previous:
+          type: integer
+        position:
+          description: Null when the key had no impressions in the window
+          nullable: true
+          type: number
+        position_previous:
+          nullable: true
+          type: number
+      type: object
+    SearchConsoleBrandSplitResponse_unclassified:
+      description: "Impressions and clicks neither side counts, mostly anonymized\
+        \ queries Google leaves out of any query filter"
+      example:
+        impressions: 6
+        clicks: 1
+      properties:
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+      type: object
+    SearchConsoleAiVisibilityGapsResponse_data_inner:
+      example:
+        query: query
+        impressions: 7
+        clicks: 9
+        ctr: 3.616076749251911
+        position: 2.027123023002322
+        prompt_id: 4
+        responses: 7
+        brand_visibility: 1.2315135367772556
+      properties:
+        query:
+          type: string
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        ctr:
+          description: 0..1 fraction
+          type: number
+        position:
+          description: Impression-weighted average position
+          type: number
+        prompt_id:
+          description: The project's prompt with the same text as the query; null
+            when no prompt matches
+          nullable: true
+          type: integer
+        responses:
+          description: AI answers the matching prompt got in the window over the account's
+            enabled models; null when no prompt matches
+          nullable: true
+          type: integer
+        brand_visibility:
+          description: "Brand Visibility of the matching prompt in the window, percent\
+            \ (0-100) of its AI answers that mention the brand, over the account's\
+            \ enabled models; null when no prompt matches or it has no answer"
+          nullable: true
+          type: number
       type: object
     SuggestedPromptsAcceptResponse_accepted_inner:
       example:
