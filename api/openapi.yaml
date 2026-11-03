@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.78.0
+  version: 1.79.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -610,9 +610,11 @@ paths:
         \ when the month's pitch projects are used (error.meta.resets_on), ERR_INVALID_PARAM\
         \ for more than 100 prompts or a domain the account tracks or pitched in the\
         \ last 90 days. The response lists same_domain_projects so an accidental duplicate\
-        \ is visible; it never blocks the create. Idempotent via `external_identifier`\
-        \ (embed-enabled accounts only; replay returns 200 with the existing project).\
-        \ Requires a `read_write` scope API key."
+        \ is visible; it never blocks the create. Its prompts get their first answers\
+        \ within about 24 hours, as far as the account's allowance of AI answers for\
+        \ the cycle covers them; the rest run when the allowance resets. Idempotent\
+        \ via `external_identifier` (embed-enabled accounts only; replay returns 200\
+        \ with the existing project). Requires a `read_write` scope API key."
       operationId: createProject
       requestBody:
         content:
@@ -3111,10 +3113,16 @@ paths:
         \ the account prompt quota and skips duplicates. When the project does not\
         \ run on the schedule (paused, or beyond the plan's project limit) the prompts\
         \ are still created, and the response says so with `tracked` false, `untracked_reason`\
-        \ and a `warning`. A pitch project holds at most 100 prompts in all, deleted\
-        \ ones included (ERR_LIMIT_REACHED past that), and the prompts of a launched\
-        \ pitch project are fixed, so adding one returns ERR_INVALID_PARAM with error.meta.reason\
-        \ pitch_prompts_frozen. Requires a `read_write` scope API key."
+        \ and a `warning`. New prompts get their first answers within about 24 hours.\
+        \ The first run is queued on creation and a nightly run at 00:00 Europe/Madrid\
+        \ picks up any prompt still without answers, as far as the account's allowance\
+        \ of AI answers for the cycle covers it. When the allowance left cannot give\
+        \ every new prompt one answer per enabled AI model, `first_runs_wait_until`\
+        \ gives the reset time when the rest run, with a `warning`. A pitch project\
+        \ holds at most 100 prompts in all, deleted ones included (ERR_LIMIT_REACHED\
+        \ past that), and the prompts of a launched pitch project are fixed, so adding\
+        \ one returns ERR_INVALID_PARAM with error.meta.reason pitch_prompts_frozen.\
+        \ Requires a `read_write` scope API key."
       operationId: createPrompts
       requestBody:
         content:
@@ -3177,8 +3185,14 @@ paths:
         \ project are fixed, so importing one returns ERR_INVALID_PARAM with error.meta.reason\
         \ pitch_prompts_frozen. `tracked` false, with `untracked_reason` and a `warning`,\
         \ means the project does not run on the schedule, so the imported prompts\
-        \ do not run until that changes. Requires a `read_write` scope API key and,\
-        \ for team members, create access to Prompts."
+        \ do not run until that changes. Imported prompts get their first answers\
+        \ within about 24 hours. The first run is queued on creation and a nightly\
+        \ run at 00:00 Europe/Madrid picks up any prompt still without answers, as\
+        \ far as the account's allowance of AI answers for the cycle covers it. When\
+        \ the allowance left cannot give every new prompt one answer per enabled AI\
+        \ model, `first_runs_wait_until` gives the reset time when the rest run, with\
+        \ a `warning`. Requires a `read_write` scope API key and, for team members,\
+        \ create access to Prompts."
       operationId: importPrompts
       requestBody:
         content:
@@ -18772,6 +18786,7 @@ components:
         tracked: true
         untracked_reason: untracked_reason
         warning: warning
+        first_runs_wait_until: 2000-01-23T04:56:07.000+00:00
         data:
         - id: 2
           raw_input: raw_input
@@ -18802,7 +18817,19 @@ components:
           nullable: true
           type: string
         warning:
-          description: What to do when tracked is false. Null when tracked
+          description: "What to do when tracked is false, or why some first runs wait\
+            \ when first_runs_wait_until is set. Null otherwise"
+          nullable: true
+          type: string
+        first_runs_wait_until:
+          description: "Set when the account's allowance of AI answers left this cycle\
+            \ cannot give every new prompt one answer per enabled AI model, so the\
+            \ rest run when the allowance resets at this time (00:00 Europe/Madrid).\
+            \ It counts this request's prompts against what was left when it arrived,\
+            \ not first runs other requests queued moments earlier. Null otherwise,\
+            \ when the allowance is unlimited, when tracked is false or when the account\
+            \ is not active"
+          format: date-time
           nullable: true
           type: string
         data:
@@ -24673,6 +24700,7 @@ components:
         tracked: true
         untracked_reason: untracked_reason
         warning: warning
+        first_runs_wait_until: 2000-01-23T04:56:07.000+00:00
         request_id: request_id
       properties:
         project_id:
@@ -24717,7 +24745,19 @@ components:
           nullable: true
           type: string
         warning:
-          description: What to do when tracked is false. Null when tracked
+          description: "What to do when tracked is false, or why some first runs wait\
+            \ when first_runs_wait_until is set. Null otherwise"
+          nullable: true
+          type: string
+        first_runs_wait_until:
+          description: "Set when the account's allowance of AI answers left this cycle\
+            \ cannot give every new prompt one answer per enabled AI model, so the\
+            \ rest run when the allowance resets at this time (00:00 Europe/Madrid).\
+            \ It counts this request's prompts against what was left when it arrived,\
+            \ not first runs other requests queued moments earlier. Null otherwise,\
+            \ when the allowance is unlimited, when tracked is false or when the account\
+            \ is not active"
+          format: date-time
           nullable: true
           type: string
         request_id:
@@ -24726,6 +24766,7 @@ components:
       - created
       - created_tags
       - duplicates
+      - first_runs_wait_until
       - length_warning
       - processed_rows
       - project_id
