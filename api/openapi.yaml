@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.79.0
+  version: 1.80.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -173,23 +173,25 @@ paths:
       description: "Returns the account plan, tracking cadence, subscription window,\
         \ how much of each quota is used (prompts, projects, competitors per project,\
         \ monthly GEO Writer tasks, team members, active recurring GEO audits, manual\
-        \ GEO audit runs in the last 24 hours and pitch projects created this month,\
-        \ with the account's pitch project access) and the published API rate limits.\
-        \ Limits resolve through the account owner, so a team member sees the capacity\
-        \ that applies to them. An unlimited quota returns limit and remaining as\
-        \ null with unlimited set to true, since Infinity is not representable in\
-        \ JSON. The subscription block is only present for callers who can access\
-        \ Billing and Plans in the app (the account owner, or a team member with billing\
-        \ access); everyone else gets the same response without that key. requests_per_minute\
+        \ GEO audit runs in the last 24 hours, AI answers spent in the current tracking\
+        \ window with its reset time, and pitch projects created this month, with\
+        \ the account's pitch project access) and the published API rate limits. Limits\
+        \ resolve through the account owner, so a team member sees the capacity that\
+        \ applies to them. An unlimited quota returns limit and remaining as null\
+        \ with unlimited set to true, since Infinity is not representable in JSON.\
+        \ The subscription block is only present for callers who can access Billing\
+        \ and Plans in the app (the account owner, or a team member with billing access);\
+        \ everyone else gets the same response without that key. requests_per_minute\
         \ is the ceiling of the key used for the call, not a fixed number. For a key\
         \ limited to some projects, the response carries nothing about the rest of\
         \ the account: plan, plan_name, subscription and limits.team_members are absent,\
         \ api_key_project_ids lists the key's projects, limits.prompts.used counts\
-        \ those projects' prompts, limits.prompts, limits.intelligence_tasks and the\
-        \ two GEO audit quotas show only remaining and unlimited (the capacity the\
-        \ key can still spend, without the account total), limits.pitch_projects is\
-        \ absent, and the projects quota is capped at the projects it reaches. tracking_frequency\
-        \ stays, as the cadence those projects' data is collected at."
+        \ those projects' prompts, limits.prompts, limits.intelligence_tasks, the\
+        \ two GEO audit quotas and limits.prompt_executions show only remaining and\
+        \ unlimited (the capacity the key can still spend, without the account total),\
+        \ limits.pitch_projects is absent, and the projects quota is capped at the\
+        \ projects it reaches. tracking_frequency stays, as the cadence those projects'\
+        \ data is collected at."
       operationId: getAccount
       responses:
         "200":
@@ -212,9 +214,9 @@ paths:
       summary: "Account plan, quota usage and rate limits"
       tags:
       - Account
-      x-llms-description: "Plan, subscription window, quota usage (prompts, projects,\
-        \ competitors, intelligence tasks, pitch projects) and API rate limits for\
-        \ the authenticated account."
+      x-llms-description: "Plan, subscription window, quota usage (prompts, AI answers\
+        \ this tracking cycle, projects, competitors, intelligence tasks, pitch projects)\
+        \ and API rate limits for the authenticated account."
       x-mcp-tool: get_account_usage
   /dimensions/projects:
     get:
@@ -16140,14 +16142,55 @@ components:
           description: Reset window for quotas that reset (e.g. month)
           type: string
       type: object
+    AccountExecutionQuota:
+      description: "The account's allowance of AI answers for the current tracking\
+        \ window: its prompt limit times its enabled AI models, plus 5% so prompts\
+        \ can be replaced during the window. Every scheduled run and every first run\
+        \ of a new prompt spends one answer per AI model, and deleting a prompt gives\
+        \ nothing back. When it is used up, new prompts wait until resets_at. limit\
+        \ and remaining are null when unlimited is true. For a key limited to some\
+        \ projects, only remaining and unlimited (the account-wide answers left),\
+        \ period and resets_at."
+      example:
+        limit: 2
+        used: 7
+        remaining: 9
+        unlimited: true
+        period: day
+        resets_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        limit:
+          nullable: true
+          type: integer
+        used:
+          type: integer
+        remaining:
+          nullable: true
+          type: integer
+        unlimited:
+          type: boolean
+        period:
+          description: "The tracking window, from the account's tracking cadence (week\
+            \ runs Monday to Sunday)"
+          enum:
+          - day
+          - week
+          - month
+          type: string
+        resets_at:
+          description: When the next window starts and the allowance is full again
+            (00:00 Europe/Madrid)
+          format: date-time
+          type: string
+      type: object
     AccountPitchQuota:
       description: "Pitch projects created this calendar month (Europe/Madrid) against\
         \ the monthly allowance, which pitch projects use instead of a project slot.\
         \ limit and remaining are null when unlimited is true."
       example:
-        limit: 2
-        used: 7
-        remaining: 9
+        limit: 3
+        used: 2
+        remaining: 4
         unlimited: true
         period: period
         resets_on: 2000-01-23
@@ -25971,10 +26014,17 @@ components:
           remaining: 5
           unlimited: true
           period: period
-        pitch_projects:
+        prompt_executions:
           limit: 2
           used: 7
           remaining: 9
+          unlimited: true
+          period: day
+          resets_at: 2000-01-23T04:56:07.000+00:00
+        pitch_projects:
+          limit: 3
+          used: 2
+          remaining: 4
           unlimited: true
           period: period
           resets_on: 2000-01-23
@@ -25994,13 +26044,15 @@ components:
           $ref: "#/components/schemas/AccountQuota"
         geo_audit_manual_runs:
           $ref: "#/components/schemas/AccountQuota"
+        prompt_executions:
+          $ref: "#/components/schemas/AccountExecutionQuota"
         pitch_projects:
           $ref: "#/components/schemas/AccountPitchQuota"
       type: object
     getAccount_200_response_rate_limits:
       example:
-        requests_per_minute: 3
-        write_requests_per_minute: 2
+        requests_per_minute: 7
+        write_requests_per_minute: 1
       properties:
         requests_per_minute:
           description: "The ceiling enforced for the API key used on this call, which\
@@ -26060,17 +26112,24 @@ components:
             remaining: 5
             unlimited: true
             period: period
-          pitch_projects:
+          prompt_executions:
             limit: 2
             used: 7
             remaining: 9
+            unlimited: true
+            period: day
+            resets_at: 2000-01-23T04:56:07.000+00:00
+          pitch_projects:
+            limit: 3
+            used: 2
+            remaining: 4
             unlimited: true
             period: period
             resets_on: 2000-01-23
             access: none
         rate_limits:
-          requests_per_minute: 3
-          write_requests_per_minute: 2
+          requests_per_minute: 7
+          write_requests_per_minute: 1
         request_id: request_id
       properties:
         plan:

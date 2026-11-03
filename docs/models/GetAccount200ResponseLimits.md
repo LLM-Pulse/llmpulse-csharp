@@ -11,6 +11,7 @@ Name | Type | Description | Notes
 **TeamMembers** | [**AccountCapacity**](AccountCapacity.md) |  | [optional] 
 **RecurringGeoAudits** | [**AccountQuota**](AccountQuota.md) |  | [optional] 
 **GeoAuditManualRuns** | [**AccountQuota**](AccountQuota.md) |  | [optional] 
+**PromptExecutions** | [**AccountExecutionQuota**](AccountExecutionQuota.md) |  | [optional] 
 **PitchProjects** | [**AccountPitchQuota**](AccountPitchQuota.md) |  | [optional] 
 
 [[Back to Model list]](../../README.md#documentation-for-models) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to README]](../../README.md)

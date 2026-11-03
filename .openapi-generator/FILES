@@ -32,6 +32,7 @@ docs/apis/TeamApi.md
 docs/apis/TechnicalGEOReportsApi.md
 docs/apis/WebhooksApi.md
 docs/models/AccountCapacity.md
+docs/models/AccountExecutionQuota.md
 docs/models/AccountPitchQuota.md
 docs/models/AccountQuota.md
 docs/models/Actor.md
@@ -384,6 +385,7 @@ src/LLMPulse.SDK/Extensions/IServiceCollectionExtensions.cs
 src/LLMPulse.SDK/LLMPulse.SDK.csproj
 src/LLMPulse.SDK/Logging/RestLogEvents.cs
 src/LLMPulse.SDK/Model/AccountCapacity.cs
+src/LLMPulse.SDK/Model/AccountExecutionQuota.cs
 src/LLMPulse.SDK/Model/AccountPitchQuota.cs
 src/LLMPulse.SDK/Model/AccountQuota.cs
 src/LLMPulse.SDK/Model/Actor.cs
