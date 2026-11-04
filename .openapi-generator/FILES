@@ -89,6 +89,13 @@ docs/models/CatalogPromptSuggestionsResponse.md
 docs/models/CitationMatchMode.md
 docs/models/CitationRecord.md
 docs/models/CitationsResponse.md
+docs/models/CmsContentItem.md
+docs/models/CmsContentItemResponse.md
+docs/models/CmsContentListResponse.md
+docs/models/CmsContentSummary.md
+docs/models/CmsPublication.md
+docs/models/CmsSendResponse.md
+docs/models/CmsSite.md
 docs/models/CollectionCreateResponse.md
 docs/models/CollectionCreateResponseCollection.md
 docs/models/CollectionsResponse.md
@@ -453,6 +460,13 @@ src/LLMPulse.SDK/Model/CatalogPromptSuggestionsResponse.cs
 src/LLMPulse.SDK/Model/CitationMatchMode.cs
 src/LLMPulse.SDK/Model/CitationRecord.cs
 src/LLMPulse.SDK/Model/CitationsResponse.cs
+src/LLMPulse.SDK/Model/CmsContentItem.cs
+src/LLMPulse.SDK/Model/CmsContentItemResponse.cs
+src/LLMPulse.SDK/Model/CmsContentListResponse.cs
+src/LLMPulse.SDK/Model/CmsContentSummary.cs
+src/LLMPulse.SDK/Model/CmsPublication.cs
+src/LLMPulse.SDK/Model/CmsSendResponse.cs
+src/LLMPulse.SDK/Model/CmsSite.cs
 src/LLMPulse.SDK/Model/CollectionCreateResponse.cs
 src/LLMPulse.SDK/Model/CollectionCreateResponseCollection.cs
 src/LLMPulse.SDK/Model/CollectionsResponse.cs
