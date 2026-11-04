@@ -195,6 +195,7 @@ docs/models/OwnedMediaKpiChanges.md
 docs/models/OwnedMediaKpis.md
 docs/models/OwnedMediaListResponse.md
 docs/models/OwnedMediaModelShare.md
+docs/models/OwnedMediaPlatformActivityPeriod.md
 docs/models/OwnedMediaPlatformProfiles.md
 docs/models/OwnedMediaPlatformRollup.md
 docs/models/OwnedMediaPlatformRollupWeeklyInner.md
@@ -204,6 +205,7 @@ docs/models/OwnedMediaProfilesResponse.md
 docs/models/OwnedMediaProfilesUpdateResponse.md
 docs/models/OwnedMediaRow.md
 docs/models/OwnedMediaStoreTotals.md
+docs/models/OwnedMediaSummaryActivityPeriod.md
 docs/models/OwnedMediaSummaryResponse.md
 docs/models/OwnedMediaSummaryResponsePrevious.md
 docs/models/OwnedMediaWeek.md
@@ -259,6 +261,9 @@ docs/models/RecommendationItemUpdateResponse.md
 docs/models/RecommendationSummary.md
 docs/models/RecommendationSummarySummary.md
 docs/models/RecommendationsResponse.md
+docs/models/RedditBrandShare.md
+docs/models/RedditPositionShare.md
+docs/models/RedditSubredditActivityPeriod.md
 docs/models/RemovePromptTagsRequest.md
 docs/models/RemoveTeamMember200Response.md
 docs/models/RevokeApiKey200Response.md
@@ -566,6 +571,7 @@ src/LLMPulse.SDK/Model/OwnedMediaKpiChanges.cs
 src/LLMPulse.SDK/Model/OwnedMediaKpis.cs
 src/LLMPulse.SDK/Model/OwnedMediaListResponse.cs
 src/LLMPulse.SDK/Model/OwnedMediaModelShare.cs
+src/LLMPulse.SDK/Model/OwnedMediaPlatformActivityPeriod.cs
 src/LLMPulse.SDK/Model/OwnedMediaPlatformProfiles.cs
 src/LLMPulse.SDK/Model/OwnedMediaPlatformRollup.cs
 src/LLMPulse.SDK/Model/OwnedMediaPlatformRollupWeeklyInner.cs
@@ -575,6 +581,7 @@ src/LLMPulse.SDK/Model/OwnedMediaProfilesResponse.cs
 src/LLMPulse.SDK/Model/OwnedMediaProfilesUpdateResponse.cs
 src/LLMPulse.SDK/Model/OwnedMediaRow.cs
 src/LLMPulse.SDK/Model/OwnedMediaStoreTotals.cs
+src/LLMPulse.SDK/Model/OwnedMediaSummaryActivityPeriod.cs
 src/LLMPulse.SDK/Model/OwnedMediaSummaryResponse.cs
 src/LLMPulse.SDK/Model/OwnedMediaSummaryResponsePrevious.cs
 src/LLMPulse.SDK/Model/OwnedMediaWeek.cs
@@ -630,6 +637,9 @@ src/LLMPulse.SDK/Model/RecommendationItemUpdateResponse.cs
 src/LLMPulse.SDK/Model/RecommendationSummary.cs
 src/LLMPulse.SDK/Model/RecommendationSummarySummary.cs
 src/LLMPulse.SDK/Model/RecommendationsResponse.cs
+src/LLMPulse.SDK/Model/RedditBrandShare.cs
+src/LLMPulse.SDK/Model/RedditPositionShare.cs
+src/LLMPulse.SDK/Model/RedditSubredditActivityPeriod.cs
 src/LLMPulse.SDK/Model/RemovePromptTagsRequest.cs
 src/LLMPulse.SDK/Model/RemoveTeamMember200Response.cs
 src/LLMPulse.SDK/Model/RevokeApiKey200Response.cs

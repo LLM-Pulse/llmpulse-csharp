@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.83.0
+  version: 1.84.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -8628,11 +8628,17 @@ paths:
         \ channel and profile rows also carry their image (thumbnail_url or avatar_url,\
         \ our cached copy where one exists), their average position in the answers\
         \ and, on YouTube, the video id, the channel handle and URL, and the channel\
-        \ key that /dimensions/owned_media/citing_prompts accepts. view=own_citations\
-        \ returns the raw citations of the connected profile only and stays empty\
-        \ until a profile is connected. For Reddit use /dimensions/reddit. A team\
-        \ member also needs the YouTube Intelligence permission for provider=youtube.\
-        \ Requires the Growth plan or above."
+        \ key that /dimensions/owned_media/citing_prompts accepts. `view=activity`\
+        \ returns one row per entity and actual reporting period; periods without\
+        \ runs are omitted, while a run without a citation has a real zero. Its citation\
+        \ counts cover the selected date window; profile, channel and app metadata\
+        \ are current values, not historical growth. For provider=mobile_apps, select\
+        \ the store with `store`. `view=own_citations` returns the raw citations of\
+        \ the connected profile only and stays empty until a profile is connected.\
+        \ For Reddit use /dimensions/owned_media/summary?provider=reddit for the summary\
+        \ and /dimensions/reddit for cited-content tables. A team member also needs\
+        \ the YouTube Intelligence permission for provider=youtube. Requires the Growth\
+        \ plan or above."
       operationId: listOwnedMedia
       parameters:
       - description: Project ID
@@ -8677,7 +8683,8 @@ paths:
           - mobile_apps
           type: string
         style: form
-      - description: Row shape; the allowed set depends on provider
+      - description: "Row shape; the allowed set depends on provider, and activity\
+          \ is available for each provider"
         explode: true
         in: query
         name: view
@@ -8690,6 +8697,7 @@ paths:
           - profiles
           - own_citations
           - apps
+          - activity
           type: string
         style: form
       - description: provider=mobile_apps only
@@ -8861,25 +8869,34 @@ paths:
       tags:
       - Owned Media & Communities
       x-llms-description: "Owned-media citations by platform (provider=youtube, instagram,\
-        \ facebook, tiktok, linkedin, mobile_apps): cited videos, posts, profiles,\
-        \ channels and app-store listings, each flagged as yours or not (Growth+)."
+        \ facebook, tiktok, linkedin, mobile_apps): cited content flagged as yours\
+        \ or not, plus per-entity activity by tracking period (view=activity) (Growth+)."
       x-mcp-tool: list_owned_media
       x-plan: growth
   /dimensions/owned_media/summary:
     get:
-      description: "The numbers behind one Owned Media tab. kpis gives the platform\
-        \ citations (total), yours (your profiles and their content), your_profile\
-        \ and your_content apart, and share_pct; previous gives the same KPIs for\
-        \ the period of the same length that ends just before from, and changes the\
-        \ difference (percent for counts, percentage points for share_pct, null when\
-        \ there is nothing to compare). weekly is the citations per week, yours against\
-        \ everyone else. by_model and by_country split every citation of the platform;\
-        \ content_types (reel, post, tv, pulse, or regular, shorts and live on YouTube)\
-        \ and age_buckets cover posts and videos. provider=mobile_apps adds stores,\
-        \ the per-store totals, and has no content type or age; provider=overview\
-        \ returns platforms, one rollup per platform the caller can read, and no breakdowns.\
-        \ A team member also needs the YouTube Intelligence permission for provider=youtube.\
-        \ Defaults to the last 30 days. Requires the Growth plan or above."
+      description: "The numbers behind one Owned Media tab. kpis gives platform citations\
+        \ (total), yours (the account's own profiles and content), your_profile and\
+        \ your_content separately where available, and share_pct; previous gives the\
+        \ same KPIs for the period of the same length that ends just before from,\
+        \ and changes gives the difference (percent for counts, percentage points\
+        \ for share_pct and positive_pct, null when there is nothing to compare).\
+        \ weekly remains the Monday-anchored series. Every provider returns activity\
+        \ by actual project reporting period, with date at the period start, citations,\
+        \ yours and other; yours and other are null for provider=overview. The overview\
+        \ also includes each readable platform's activity under platforms, with date\
+        \ and citations. Periods without runs are omitted, and a period with runs\
+        \ but no citation has zero. Activity counts use the selected date window.\
+        \ by_model and by_country split citations; content_types (reel, post, tv,\
+        \ pulse, or regular, shorts and live on YouTube) and age_buckets cover posts\
+        \ and videos. provider=mobile_apps adds stores and per-store totals; provider=overview\
+        \ returns one rollup per readable platform. provider=reddit adds unique_subreddits,\
+        \ unique_authors, positive_pct, and positive, neutral and negative sentiment\
+        \ counts in activity for the citing AI answers, plus subreddit_activity for\
+        \ the top five subreddits and Others, positions and brand_share. A team member\
+        \ also needs the YouTube Intelligence permission for provider=youtube or Reddit\
+        \ Intelligence for provider=reddit. Defaults to the last 30 days. Requires\
+        \ the Growth plan or above."
       operationId: getOwnedMediaSummary
       parameters:
       - description: Project ID
@@ -8904,6 +8921,7 @@ paths:
           - tiktok
           - linkedin
           - mobile_apps
+          - reddit
           - overview
           type: string
         style: form
@@ -9036,6 +9054,11 @@ paths:
                   your_profile: 33.3
                   your_content: 60.0
                   share_pct: 5.0
+                activity:
+                - date: 2026-09-14
+                  citations: 4
+                  yours: 1
+                  other: 3
                 weekly:
                 - week: 2026-09-14
                   citations: 9
@@ -9062,7 +9085,8 @@ paths:
                 request_id: 4f7c2a1e-0d2b-4c1a-9e55-1b2c3d4e5f60
               schema:
                 $ref: "#/components/schemas/OwnedMediaSummaryResponse"
-          description: "The KPI cards, comparison, weekly series and breakdowns"
+          description: "The KPI cards, comparison, weekly series, all-provider activity\
+            \ series, breakdowns and Reddit charts"
         "403":
           content:
             application/json:
@@ -9075,8 +9099,8 @@ paths:
                 $ref: "#/components/schemas/ApiError"
           description: "A plan below Growth answers ERR_PLAN_REQUIRED. A team member\
             \ whose permissions do not grant Owned Media (or YouTube Intelligence\
-            \ for provider=youtube) answers ERR_INSUFFICIENT_PERMISSION, with the\
-            \ same status"
+            \ for provider=youtube or Reddit Intelligence for provider=reddit) answers\
+            \ ERR_INSUFFICIENT_PERMISSION, with the same status"
         "404":
           content:
             application/json:
@@ -9102,10 +9126,10 @@ paths:
       summary: Get an owned-media summary
       tags:
       - Owned Media & Communities
-      x-llms-description: "The summary of one Owned Media tab (provider=youtube, instagram,\
-        \ facebook, tiktok, linkedin, mobile_apps) or of the cross-platform overview:\
-        \ KPI cards with the previous period and change, weekly series, breakdowns\
-        \ by model, country, content type and age (Growth+)."
+      x-llms-description: "The summary of one Owned Media platform (provider=youtube,\
+        \ instagram, facebook, tiktok, linkedin, mobile_apps, reddit) or the cross-platform\
+        \ overview, with KPIs, previous-period comparison, weekly totals, activity\
+        \ by reporting period and Reddit charts (Growth+)."
       x-mcp-tool: get_owned_media_summary
       x-plan: growth
   /dimensions/owned_media/citing_prompts:
@@ -17028,8 +17052,9 @@ paths:
       tags:
       - Webhooks
       x-llms-description: "Subscribe a public HTTPS URL to a project event (new mention,\
-        \ citation, execution, negative sentiment, completed report); deliveries are\
-        \ HMAC-signed. Scale plan or above."
+        \ citation, execution, negative sentiment, completed report, GEO Writer edit,\
+        \ GEO audit run or alert, finished tracking run); deliveries are HMAC-signed.\
+        \ Scale plan or above."
       x-mcp-tool: create_webhook_subscription
       x-plan: scale
       x-write: true
@@ -22359,10 +22384,20 @@ components:
         \ url, avatar_url, unique_videos), posts (url, caption, owner_handle, thumbnail_url,\
         \ content_type, likes, comments, views, posted_at), profiles (handle, name,\
         \ url, avatar_url, followers, unique_posts), own_citations (url, citation_date,\
-        \ position, model) and apps (domain, total_responses, rank, global_rank).\
+        \ position, model), apps (domain, total_responses, rank, global_rank) and\
+        \ activity (date, entity_id, entity_name, entity_url, yours, citations, plus\
+        \ store and competitor_id where applicable). Activity rows identify a reporting-period\
+        \ start; entity metadata is optional, and entity_id, entity_name and entity_url\
+        \ can be null when unknown. Store and competitor_id appear only where applicable.\
         \ Every view but own_citations carries citations and yours; videos, channels,\
         \ posts and profiles carry avg_position."
       example:
+        date: 2000-01-23
+        entity_id: entity_id
+        entity_name: entity_name
+        entity_url: entity_url
+        store: google_play
+        competitor_id: 5
         title: title
         url: url
         channel_name: channel_name
@@ -22377,25 +22412,52 @@ components:
         thumbnail_url: thumbnail_url
         avatar_url: avatar_url
         content_type: content_type
-        citations: 5
-        unique_videos: 2
-        unique_posts: 7
-        followers: 9
-        likes: 3
-        comments: 2
+        citations: 2
+        unique_videos: 7
+        unique_posts: 9
+        followers: 3
+        likes: 2
+        comments: 4
         views: ""
         published_at: published_at
         posted_at: posted_at
-        avg_position: 4.145608029883936
+        avg_position: 7.386281948385884
         yours: true
         citation_date: 2000-01-23T04:56:07.000+00:00
-        position: 7
+        position: 1
         model: model
         domain: domain
         total_responses: 1
         rank: 1
-        global_rank: 1
+        global_rank: 6
       properties:
+        date:
+          description: The start date of the actual reporting period (view=activity)
+          format: date
+          type: string
+        entity_id:
+          description: Platform entity identifier (view=activity)
+          nullable: true
+          type: string
+        entity_name:
+          description: Current entity name when known (view=activity)
+          nullable: true
+          type: string
+        entity_url:
+          description: "Current profile, channel or app listing URL when known (view=activity)"
+          nullable: true
+          type: string
+        store:
+          description: Store selected for provider=mobile_apps (view=activity)
+          enum:
+          - google_play
+          - app_store
+          type: string
+        competitor_id:
+          description: Competitor identifier when the activity row represents a competitor
+            app
+          nullable: true
+          type: integer
         title:
           nullable: true
           type: string
@@ -22446,6 +22508,8 @@ components:
           nullable: true
           type: string
         citations:
+          description: "Citations for the row; for view=activity, the count in this\
+            \ reporting period"
           type: integer
         unique_videos:
           type: integer
@@ -22512,7 +22576,13 @@ components:
         per_page: 1
         total: 5
         data:
-        - title: title
+        - date: 2000-01-23
+          entity_id: entity_id
+          entity_name: entity_name
+          entity_url: entity_url
+          store: google_play
+          competitor_id: 5
+          title: title
           url: url
           channel_name: channel_name
           channel_handle: channel_handle
@@ -22526,25 +22596,31 @@ components:
           thumbnail_url: thumbnail_url
           avatar_url: avatar_url
           content_type: content_type
-          citations: 5
-          unique_videos: 2
-          unique_posts: 7
-          followers: 9
-          likes: 3
-          comments: 2
+          citations: 2
+          unique_videos: 7
+          unique_posts: 9
+          followers: 3
+          likes: 2
+          comments: 4
           views: ""
           published_at: published_at
           posted_at: posted_at
-          avg_position: 4.145608029883936
+          avg_position: 7.386281948385884
           yours: true
           citation_date: 2000-01-23T04:56:07.000+00:00
-          position: 7
+          position: 1
           model: model
           domain: domain
           total_responses: 1
           rank: 1
-          global_rank: 1
-        - title: title
+          global_rank: 6
+        - date: 2000-01-23
+          entity_id: entity_id
+          entity_name: entity_name
+          entity_url: entity_url
+          store: google_play
+          competitor_id: 5
+          title: title
           url: url
           channel_name: channel_name
           channel_handle: channel_handle
@@ -22558,24 +22634,24 @@ components:
           thumbnail_url: thumbnail_url
           avatar_url: avatar_url
           content_type: content_type
-          citations: 5
-          unique_videos: 2
-          unique_posts: 7
-          followers: 9
-          likes: 3
-          comments: 2
+          citations: 2
+          unique_videos: 7
+          unique_posts: 9
+          followers: 3
+          likes: 2
+          comments: 4
           views: ""
           published_at: published_at
           posted_at: posted_at
-          avg_position: 4.145608029883936
+          avg_position: 7.386281948385884
           yours: true
           citation_date: 2000-01-23T04:56:07.000+00:00
-          position: 7
+          position: 1
           model: model
           domain: domain
           total_responses: 1
           rank: 1
-          global_rank: 1
+          global_rank: 6
         request_id: request_id
       properties:
         project_id:
@@ -22613,6 +22689,9 @@ components:
         your_profile: 5
         your_content: 5
         share_pct: 2.3021358869347655
+        unique_subreddits: 7
+        unique_authors: 9
+        positive_pct: 3.616076749251911
       properties:
         total:
           description: "Citations of the platform in the window, yours and everyone\
@@ -22634,17 +22713,35 @@ components:
         share_pct:
           description: yours as a percentage of total (0-100)
           type: number
+        unique_subreddits:
+          description: Number of cited subreddits (provider=reddit; null or omitted
+            for other providers)
+          nullable: true
+          type: integer
+        unique_authors:
+          description: Number of cited Reddit authors (provider=reddit; null or omitted
+            for other providers)
+          nullable: true
+          type: integer
+        positive_pct:
+          description: "Positive sentiment among rated Reddit citations, as a percentage\
+            \ (provider=reddit; null or omitted for other providers)"
+          nullable: true
+          type: number
       type: object
     OwnedMediaKpiChanges:
       description: "Change against the previous period. Counts in percent, share_pct\
-        \ in percentage points; null when the previous period has nothing to compare\
-        \ with"
+        \ and positive_pct in percentage points; null when the previous period has\
+        \ nothing to compare with"
       example:
-        total: 7.061401241503109
-        yours: 9.301444243932576
-        your_profile: 3.616076749251911
-        your_content: 2.027123023002322
-        share_pct: 4.145608029883936
+        total: 2.027123023002322
+        yours: 4.145608029883936
+        your_profile: 7.386281948385884
+        your_content: 1.2315135367772556
+        share_pct: 1.0246457001441578
+        unique_subreddits: 1.4894159098541704
+        unique_authors: 6.84685269835264
+        positive_pct: 7.457744773683766
       properties:
         total:
           nullable: true
@@ -22661,13 +22758,28 @@ components:
         share_pct:
           nullable: true
           type: number
+        unique_subreddits:
+          description: Percent change in unique subreddits; null when the previous
+            value cannot be compared
+          nullable: true
+          type: number
+        unique_authors:
+          description: Percent change in unique authors; null when the previous value
+            cannot be compared
+          nullable: true
+          type: number
+        positive_pct:
+          description: Percentage-point change in positive sentiment; null when the
+            previous period has no citations
+          nullable: true
+          type: number
       type: object
     OwnedMediaWeek:
       example:
         week: 2000-01-23
-        citations: 7
-        yours: 1
-        other: 1
+        citations: 1
+        yours: 4
+        other: 5
       properties:
         week:
           description: The Monday that starts the week
@@ -22686,8 +22798,8 @@ components:
     OwnedMediaModelShare:
       example:
         model: model
-        citations: 1
-        share_pct: 6.84685269835264
+        citations: 9
+        share_pct: 9.369310271410669
       properties:
         model:
           type: string
@@ -22699,8 +22811,8 @@ components:
     OwnedMediaCountryShare:
       example:
         country_code: country_code
-        citations: 7
-        share_pct: 1.1730742509559433
+        citations: 6
+        share_pct: 8.762042012749001
       properties:
         country_code:
           type: string
@@ -22712,8 +22824,8 @@ components:
     OwnedMediaContentTypeShare:
       example:
         content_type: content_type
-        citations: 4
-        share_pct: 5.025004791520295
+        citations: 9
+        share_pct: 6.438423552598547
       properties:
         content_type:
           description: "reel, post or tv on Instagram, post or pulse on LinkedIn,\
@@ -22727,8 +22839,8 @@ components:
     OwnedMediaAgeBucketShare:
       example:
         bucket: under_1m
-        citations: 9
-        share_pct: 9.369310271410669
+        citations: 3
+        share_pct: 6.965117697638846
       properties:
         bucket:
           description: Age of the cited post or video when the summary is read
@@ -22746,9 +22858,9 @@ components:
     OwnedMediaStoreTotals:
       example:
         store: google_play
-        total: 6
-        yours: 8
-        share_pct: 9.018348186070783
+        total: 1
+        yours: 2
+        share_pct: 6.778324963048013
       properties:
         store:
           enum:
@@ -22767,13 +22879,18 @@ components:
         provider: youtube
         connected: true
         total: 6
-        yours: 3
-        share_pct: 6.965117697638846
+        yours: 5
+        share_pct: 6.704019297950036
         weekly:
         - week: 2000-01-23
-          citations: 1
+          citations: 3
         - week: 2000-01-23
-          citations: 1
+          citations: 3
+        activity:
+        - date: 2000-01-23
+          citations: 3
+        - date: 2000-01-23
+          citations: 3
       properties:
         provider:
           enum:
@@ -22797,6 +22914,27 @@ components:
           items:
             $ref: "#/components/schemas/OwnedMediaPlatformRollup_weekly_inner"
           type: array
+        activity:
+          description: One date/citation row per actual project tracking period with
+            runs
+          items:
+            $ref: "#/components/schemas/OwnedMediaPlatformActivityPeriod"
+          type: array
+      type: object
+    OwnedMediaPlatformActivityPeriod:
+      example:
+        date: 2000-01-23
+        citations: 3
+      properties:
+        date:
+          description: Start date of the actual reporting period
+          format: date
+          type: string
+        citations:
+          type: integer
+      required:
+      - citations
+      - date
       type: object
     OwnedMediaSummaryResponse:
       example:
@@ -22811,6 +22949,9 @@ components:
           your_profile: 5
           your_content: 5
           share_pct: 2.3021358869347655
+          unique_subreddits: 7
+          unique_authors: 9
+          positive_pct: 3.616076749251911
         previous:
           from: 2000-01-23T04:56:07.000+00:00
           to: 2000-01-23T04:56:07.000+00:00
@@ -22820,79 +22961,137 @@ components:
             your_profile: 5
             your_content: 5
             share_pct: 2.3021358869347655
+            unique_subreddits: 7
+            unique_authors: 9
+            positive_pct: 3.616076749251911
         changes:
-          total: 7.061401241503109
-          yours: 9.301444243932576
-          your_profile: 3.616076749251911
-          your_content: 2.027123023002322
-          share_pct: 4.145608029883936
+          total: 2.027123023002322
+          yours: 4.145608029883936
+          your_profile: 7.386281948385884
+          your_content: 1.2315135367772556
+          share_pct: 1.0246457001441578
+          unique_subreddits: 1.4894159098541704
+          unique_authors: 6.84685269835264
+          positive_pct: 7.457744773683766
         weekly:
         - week: 2000-01-23
-          citations: 7
-          yours: 1
-          other: 1
+          citations: 1
+          yours: 4
+          other: 5
         - week: 2000-01-23
-          citations: 7
-          yours: 1
-          other: 1
+          citations: 1
+          yours: 4
+          other: 5
         by_model:
         - model: model
-          citations: 1
-          share_pct: 6.84685269835264
+          citations: 9
+          share_pct: 9.369310271410669
         - model: model
-          citations: 1
-          share_pct: 6.84685269835264
+          citations: 9
+          share_pct: 9.369310271410669
         by_country:
         - country_code: country_code
-          citations: 7
-          share_pct: 1.1730742509559433
+          citations: 6
+          share_pct: 8.762042012749001
         - country_code: country_code
-          citations: 7
-          share_pct: 1.1730742509559433
+          citations: 6
+          share_pct: 8.762042012749001
         content_types:
         - content_type: content_type
-          citations: 4
-          share_pct: 5.025004791520295
+          citations: 9
+          share_pct: 6.438423552598547
         - content_type: content_type
-          citations: 4
-          share_pct: 5.025004791520295
+          citations: 9
+          share_pct: 6.438423552598547
         age_buckets:
         - bucket: under_1m
-          citations: 9
-          share_pct: 9.369310271410669
+          citations: 3
+          share_pct: 6.965117697638846
         - bucket: under_1m
-          citations: 9
-          share_pct: 9.369310271410669
+          citations: 3
+          share_pct: 6.965117697638846
         stores:
         - store: google_play
-          total: 6
-          yours: 8
-          share_pct: 9.018348186070783
+          total: 1
+          yours: 2
+          share_pct: 6.778324963048013
         - store: google_play
-          total: 6
-          yours: 8
-          share_pct: 9.018348186070783
+          total: 1
+          yours: 2
+          share_pct: 6.778324963048013
         platforms:
         - provider: youtube
           connected: true
           total: 6
-          yours: 3
-          share_pct: 6.965117697638846
+          yours: 5
+          share_pct: 6.704019297950036
           weekly:
           - week: 2000-01-23
-            citations: 1
+            citations: 3
           - week: 2000-01-23
-            citations: 1
+            citations: 3
+          activity:
+          - date: 2000-01-23
+            citations: 3
+          - date: 2000-01-23
+            citations: 3
         - provider: youtube
           connected: true
           total: 6
-          yours: 3
-          share_pct: 6.965117697638846
+          yours: 5
+          share_pct: 6.704019297950036
           weekly:
           - week: 2000-01-23
-            citations: 1
+            citations: 3
           - week: 2000-01-23
-            citations: 1
+            citations: 3
+          activity:
+          - date: 2000-01-23
+            citations: 3
+          - date: 2000-01-23
+            citations: 3
+        activity:
+        - date: 2000-01-23
+          citations: 7
+          yours: 0
+          other: 7
+          positive: 6
+          neutral: 0
+          negative: 4
+        - date: 2000-01-23
+          citations: 7
+          yours: 0
+          other: 7
+          positive: 6
+          neutral: 0
+          negative: 4
+        subreddit_activity:
+        - date: 2000-01-23
+          subreddit: subreddit
+          is_others: true
+          citations: 8
+        - date: 2000-01-23
+          subreddit: subreddit
+          is_others: true
+          citations: 8
+        positions:
+        - bucket: position_1
+          citations: 7
+          share_pct: 3.0205796992916243
+        - bucket: position_1
+          citations: 7
+          share_pct: 3.0205796992916243
+        brand_share:
+        - actor_id: 3
+          actor_name: actor_name
+          is_brand: true
+          citations: 7
+          share_pct: 5.533258397034986
+        - actor_id: 3
+          actor_name: actor_name
+          is_brand: true
+          citations: 7
+          share_pct: 5.533258397034986
         request_id: request_id
       properties:
         project_id:
@@ -22957,8 +23156,150 @@ components:
             $ref: "#/components/schemas/OwnedMediaPlatformRollup"
           nullable: true
           type: array
+        activity:
+          description: "All providers. One row per actual project reporting period\
+            \ with runs; provider=overview has null yours and other, and provider=reddit\
+            \ also returns positive, neutral and negative sentiment counts. Citation\
+            \ counts use the selected date window, and periods with runs but no citation\
+            \ have zero"
+          items:
+            $ref: "#/components/schemas/OwnedMediaSummaryActivityPeriod"
+          type: array
+        subreddit_activity:
+          description: provider=reddit only. One row per subreddit and actual reporting
+            period; the top five subreddits are separate and Others has a null subreddit
+          items:
+            $ref: "#/components/schemas/RedditSubredditActivityPeriod"
+          type: array
+        positions:
+          description: provider=reddit only. Position distribution over the selected
+            date window
+          items:
+            $ref: "#/components/schemas/RedditPositionShare"
+          type: array
+        brand_share:
+          description: provider=reddit only. Citation share among the tracked brand
+            and competitors with cited mentions
+          items:
+            $ref: "#/components/schemas/RedditBrandShare"
+          type: array
         request_id:
           type: string
+      type: object
+    OwnedMediaSummaryActivityPeriod:
+      example:
+        date: 2000-01-23
+        citations: 7
+        yours: 0
+        other: 7
+        positive: 6
+        neutral: 0
+        negative: 4
+      properties:
+        date:
+          description: Start date of the actual reporting period
+          format: date
+          type: string
+        citations:
+          type: integer
+        yours:
+          description: "Citations on owned profiles and content, null for provider=overview"
+          nullable: true
+          type: integer
+        other:
+          description: "Citations not counted as yours, null for provider=overview"
+          nullable: true
+          type: integer
+        positive:
+          description: Citations whose AI answer sentiment is positive
+          type: integer
+        neutral:
+          description: Citations whose AI answer sentiment is neutral or mixed
+          type: integer
+        negative:
+          description: Citations whose AI answer sentiment is negative
+          type: integer
+      required:
+      - citations
+      - date
+      - other
+      - yours
+      type: object
+    RedditSubredditActivityPeriod:
+      example:
+        date: 2000-01-23
+        subreddit: subreddit
+        is_others: true
+        citations: 8
+      properties:
+        date:
+          description: Start date of the actual reporting period
+          format: date
+          type: string
+        subreddit:
+          description: "Subreddit name, or null for the Others aggregate"
+          nullable: true
+          type: string
+        is_others:
+          type: boolean
+        citations:
+          type: integer
+      required:
+      - citations
+      - date
+      - is_others
+      - subreddit
+      type: object
+    RedditPositionShare:
+      example:
+        bucket: position_1
+        citations: 7
+        share_pct: 3.0205796992916243
+      properties:
+        bucket:
+          enum:
+          - position_1
+          - position_2_3
+          - position_4_7
+          - position_7_plus
+          type: string
+        citations:
+          type: integer
+        share_pct:
+          description: Percentage (0-100) of citations in the included position buckets
+          type: number
+      required:
+      - bucket
+      - citations
+      - share_pct
+      type: object
+    RedditBrandShare:
+      example:
+        actor_id: 3
+        actor_name: actor_name
+        is_brand: true
+        citations: 7
+        share_pct: 5.533258397034986
+      properties:
+        actor_id:
+          type: integer
+        actor_name:
+          nullable: true
+          type: string
+        is_brand:
+          type: boolean
+        citations:
+          type: integer
+        share_pct:
+          description: Percentage (0-100) among the tracked brand and competitors
+            with cited mentions
+          type: number
+      required:
+      - actor_id
+      - actor_name
+      - citations
+      - is_brand
+      - share_pct
       type: object
     OwnedMediaCitedItem:
       description: "The post, video, profile or channel. Null when nothing in the\
@@ -31431,7 +31772,7 @@ components:
     OwnedMediaPlatformRollup_weekly_inner:
       example:
         week: 2000-01-23
-        citations: 1
+        citations: 3
       properties:
         week:
           format: date
@@ -31450,6 +31791,9 @@ components:
           your_profile: 5
           your_content: 5
           share_pct: 2.3021358869347655
+          unique_subreddits: 7
+          unique_authors: 9
+          positive_pct: 3.616076749251911
       properties:
         from:
           format: date-time
