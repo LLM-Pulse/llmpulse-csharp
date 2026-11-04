@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.81.0
+  version: 1.82.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -16699,6 +16699,7 @@ paths:
           - intelligence_task.updated
           - geo_audit_run.completed
           - geo_audit_alert.triggered
+          - tracking_run.completed
           type: string
         style: simple
       - explode: true
@@ -29126,6 +29127,7 @@ components:
           - intelligence_task.updated
           - geo_audit_run.completed
           - geo_audit_alert.triggered
+          - tracking_run.completed
           type: string
         target_url:
           description: "The URL deliveries are sent to. A read-only API key receives\
@@ -29203,6 +29205,7 @@ components:
           - intelligence_task.updated
           - geo_audit_run.completed
           - geo_audit_alert.triggered
+          - tracking_run.completed
           type: string
         target_url:
           description: Public HTTPS URL that will receive signed event payloads
@@ -29241,6 +29244,7 @@ components:
           - intelligence_task.updated
           - geo_audit_run.completed
           - geo_audit_alert.triggered
+          - tracking_run.completed
           type: string
         target_url:
           type: string
