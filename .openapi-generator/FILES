@@ -114,6 +114,7 @@ docs/models/CreateApiKeyRequest.md
 docs/models/CreateCollectionRequest.md
 docs/models/CreateCompetitorRequest.md
 docs/models/CreateProjectDraftRequest.md
+docs/models/CreateReputationReportRequest.md
 docs/models/CreateTeamInvitation201Response.md
 docs/models/CreateTeamInvitationRequest.md
 docs/models/CreateTechnicalGeoReportsRequest.md
@@ -266,6 +267,8 @@ docs/models/RedditPositionShare.md
 docs/models/RedditSubredditActivityPeriod.md
 docs/models/RemovePromptTagsRequest.md
 docs/models/RemoveTeamMember200Response.md
+docs/models/ReputationReportCreateResponse.md
+docs/models/ReputationReportSummary.md
 docs/models/RevokeApiKey200Response.md
 docs/models/RevokeTeamInvitation200Response.md
 docs/models/SampleWebhookPayloads200Response.md
@@ -490,6 +493,7 @@ src/LLMPulse.SDK/Model/CreateApiKeyRequest.cs
 src/LLMPulse.SDK/Model/CreateCollectionRequest.cs
 src/LLMPulse.SDK/Model/CreateCompetitorRequest.cs
 src/LLMPulse.SDK/Model/CreateProjectDraftRequest.cs
+src/LLMPulse.SDK/Model/CreateReputationReportRequest.cs
 src/LLMPulse.SDK/Model/CreateTeamInvitation201Response.cs
 src/LLMPulse.SDK/Model/CreateTeamInvitationRequest.cs
 src/LLMPulse.SDK/Model/CreateTechnicalGeoReportsRequest.cs
@@ -642,6 +646,8 @@ src/LLMPulse.SDK/Model/RedditPositionShare.cs
 src/LLMPulse.SDK/Model/RedditSubredditActivityPeriod.cs
 src/LLMPulse.SDK/Model/RemovePromptTagsRequest.cs
 src/LLMPulse.SDK/Model/RemoveTeamMember200Response.cs
+src/LLMPulse.SDK/Model/ReputationReportCreateResponse.cs
+src/LLMPulse.SDK/Model/ReputationReportSummary.cs
 src/LLMPulse.SDK/Model/RevokeApiKey200Response.cs
 src/LLMPulse.SDK/Model/RevokeTeamInvitation200Response.cs
 src/LLMPulse.SDK/Model/SampleWebhookPayloads200Response.cs

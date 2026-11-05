@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.84.0
+  version: 1.85.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -9919,6 +9919,91 @@ paths:
         \ first, with status and which analyst models produced data."
       x-mcp-tool: list_reputation_reports
       x-plan: reputation_access
+    post:
+      description: "Starts this month's Brand Reputation report, like the Generate\
+        \ button on the Reputation page: 201 with the new report (status pending).\
+        \ When the month already holds a report that did not fail, whether it is still\
+        \ running or finished, nothing new starts and the answer is 200 with created\
+        \ false and that report. With recalculate true it uses the month's one manual\
+        \ recalculation instead (the Recalculate This Month button): a fresh run across\
+        \ every analyst model, 201 when it starts, 200 with created false while a\
+        \ report is still running, and ERR_LIMIT_REACHED once the month holds two\
+        \ reports. Generation runs in the background: poll GET /reputation/reports\
+        \ until status is completed, then read the scores with GET /reputation/reports/{id}.\
+        \ ERR_RATE_LIMITED (429, with Retry-After) means another request is starting\
+        \ a report for the same project; retry after a few seconds. recalculate must\
+        \ be true or false and unknown fields are refused (ERR_INVALID_PARAM). Requires\
+        \ reputation monitoring on the account, a `read_write` scope API key and,\
+        \ for team members, create permission on Reputation."
+      operationId: createReputationReport
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/createReputationReport_request"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReputationReportCreateResponse"
+          description: Nothing new started; the report that already holds this month
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReputationReportCreateResponse"
+          description: "The new report, status pending"
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+        "429":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Another request is starting a report for this project; retry
+            after a few seconds
+      summary: Start a reputation report
+      tags:
+      - Reputation & Studies
+      x-llms-description: "Start this month's reputation report for a project, or\
+        \ use the one manual recalculation a month with recalculate=true; poll GET\
+        \ /reputation/reports until it completes."
+      x-mcp-tool: create_reputation_report
+      x-plan: reputation_access
+      x-write: true
   /reputation/reports/{id}:
     get:
       description: "One reputation report's scores as flat rows: one row per analyst\
@@ -17051,10 +17136,11 @@ paths:
       summary: Create a webhook subscription
       tags:
       - Webhooks
-      x-llms-description: "Subscribe a public HTTPS URL to a project event (new mention,\
-        \ citation, execution, negative sentiment, completed report, GEO Writer edit,\
-        \ GEO audit run or alert, finished tracking run); deliveries are HMAC-signed.\
-        \ Scale plan or above."
+      x-llms-description: "Subscribe a public HTTPS URL to a project event (new brand\
+        \ or competitor mention, citation, execution, negative sentiment, completed\
+        \ recommendations report or GEO Writer task, GEO Writer edit, GEO audit run\
+        \ or alert, finished tracking run); deliveries are HMAC-signed. Scale plan\
+        \ or above."
       x-mcp-tool: create_webhook_subscription
       x-plan: scale
       x-write: true
@@ -24386,6 +24472,106 @@ components:
         request_id:
           type: string
       type: object
+    ReputationReportSummary:
+      description: One reputation report's status and analyst model coverage
+      example:
+        id: id
+        status: pending
+        created_at: 2000-01-23T04:56:07.000+00:00
+        processed_at: 2000-01-23T04:56:07.000+00:00
+        available_models:
+        - chatgpt
+        - chatgpt
+        missing_models:
+        - chatgpt
+        - chatgpt
+        error_message: error_message
+      properties:
+        id:
+          description: "Report id for GET /reputation/reports/{id}"
+          type: string
+        status:
+          enum:
+          - pending
+          - processing
+          - completed
+          - failed
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        processed_at:
+          format: date-time
+          nullable: true
+          type: string
+        available_models:
+          description: Analyst models that produced data
+          items:
+            enum:
+            - chatgpt
+            - perplexity
+            - gemini
+            - deepseek
+            - grok
+            - claude
+            type: string
+          type: array
+        missing_models:
+          description: Analyst models with no data yet
+          items:
+            enum:
+            - chatgpt
+            - perplexity
+            - gemini
+            - deepseek
+            - grok
+            - claude
+            type: string
+          type: array
+        error_message:
+          description: Why the report failed; null unless status is failed
+          nullable: true
+          type: string
+      required:
+      - available_models
+      - created_at
+      - id
+      - missing_models
+      - status
+      type: object
+    ReputationReportCreateResponse:
+      example:
+        project_id: 0
+        created: true
+        report:
+          id: id
+          status: pending
+          created_at: 2000-01-23T04:56:07.000+00:00
+          processed_at: 2000-01-23T04:56:07.000+00:00
+          available_models:
+          - chatgpt
+          - chatgpt
+          missing_models:
+          - chatgpt
+          - chatgpt
+          error_message: error_message
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        created:
+          description: True when this request started a new report; false when it
+            returned the one that already holds the month
+          type: boolean
+        report:
+          $ref: "#/components/schemas/ReputationReportSummary"
+        request_id:
+          type: string
+      required:
+      - created
+      - project_id
+      - report
+      type: object
     GeoAuditRunResponse:
       allOf:
       - $ref: "#/components/schemas/GeoAuditRun"
@@ -29853,6 +30039,18 @@ components:
           items:
             type: string
           type: array
+      type: object
+    createReputationReport_request:
+      properties:
+        project_id:
+          type: integer
+        recalculate:
+          default: false
+          description: Use this month's one manual recalculation instead of returning
+            the existing report
+          type: boolean
+      required:
+      - project_id
       type: object
     sendCustomReport_request:
       properties:
