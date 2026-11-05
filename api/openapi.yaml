@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.85.0
+  version: 1.86.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -4134,7 +4134,8 @@ paths:
       - description: "Filter sentinel non-answers (no answer could be collected after\
           \ all retries, or the model declined to answer, today only Gemini; excluded\
           \ from platform metrics). false = only real answers, true = only sentinels,\
-          \ omit = both. Every item carries its own no_result flag."
+          \ omit = both. Every item carries its own no_result flag, and a sentinel\
+          \ also carries no_result_reason (declined or no_answer)."
         explode: true
         in: query
         name: no_result
@@ -4161,8 +4162,9 @@ paths:
       tags:
       - Answers
       x-llms-description: "Paginated AI responses with truncated content (10k chars),\
-        \ counts, executed_at. query = full-text search (total becomes the exact match\
-        \ count; rows return snippet + match_count)."
+        \ counts, executed_at, no_result and no_result_reason (declined or no_answer).\
+        \ query = full-text search (total becomes the exact match count; rows return\
+        \ snippet + match_count)."
       x-mcp-tool: list_answers
   /answers/{id}:
     get:
@@ -20390,6 +20392,7 @@ components:
         duration_ms: 1.4658129805029452
         success: true
         no_result: true
+        no_result_reason: declined
         fan_out_queries:
         - fan_out_queries
         - fan_out_queries
@@ -20438,6 +20441,9 @@ components:
         model:
           type: string
         response:
+          description: "The AI answer. For a declined answer (no_result_reason declined)\
+            \ it is the reply the model gave instead; for no_answer it is a placeholder,\
+            \ not an AI response"
           nullable: true
           type: string
         response_truncated:
@@ -20459,6 +20465,14 @@ components:
             \ after all retries, or the model declined to answer, today only Gemini);\
             \ excluded from platform metrics"
           type: boolean
+        no_result_reason:
+          description: "Present only when no_result is true. declined = the model\
+            \ declined to answer (today only Gemini, shown as Declined in the app)\
+            \ and response holds its reply; no_answer = no answer could be collected"
+          enum:
+          - declined
+          - no_answer
+          type: string
         fan_out_queries:
           items:
             type: string
