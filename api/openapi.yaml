@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.87.0
+  version: 1.88.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -8636,12 +8636,17 @@ paths:
         \ runs are omitted, while a run without a citation has a real zero. Its citation\
         \ counts cover the selected date window; profile, channel and app metadata\
         \ are current values, not historical growth. For provider=mobile_apps, select\
-        \ the store with `store`. `view=own_citations` returns the raw citations of\
-        \ the connected profile only and stays empty until a profile is connected.\
-        \ For Reddit use /dimensions/owned_media/summary?provider=reddit for the summary\
-        \ and /dimensions/reddit for cited-content tables. A team member also needs\
-        \ the YouTube Intelligence permission for provider=youtube. Requires the Growth\
-        \ plan or above."
+        \ the store with `store`. For provider=trustpilot, `view=profiles` (the default)\
+        \ lists the cited Trustpilot profiles with their rating and review count,\
+        \ `view=brands` the brand and each competitor with their profile's rating,\
+        \ its change since the previous monthly read, review count, read status and\
+        \ citations, and `view=reviews` the reviews published in the window on those\
+        \ profiles; ratings and reviews come from a monthly read of each profile.\
+        \ `view=own_citations` returns the raw citations of the connected profile\
+        \ only and stays empty until a profile is connected. For Reddit use /dimensions/owned_media/summary?provider=reddit\
+        \ for the summary and /dimensions/reddit for cited-content tables. A team\
+        \ member also needs the YouTube Intelligence permission for provider=youtube.\
+        \ Requires the Growth plan or above."
       operationId: listOwnedMedia
       parameters:
       - description: Project ID
@@ -8684,6 +8689,7 @@ paths:
           - tiktok
           - linkedin
           - mobile_apps
+          - trustpilot
           type: string
         style: form
       - description: "Row shape; the allowed set depends on provider, and activity\
@@ -8700,6 +8706,8 @@ paths:
           - profiles
           - own_citations
           - apps
+          - brands
+          - reviews
           - activity
           type: string
         style: form
@@ -8872,8 +8880,9 @@ paths:
       tags:
       - Owned Media & Communities
       x-llms-description: "Owned-media citations by platform (provider=youtube, instagram,\
-        \ facebook, tiktok, linkedin, mobile_apps): cited content flagged as yours\
-        \ or not, plus per-entity activity by tracking period (view=activity) (Growth+)."
+        \ facebook, tiktok, linkedin, mobile_apps, trustpilot): cited content flagged\
+        \ as yours or not, Trustpilot ratings and reviews of the brand and its competitors,\
+        \ plus per-entity activity by tracking period (view=activity) (Growth+)."
       x-mcp-tool: list_owned_media
       x-plan: growth
   /dimensions/owned_media/summary:
@@ -8892,14 +8901,16 @@ paths:
         \ but no citation has zero. Activity counts use the selected date window.\
         \ by_model and by_country split citations; content_types (reel, post, tv,\
         \ pulse, or regular, shorts and live on YouTube) and age_buckets cover posts\
-        \ and videos. provider=mobile_apps adds stores and per-store totals; provider=overview\
-        \ returns one rollup per readable platform. provider=reddit adds unique_subreddits,\
-        \ unique_authors, positive_pct, and positive, neutral and negative sentiment\
-        \ counts in activity for the citing AI answers, plus subreddit_activity for\
-        \ the top five subreddits and Others, positions and brand_share. A team member\
-        \ also needs the YouTube Intelligence permission for provider=youtube or Reddit\
-        \ Intelligence for provider=reddit. Defaults to the last 30 days. Requires\
-        \ the Growth plan or above."
+        \ and videos. provider=mobile_apps adds stores and per-store totals; provider=trustpilot\
+        \ counts trustpilot.com citations, yours being those of the profile of the\
+        \ account's own domains; provider=overview returns one rollup per readable\
+        \ platform. provider=reddit adds unique_subreddits, unique_authors, positive_pct,\
+        \ and positive, neutral and negative sentiment counts in activity for the\
+        \ citing AI answers, plus subreddit_activity for the top five subreddits and\
+        \ Others, positions and brand_share. A team member also needs the YouTube\
+        \ Intelligence permission for provider=youtube or Reddit Intelligence for\
+        \ provider=reddit. Defaults to the last 30 days. Requires the Growth plan\
+        \ or above."
       operationId: getOwnedMediaSummary
       parameters:
       - description: Project ID
@@ -8925,6 +8936,7 @@ paths:
           - linkedin
           - mobile_apps
           - reddit
+          - trustpilot
           - overview
           type: string
         style: form
@@ -9130,9 +9142,9 @@ paths:
       tags:
       - Owned Media & Communities
       x-llms-description: "The summary of one Owned Media platform (provider=youtube,\
-        \ instagram, facebook, tiktok, linkedin, mobile_apps, reddit) or the cross-platform\
-        \ overview, with KPIs, previous-period comparison, weekly totals, activity\
-        \ by reporting period and Reddit charts (Growth+)."
+        \ instagram, facebook, tiktok, linkedin, mobile_apps, reddit, trustpilot)\
+        \ or the cross-platform overview, with KPIs, previous-period comparison, weekly\
+        \ totals, activity by reporting period and Reddit charts (Growth+)."
       x-mcp-tool: get_owned_media_summary
       x-plan: growth
   /dimensions/owned_media/citing_prompts:
@@ -14126,9 +14138,13 @@ paths:
                 $ref: "#/components/schemas/ApiError"
           description: "WordPress no longer accepts the stored application password,\
             \ or its user cannot write posts (ERR_CMS_ACCESS_REVOKED, with error.meta.connect_url\
-            \ to reconnect). A white-label portal host answers ERR_INTEGRATION_UNAVAILABLE,\
-            \ a read-only key on a write ERR_INSUFFICIENT_SCOPE and a team member\
-            \ without the permission ERR_INSUFFICIENT_PERMISSION, with the same status"
+            \ to reconnect). error.meta.reason says why: reconnect_required, authorization_header_lost\
+            \ (the password stopped reaching WordPress: revoked, or the server now\
+            \ strips the Authorization header), unknown_user, application_passwords_disabled,\
+            \ application_passwords_disabled_for_user, rest_api_restricted or missing_capability.\
+            \ A white-label portal host answers ERR_INTEGRATION_UNAVAILABLE, a read-only\
+            \ key on a write ERR_INSUFFICIENT_SCOPE and a team member without the\
+            \ permission ERR_INSUFFICIENT_PERMISSION, with the same status"
         "404":
           content:
             application/json:
@@ -14164,7 +14180,8 @@ paths:
           description: "A parameter failed validation (ERR_INVALID_PARAM), or WordPress\
             \ refused the request, the site now redirects to another address or it\
             \ can no longer be reached safely from our servers (ERR_CMS_REJECTED,\
-            \ error.meta.reason rejected, redirected or unsafe_site; redirected carries\
+            \ error.meta.reason rejected, firewall_blocked, http_auth_required, invalid_json,\
+            \ redirected, unsafe_site, dns_failed or private_address; redirected carries\
             \ error.meta.connect_url to reconnect). Retrying the same request gives\
             \ the same answer"
         "503":
@@ -14180,8 +14197,10 @@ paths:
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
-          description: The WordPress site could not be reached or took too long to
-            answer (ERR_CMS_UPSTREAM). Retry later; error.meta.reason says why
+          description: "The WordPress site could not be reached or took too long to\
+            \ answer (ERR_CMS_UPSTREAM). Retry later; error.meta.reason says why:\
+            \ unreachable, timeout, connection_refused, tls_error, server_error or\
+            \ maintenance"
       summary: List the posts or pages of the connected WordPress site
       tags:
       - GEO Writer
@@ -14253,9 +14272,13 @@ paths:
                 $ref: "#/components/schemas/ApiError"
           description: "WordPress no longer accepts the stored application password,\
             \ or its user cannot write posts (ERR_CMS_ACCESS_REVOKED, with error.meta.connect_url\
-            \ to reconnect). A white-label portal host answers ERR_INTEGRATION_UNAVAILABLE,\
-            \ a read-only key on a write ERR_INSUFFICIENT_SCOPE and a team member\
-            \ without the permission ERR_INSUFFICIENT_PERMISSION, with the same status"
+            \ to reconnect). error.meta.reason says why: reconnect_required, authorization_header_lost\
+            \ (the password stopped reaching WordPress: revoked, or the server now\
+            \ strips the Authorization header), unknown_user, application_passwords_disabled,\
+            \ application_passwords_disabled_for_user, rest_api_restricted or missing_capability.\
+            \ A white-label portal host answers ERR_INTEGRATION_UNAVAILABLE, a read-only\
+            \ key on a write ERR_INSUFFICIENT_SCOPE and a team member without the\
+            \ permission ERR_INSUFFICIENT_PERMISSION, with the same status"
         "404":
           content:
             application/json:
@@ -14291,7 +14314,8 @@ paths:
           description: "A parameter failed validation (ERR_INVALID_PARAM), or WordPress\
             \ refused the request, the site now redirects to another address or it\
             \ can no longer be reached safely from our servers (ERR_CMS_REJECTED,\
-            \ error.meta.reason rejected, redirected or unsafe_site; redirected carries\
+            \ error.meta.reason rejected, firewall_blocked, http_auth_required, invalid_json,\
+            \ redirected, unsafe_site, dns_failed or private_address; redirected carries\
             \ error.meta.connect_url to reconnect). Retrying the same request gives\
             \ the same answer"
         "503":
@@ -14307,8 +14331,10 @@ paths:
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
-          description: The WordPress site could not be reached or took too long to
-            answer (ERR_CMS_UPSTREAM). Retry later; error.meta.reason says why
+          description: "The WordPress site could not be reached or took too long to\
+            \ answer (ERR_CMS_UPSTREAM). Retry later; error.meta.reason says why:\
+            \ unreachable, timeout, connection_refused, tls_error, server_error or\
+            \ maintenance"
       summary: Get one post or page of the connected WordPress site
       tags:
       - GEO Writer
@@ -14380,9 +14406,13 @@ paths:
                 $ref: "#/components/schemas/ApiError"
           description: "WordPress no longer accepts the stored application password,\
             \ or its user cannot write posts (ERR_CMS_ACCESS_REVOKED, with error.meta.connect_url\
-            \ to reconnect). A white-label portal host answers ERR_INTEGRATION_UNAVAILABLE,\
-            \ a read-only key on a write ERR_INSUFFICIENT_SCOPE and a team member\
-            \ without the permission ERR_INSUFFICIENT_PERMISSION, with the same status"
+            \ to reconnect). error.meta.reason says why: reconnect_required, authorization_header_lost\
+            \ (the password stopped reaching WordPress: revoked, or the server now\
+            \ strips the Authorization header), unknown_user, application_passwords_disabled,\
+            \ application_passwords_disabled_for_user, rest_api_restricted or missing_capability.\
+            \ A white-label portal host answers ERR_INTEGRATION_UNAVAILABLE, a read-only\
+            \ key on a write ERR_INSUFFICIENT_SCOPE and a team member without the\
+            \ permission ERR_INSUFFICIENT_PERMISSION, with the same status"
         "404":
           content:
             application/json:
@@ -18077,9 +18107,13 @@ components:
             $ref: "#/components/schemas/ApiError"
       description: "WordPress no longer accepts the stored application password, or\
         \ its user cannot write posts (ERR_CMS_ACCESS_REVOKED, with error.meta.connect_url\
-        \ to reconnect). A white-label portal host answers ERR_INTEGRATION_UNAVAILABLE,\
-        \ a read-only key on a write ERR_INSUFFICIENT_SCOPE and a team member without\
-        \ the permission ERR_INSUFFICIENT_PERMISSION, with the same status"
+        \ to reconnect). error.meta.reason says why: reconnect_required, authorization_header_lost\
+        \ (the password stopped reaching WordPress: revoked, or the server now strips\
+        \ the Authorization header), unknown_user, application_passwords_disabled,\
+        \ application_passwords_disabled_for_user, rest_api_restricted or missing_capability.\
+        \ A white-label portal host answers ERR_INTEGRATION_UNAVAILABLE, a read-only\
+        \ key on a write ERR_INSUFFICIENT_SCOPE and a team member without the permission\
+        \ ERR_INSUFFICIENT_PERMISSION, with the same status"
     CmsNotConnected:
       content:
         application/json:
@@ -18115,7 +18149,8 @@ components:
       description: "A parameter failed validation (ERR_INVALID_PARAM), or WordPress\
         \ refused the request, the site now redirects to another address or it can\
         \ no longer be reached safely from our servers (ERR_CMS_REJECTED, error.meta.reason\
-        \ rejected, redirected or unsafe_site; redirected carries error.meta.connect_url\
+        \ rejected, firewall_blocked, http_auth_required, invalid_json, redirected,\
+        \ unsafe_site, dns_failed or private_address; redirected carries error.meta.connect_url\
         \ to reconnect). Retrying the same request gives the same answer"
     CmsUnavailable:
       content:
@@ -18130,8 +18165,9 @@ components:
             request_id: abc-123
           schema:
             $ref: "#/components/schemas/ApiError"
-      description: The WordPress site could not be reached or took too long to answer
-        (ERR_CMS_UPSTREAM). Retry later; error.meta.reason says why
+      description: "The WordPress site could not be reached or took too long to answer\
+        \ (ERR_CMS_UPSTREAM). Retry later; error.meta.reason says why: unreachable,\
+        \ timeout, connection_refused, tls_error, server_error or maintenance"
   schemas:
     SearchConsoleFilters:
       description: "The value of the filters query parameter, JSON-encoded into a\
@@ -22134,8 +22170,9 @@ components:
           nullable: true
           type: string
         error_code:
-          description: "Why the send failed, for example reconnect_required, missing_capability,\
-            \ unreachable or rejected"
+          description: "Why the send failed, the same token as error.meta.reason,\
+            \ for example reconnect_required, authorization_header_lost, missing_capability,\
+            \ firewall_blocked, timeout, unreachable or rejected"
           nullable: true
           type: string
         created_at:
@@ -22507,13 +22544,17 @@ components:
         \ url, avatar_url, unique_videos), posts (url, caption, owner_handle, thumbnail_url,\
         \ content_type, likes, comments, views, posted_at), profiles (handle, name,\
         \ url, avatar_url, followers, unique_posts), own_citations (url, citation_date,\
-        \ position, model), apps (domain, total_responses, rank, global_rank) and\
-        \ activity (date, entity_id, entity_name, entity_url, yours, citations, plus\
-        \ store and competitor_id where applicable). Activity rows identify a reporting-period\
-        \ start; entity metadata is optional, and entity_id, entity_name and entity_url\
-        \ can be null when unknown. Store and competitor_id appear only where applicable.\
-        \ Every view but own_citations carries citations and yours; videos, channels,\
-        \ posts and profiles carry avg_position."
+        \ position, model), apps (domain, total_responses, rank, global_rank), the\
+        \ Trustpilot views profiles (key, name, rating, reviews_count, url, competitor_id),\
+        \ brands (name, domain, key, rating, rating_change, reviews_count, status,\
+        \ url, competitor_id) and reviews (id, brand, rating, title, text, author,\
+        \ published_at, replied, url, competitor_id), and activity (date, entity_id,\
+        \ entity_name, entity_url, yours, citations, plus store and competitor_id\
+        \ where applicable). Activity rows identify a reporting-period start; entity\
+        \ metadata is optional, and entity_id, entity_name and entity_url can be null\
+        \ when unknown. Store and competitor_id appear only where applicable. Every\
+        \ view but own_citations carries citations and yours; videos, channels, posts\
+        \ and profiles carry avg_position."
       example:
         date: 2000-01-23
         entity_id: entity_id
@@ -22521,6 +22562,15 @@ components:
         entity_url: entity_url
         store: google_play
         competitor_id: 5
+        id: 2
+        brand: brand
+        rating: 7.061401241503109
+        rating_change: 9.301444243932576
+        reviews_count: 3
+        status: found
+        text: text
+        author: author
+        replied: true
         title: title
         url: url
         channel_name: channel_name
@@ -22536,23 +22586,23 @@ components:
         avatar_url: avatar_url
         content_type: content_type
         citations: 2
-        unique_videos: 7
-        unique_posts: 9
-        followers: 3
-        likes: 2
-        comments: 4
+        unique_videos: 4
+        unique_posts: 7
+        followers: 1
+        likes: 1
+        comments: 1
         views: ""
         published_at: published_at
         posted_at: posted_at
-        avg_position: 7.386281948385884
+        avg_position: 6.84685269835264
         yours: true
         citation_date: 2000-01-23T04:56:07.000+00:00
-        position: 1
+        position: 7
         model: model
         domain: domain
         total_responses: 1
-        rank: 1
-        global_rank: 6
+        rank: 4
+        global_rank: 5
       properties:
         date:
           description: The start date of the actual reporting period (view=activity)
@@ -22577,10 +22627,53 @@ components:
           - app_store
           type: string
         competitor_id:
-          description: Competitor identifier when the activity row represents a competitor
-            app
+          description: Competitor identifier when the row represents a competitor's
+            app or Trustpilot profile
           nullable: true
           type: integer
+        id:
+          description: "The review's identifier (provider=trustpilot, view=reviews)"
+          type: integer
+        brand:
+          description: "The brand or competitor whose Trustpilot profile carries the\
+            \ review (provider=trustpilot, view=reviews)"
+          type: string
+        rating:
+          description: "Trustpilot rating out of 5: the profile's at its last monthly\
+            \ read (views profiles and brands) or the review's stars (view=reviews)"
+          nullable: true
+          type: number
+        rating_change:
+          description: "Change of the profile's rating since the previous monthly\
+            \ read (provider=trustpilot, view=brands); null before a second read"
+          nullable: true
+          type: number
+        reviews_count:
+          description: The profile's review count on Trustpilot at its last monthly
+            read (provider=trustpilot)
+          nullable: true
+          type: integer
+        status:
+          description: "Whether the brand's Trustpilot profile has been read (found),\
+            \ Trustpilot has no business for its domain (not_found), or it has not\
+            \ been read yet (pending) (provider=trustpilot, view=brands)"
+          enum:
+          - found
+          - not_found
+          - pending
+          type: string
+        text:
+          description: "The review text (provider=trustpilot, view=reviews)"
+          nullable: true
+          type: string
+        author:
+          description: "The reviewer's display name (provider=trustpilot, view=reviews)"
+          nullable: true
+          type: string
+        replied:
+          description: "Whether the business replied to the review (provider=trustpilot,\
+            \ view=reviews)"
+          type: boolean
         title:
           nullable: true
           type: string
@@ -22602,7 +22695,10 @@ components:
           type: string
         key:
           description: "The channel key (handle:..., channel:... or name:...), accepted\
-            \ as profile by /dimensions/owned_media/citing_prompts"
+            \ as profile by /dimensions/owned_media/citing_prompts; on provider=trustpilot,\
+            \ the business domain the profile is filed under, null for a brand without\
+            \ a domain"
+          nullable: true
           type: string
         name:
           nullable: true
@@ -22677,7 +22773,8 @@ components:
           nullable: true
           type: string
         domain:
-          description: The app's store listing URL (provider=mobile_apps)
+          description: "The app's store listing URL (provider=mobile_apps), or the\
+            \ brand's domain (provider=trustpilot, view=brands)"
           type: string
         total_responses:
           type: integer
@@ -22705,6 +22802,15 @@ components:
           entity_url: entity_url
           store: google_play
           competitor_id: 5
+          id: 2
+          brand: brand
+          rating: 7.061401241503109
+          rating_change: 9.301444243932576
+          reviews_count: 3
+          status: found
+          text: text
+          author: author
+          replied: true
           title: title
           url: url
           channel_name: channel_name
@@ -22720,29 +22826,38 @@ components:
           avatar_url: avatar_url
           content_type: content_type
           citations: 2
-          unique_videos: 7
-          unique_posts: 9
-          followers: 3
-          likes: 2
-          comments: 4
+          unique_videos: 4
+          unique_posts: 7
+          followers: 1
+          likes: 1
+          comments: 1
           views: ""
           published_at: published_at
           posted_at: posted_at
-          avg_position: 7.386281948385884
+          avg_position: 6.84685269835264
           yours: true
           citation_date: 2000-01-23T04:56:07.000+00:00
-          position: 1
+          position: 7
           model: model
           domain: domain
           total_responses: 1
-          rank: 1
-          global_rank: 6
+          rank: 4
+          global_rank: 5
         - date: 2000-01-23
           entity_id: entity_id
           entity_name: entity_name
           entity_url: entity_url
           store: google_play
           competitor_id: 5
+          id: 2
+          brand: brand
+          rating: 7.061401241503109
+          rating_change: 9.301444243932576
+          reviews_count: 3
+          status: found
+          text: text
+          author: author
+          replied: true
           title: title
           url: url
           channel_name: channel_name
@@ -22758,23 +22873,23 @@ components:
           avatar_url: avatar_url
           content_type: content_type
           citations: 2
-          unique_videos: 7
-          unique_posts: 9
-          followers: 3
-          likes: 2
-          comments: 4
+          unique_videos: 4
+          unique_posts: 7
+          followers: 1
+          likes: 1
+          comments: 1
           views: ""
           published_at: published_at
           posted_at: posted_at
-          avg_position: 7.386281948385884
+          avg_position: 6.84685269835264
           yours: true
           citation_date: 2000-01-23T04:56:07.000+00:00
-          position: 1
+          position: 7
           model: model
           domain: domain
           total_responses: 1
-          rank: 1
-          global_rank: 6
+          rank: 4
+          global_rank: 5
         request_id: request_id
       properties:
         project_id:
@@ -23023,6 +23138,7 @@ components:
           - facebook
           - tiktok
           - linkedin
+          - trustpilot
           - reddit
           type: string
         connected:
