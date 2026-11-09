@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.88.0
+  version: 1.89.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -3137,11 +3137,13 @@ paths:
         \ picks up any prompt still without answers, as far as the account's allowance\
         \ of AI answers for the cycle covers it. When the allowance left cannot give\
         \ every new prompt one answer per enabled AI model, `first_runs_wait_until`\
-        \ gives the reset time when the rest run, with a `warning`. A pitch project\
-        \ holds at most 100 prompts in all, deleted ones included (ERR_LIMIT_REACHED\
-        \ past that), and the prompts of a launched pitch project are fixed, so adding\
-        \ one returns ERR_INVALID_PARAM with error.meta.reason pitch_prompts_frozen.\
-        \ Requires a `read_write` scope API key."
+        \ gives the reset time when the rest run, with a `warning`. On an account\
+        \ that caps each project's executions at its prompt limit, the project's own\
+        \ share of the allowance counts the same way. A pitch project holds at most\
+        \ 100 prompts in all, deleted ones included (ERR_LIMIT_REACHED past that),\
+        \ and the prompts of a launched pitch project are fixed, so adding one returns\
+        \ ERR_INVALID_PARAM with error.meta.reason pitch_prompts_frozen. Requires\
+        \ a `read_write` scope API key."
       operationId: createPrompts
       requestBody:
         content:
@@ -3210,8 +3212,9 @@ paths:
         \ far as the account's allowance of AI answers for the cycle covers it. When\
         \ the allowance left cannot give every new prompt one answer per enabled AI\
         \ model, `first_runs_wait_until` gives the reset time when the rest run, with\
-        \ a `warning`. Requires a `read_write` scope API key and, for team members,\
-        \ create access to Prompts."
+        \ a `warning`. On an account that caps each project's executions at its prompt\
+        \ limit, the project's own share of the allowance counts the same way. Requires\
+        \ a `read_write` scope API key and, for team members, create access to Prompts."
       operationId: importPrompts
       requestBody:
         content:
@@ -20936,9 +20939,10 @@ components:
           nullable: true
           type: string
         first_runs_wait_until:
-          description: "Set when the account's allowance of AI answers left this cycle\
-            \ cannot give every new prompt one answer per enabled AI model, so the\
-            \ rest run when the allowance resets at this time (00:00 Europe/Madrid).\
+          description: "Set when the account's allowance of AI answers left this cycle,\
+            \ or the project's own share of it when the account caps each project's\
+            \ executions, cannot give every new prompt one answer per enabled AI model,\
+            \ so the rest run when the allowance resets at this time (00:00 Europe/Madrid).\
             \ It counts this request's prompts against what was left when it arrived,\
             \ not first runs other requests queued moments earlier. Null otherwise,\
             \ when the allowance is unlimited, when tracked is false or when the account\
@@ -28315,9 +28319,10 @@ components:
           nullable: true
           type: string
         first_runs_wait_until:
-          description: "Set when the account's allowance of AI answers left this cycle\
-            \ cannot give every new prompt one answer per enabled AI model, so the\
-            \ rest run when the allowance resets at this time (00:00 Europe/Madrid).\
+          description: "Set when the account's allowance of AI answers left this cycle,\
+            \ or the project's own share of it when the account caps each project's\
+            \ executions, cannot give every new prompt one answer per enabled AI model,\
+            \ so the rest run when the allowance resets at this time (00:00 Europe/Madrid).\
             \ It counts this request's prompts against what was left when it arrived,\
             \ not first runs other requests queued moments earlier. Null otherwise,\
             \ when the allowance is unlimited, when tracked is false or when the account\
