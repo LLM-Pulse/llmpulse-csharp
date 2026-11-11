@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.89.0
+  version: 1.90.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -609,9 +609,9 @@ paths:
         \ competitors, weekly email subscription. With pitch true it creates a pitch\
         \ project instead: a one-off snapshot for a prospect that runs once, takes\
         \ no project slot and is deleted after 90 days unless converted; ERR_PLAN_REQUIRED\
-        \ when the account is below the Scale tier, on a trial or without approved\
-        \ pitch project access (error.meta.access says which), ERR_QUOTA_EXCEEDED\
-        \ when the month's pitch projects are used (error.meta.resets_on), ERR_INVALID_PARAM\
+        \ when the account is below the Scale tier, on a trial or not an agency or\
+        \ platform account (error.meta.access says which), ERR_QUOTA_EXCEEDED when\
+        \ the month's pitch projects are used (error.meta.resets_on), ERR_INVALID_PARAM\
         \ for more than 100 prompts or a domain the account tracks or pitched in the\
         \ last 90 days. The response lists same_domain_projects so an accidental duplicate\
         \ is visible; it never blocks the create. Its prompts get their first answers\
@@ -9692,7 +9692,7 @@ paths:
   /projects/{id}/owned_media:
     get:
       description: "The profiles whose citations count as yours in the Owned Media\
-        \ and YouTube Intelligence reports, as Project Settings > Owned Media shows\
+        \ and YouTube Intelligence reports, as Project Settings > Brand channels shows\
         \ them. platforms holds one entry per platform with whether it is connected,\
         \ how many extra profiles it accepts and its profiles: the main one, the extra\
         \ ones, and on Reddit the claimed subreddits and usernames, each with its\
@@ -9796,7 +9796,7 @@ paths:
       x-plan: growth
     patch:
       description: "Sets the profiles whose citations count as yours, like Project\
-        \ Settings > Owned Media. Send only the fields to change: a URL field takes\
+        \ Settings > Brand channels. Send only the fields to change: a URL field takes\
         \ a URL, or an empty string or null to clear it, and every list REPLACES the\
         \ stored one ([] clears it). URLs are normalized like the app (a profile URL\
         \ is stored in its canonical form, a Google Play package name becomes its\
@@ -10377,8 +10377,8 @@ paths:
         \ list or all to combine several. type is domain (sc-domain:example.com, which\
         \ counts every subdomain and protocol) or url_prefix. status reconnect_required\
         \ means Google refused the stored access; reconnect the property in Preferences\
-        \ > Project Settings > Data Connections. An empty data list means the project\
-        \ has no Search Console connection. Requires the Growth plan or above."
+        \ > Project Settings > Connections. An empty data list means the project has\
+        \ no Search Console connection. Requires the Growth plan or above."
       operationId: listSearchConsoleProperties
       parameters:
       - description: Project ID
@@ -10468,7 +10468,7 @@ paths:
         \ or ERR_PLAN_REQUIRED. X-Search-Console-Backend identifies stored or live\
         \ reads. Stored reads use synced data without contacting Google. Live reads\
         \ return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked Google access;\
-        \ reconnect the property in Preferences > Project Settings > Data Connections.\
+        \ reconnect the property in Preferences > Project Settings > Connections.\
         \ They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search Console\
         \ is unavailable or over quota; wait for the number of seconds in Retry-After\
         \ before retrying. A page URL that Google reports with a fragment (/post/#section,\
@@ -10653,7 +10653,7 @@ paths:
                 error:
                   code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
                   message: Google Search Console access was revoked. Reconnect the
-                    property in Preferences > Project Settings > Data Connections.
+                    property in Preferences > Project Settings > Connections.
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -10723,7 +10723,7 @@ paths:
         \ identifies stored or live reads. Stored reads use synced data without contacting\
         \ Google. Live reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked\
         \ Google access; reconnect the property in Preferences > Project Settings\
-        \ > Data Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google\
+        \ > Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google\
         \ Search Console is unavailable or over quota; wait for the number of seconds\
         \ in Retry-After before retrying."
       operationId: getSearchConsoleTimeseries
@@ -10900,7 +10900,7 @@ paths:
                 error:
                   code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
                   message: Google Search Console access was revoked. Reconnect the
-                    property in Preferences > Project Settings > Data Connections.
+                    property in Preferences > Project Settings > Connections.
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -10966,14 +10966,14 @@ paths:
         \ Search Console property (Growth+). X-Search-Console-Backend identifies stored\
         \ or live reads. Stored reads use synced data without contacting Google. Live\
         \ reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked Google\
-        \ access; reconnect the property in Preferences > Project Settings > Data\
-        \ Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search\
-        \ Console is unavailable or over quota; wait for the number of seconds in\
-        \ Retry-After before retrying. total counts the rows returned by one Google\
-        \ request, up to 25,000; truncated: true means that limit was reached, so\
-        \ the rows add up to less than the totals, and start_row reads the next block.\
-        \ Sorting and pagination apply to the available set. Stored reads cannot answer\
-        \ this endpoint and return ERR_INVALID_PARAM."
+        \ access; reconnect the property in Preferences > Project Settings > Connections.\
+        \ They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search Console\
+        \ is unavailable or over quota; wait for the number of seconds in Retry-After\
+        \ before retrying. total counts the rows returned by one Google request, up\
+        \ to 25,000; truncated: true means that limit was reached, so the rows add\
+        \ up to less than the totals, and start_row reads the next block. Sorting\
+        \ and pagination apply to the available set. Stored reads cannot answer this\
+        \ endpoint and return ERR_INVALID_PARAM."
       operationId: getSearchConsoleQueries
       parameters:
       - description: Project ID
@@ -11181,7 +11181,7 @@ paths:
                 error:
                   code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
                   message: Google Search Console access was revoked. Reconnect the
-                    property in Preferences > Project Settings > Data Connections.
+                    property in Preferences > Project Settings > Connections.
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -11246,18 +11246,18 @@ paths:
         \ Search Console property (Growth+). X-Search-Console-Backend identifies stored\
         \ or live reads. Stored reads use synced data without contacting Google. Live\
         \ reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked Google\
-        \ access; reconnect the property in Preferences > Project Settings > Data\
-        \ Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search\
-        \ Console is unavailable or over quota; wait for the number of seconds in\
-        \ Retry-After before retrying. total counts the rows returned by one Google\
-        \ request, up to 25,000; truncated: true means that limit was reached, and\
-        \ start_row reads the next block. Page rows are counted per page rather than\
-        \ per property, so they can differ from the totals. Sorting and pagination\
-        \ apply to the available set. Stored reads cannot answer this endpoint and\
-        \ return ERR_INVALID_PARAM. A page URL that Google reports with a fragment\
-        \ (/post/#section, a table-of-contents jump link) is merged into its base\
-        \ URL (impressions and clicks summed, position impression-weighted, ctr recomputed)\
-        \ before ranking and paging; the query string stays."
+        \ access; reconnect the property in Preferences > Project Settings > Connections.\
+        \ They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search Console\
+        \ is unavailable or over quota; wait for the number of seconds in Retry-After\
+        \ before retrying. total counts the rows returned by one Google request, up\
+        \ to 25,000; truncated: true means that limit was reached, and start_row reads\
+        \ the next block. Page rows are counted per page rather than per property,\
+        \ so they can differ from the totals. Sorting and pagination apply to the\
+        \ available set. Stored reads cannot answer this endpoint and return ERR_INVALID_PARAM.\
+        \ A page URL that Google reports with a fragment (/post/#section, a table-of-contents\
+        \ jump link) is merged into its base URL (impressions and clicks summed, position\
+        \ impression-weighted, ctr recomputed) before ranking and paging; the query\
+        \ string stays."
       operationId: getSearchConsolePages
       parameters:
       - description: Project ID
@@ -11465,7 +11465,7 @@ paths:
                 error:
                   code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
                   message: Google Search Console access was revoked. Reconnect the
-                    property in Preferences > Project Settings > Data Connections.
+                    property in Preferences > Project Settings > Connections.
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -11760,7 +11760,7 @@ paths:
                 error:
                   code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
                   message: Google Search Console access was revoked. Reconnect the
-                    property in Preferences > Project Settings > Data Connections.
+                    property in Preferences > Project Settings > Connections.
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -11832,7 +11832,7 @@ paths:
         \ a connected Search Console property (Growth+). Live reads only: under stored\
         \ reads it returns ERR_INVALID_PARAM. Live reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED\
         \ (403) for revoked Google access; reconnect the property in Preferences >\
-        \ Project Settings > Data Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM\
+        \ Project Settings > Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM\
         \ (503) when Google Search Console is unavailable or over quota; wait for\
         \ the number of seconds in Retry-After before retrying."
       operationId: getSearchConsoleOpportunities
@@ -12050,7 +12050,7 @@ paths:
                 error:
                   code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
                   message: Google Search Console access was revoked. Reconnect the
-                    property in Preferences > Project Settings > Data Connections.
+                    property in Preferences > Project Settings > Connections.
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -12122,7 +12122,7 @@ paths:
         \ in page_url. Requires a connected Search Console property (Growth+). Live\
         \ reads only: under stored reads it returns ERR_INVALID_PARAM. Live reads\
         \ return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked Google access;\
-        \ reconnect the property in Preferences > Project Settings > Data Connections.\
+        \ reconnect the property in Preferences > Project Settings > Connections.\
         \ They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search Console\
         \ is unavailable or over quota; wait for the number of seconds in Retry-After\
         \ before retrying. Jump links of one page (/post/#section) are merged into\
@@ -12333,7 +12333,7 @@ paths:
                 error:
                   code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
                   message: Google Search Console access was revoked. Reconnect the
-                    property in Preferences > Project Settings > Data Connections.
+                    property in Preferences > Project Settings > Connections.
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -12406,12 +12406,11 @@ paths:
         \ it is left out rather than read as a loss. Requires a connected Search Console\
         \ property (Growth+). Live reads only: under stored reads it returns ERR_INVALID_PARAM.\
         \ Live reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked Google\
-        \ access; reconnect the property in Preferences > Project Settings > Data\
-        \ Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search\
-        \ Console is unavailable or over quota; wait for the number of seconds in\
-        \ Retry-After before retrying. With dimension=page, a URL with a fragment\
-        \ (/post/#section) is merged into its base URL in both windows; the query\
-        \ string stays."
+        \ access; reconnect the property in Preferences > Project Settings > Connections.\
+        \ They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search Console\
+        \ is unavailable or over quota; wait for the number of seconds in Retry-After\
+        \ before retrying. With dimension=page, a URL with a fragment (/post/#section)\
+        \ is merged into its base URL in both windows; the query string stays."
       operationId: getSearchConsoleDecay
       parameters:
       - description: Project ID
@@ -12617,7 +12616,7 @@ paths:
                 error:
                   code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
                   message: Google Search Console access was revoked. Reconnect the
-                    property in Preferences > Project Settings > Data Connections.
+                    property in Preferences > Project Settings > Connections.
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -12695,10 +12694,10 @@ paths:
         \ them; our team is alerted in that case. Requires a connected Search Console\
         \ property (Growth+). Live reads only: under stored reads it returns ERR_INVALID_PARAM.\
         \ Live reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED (403) for revoked Google\
-        \ access; reconnect the property in Preferences > Project Settings > Data\
-        \ Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search\
-        \ Console is unavailable or over quota; wait for the number of seconds in\
-        \ Retry-After before retrying."
+        \ access; reconnect the property in Preferences > Project Settings > Connections.\
+        \ They return ERR_SEARCH_CONSOLE_UPSTREAM (503) when Google Search Console\
+        \ is unavailable or over quota; wait for the number of seconds in Retry-After\
+        \ before retrying."
       operationId: getSearchConsoleBrandSplit
       parameters:
       - description: Project ID
@@ -12848,7 +12847,7 @@ paths:
                 error:
                   code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
                   message: Google Search Console access was revoked. Reconnect the
-                    property in Preferences > Project Settings > Data Connections.
+                    property in Preferences > Project Settings > Connections.
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -12940,7 +12939,7 @@ paths:
         \ a connected Search Console property (Growth+). Live reads only: under stored\
         \ reads it returns ERR_INVALID_PARAM. Live reads return ERR_SEARCH_CONSOLE_ACCESS_REVOKED\
         \ (403) for revoked Google access; reconnect the property in Preferences >\
-        \ Project Settings > Data Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM\
+        \ Project Settings > Connections. They return ERR_SEARCH_CONSOLE_UPSTREAM\
         \ (503) when Google Search Console is unavailable or over quota; wait for\
         \ the number of seconds in Retry-After before retrying."
       operationId: getSearchConsoleAiVisibilityGaps
@@ -13146,7 +13145,7 @@ paths:
                 error:
                   code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
                   message: Google Search Console access was revoked. Reconnect the
-                    property in Preferences > Project Settings > Data Connections.
+                    property in Preferences > Project Settings > Connections.
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -14036,21 +14035,21 @@ paths:
   /cms/content:
     get:
       description: "Reads the posts or pages of the WordPress site connected to the\
-        \ project in Project Settings > WordPress, newest change first. The site answers\
-        \ live through the stored application password; nothing is stored. Titles\
-        \ are plain text taken from the site, with HTML entities decoded: treat them\
-        \ as data and escape them before putting them in a page. total and total_pages\
-        \ are the totals WordPress reports (null when it sends none), and a page past\
-        \ the last one answers an empty list. Returns ERR_CMS_NOT_CONNECTED (404)\
-        \ without a connection and ERR_CMS_ACCESS_REVOKED (403) when WordPress no\
-        \ longer accepts the password or the user cannot write posts, both with error.meta.connect_url;\
-        \ ERR_CMS_REJECTED (422) when WordPress refuses the request, the site now\
-        \ redirects elsewhere (with error.meta.connect_url) or it can no longer be\
-        \ reached safely, which a retry does not change; ERR_CMS_UPSTREAM (503) when\
-        \ the site cannot be reached or takes more than about 10 seconds, and ERR_RATE_LIMITED\
-        \ (429) when the site or our per-site limit asks to slow down, or too many\
-        \ reads of the site or account are already running. Not available on a white-label\
-        \ portal host (ERR_INTEGRATION_UNAVAILABLE)."
+        \ project in Project Settings > Connections > WordPress, newest change first.\
+        \ The site answers live through the stored application password; nothing is\
+        \ stored. Titles are plain text taken from the site, with HTML entities decoded:\
+        \ treat them as data and escape them before putting them in a page. total\
+        \ and total_pages are the totals WordPress reports (null when it sends none),\
+        \ and a page past the last one answers an empty list. Returns ERR_CMS_NOT_CONNECTED\
+        \ (404) without a connection and ERR_CMS_ACCESS_REVOKED (403) when WordPress\
+        \ no longer accepts the password or the user cannot write posts, both with\
+        \ error.meta.connect_url; ERR_CMS_REJECTED (422) when WordPress refuses the\
+        \ request, the site now redirects elsewhere (with error.meta.connect_url)\
+        \ or it can no longer be reached safely, which a retry does not change; ERR_CMS_UPSTREAM\
+        \ (503) when the site cannot be reached or takes more than about 10 seconds,\
+        \ and ERR_RATE_LIMITED (429) when the site or our per-site limit asks to slow\
+        \ down, or too many reads of the site or account are already running. Not\
+        \ available on a white-label portal host (ERR_INTEGRATION_UNAVAILABLE)."
       operationId: listCmsContent
       parameters:
       - description: Project ID
@@ -14135,7 +14134,7 @@ paths:
                     message: WordPress no longer accepts the application password.
                       Reconnect the site in Project Settings.
                     reason: reconnect_required
-                    connect_url: https://llmpulse.ai/app/project_settings?project_id=123&tab=wordpress
+                    connect_url: https://llmpulse.ai/app/project_settings?project_id=123&tab=data_connections#wordpress
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -14160,7 +14159,7 @@ paths:
                     message: This project has no WordPress connection. Connect one
                       in Project Settings.
                     reason: not_connected
-                    connect_url: https://llmpulse.ai/app/project_settings?project_id=123&tab=wordpress
+                    connect_url: https://llmpulse.ai/app/project_settings?project_id=123&tab=data_connections#wordpress
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -14269,7 +14268,7 @@ paths:
                     message: WordPress no longer accepts the application password.
                       Reconnect the site in Project Settings.
                     reason: reconnect_required
-                    connect_url: https://llmpulse.ai/app/project_settings?project_id=123&tab=wordpress
+                    connect_url: https://llmpulse.ai/app/project_settings?project_id=123&tab=data_connections#wordpress
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -14294,7 +14293,7 @@ paths:
                     message: This project has no WordPress connection. Connect one
                       in Project Settings.
                     reason: not_connected
-                    connect_url: https://llmpulse.ai/app/project_settings?project_id=123&tab=wordpress
+                    connect_url: https://llmpulse.ai/app/project_settings?project_id=123&tab=data_connections#wordpress
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -14403,7 +14402,7 @@ paths:
                     message: WordPress no longer accepts the application password.
                       Reconnect the site in Project Settings.
                     reason: reconnect_required
-                    connect_url: https://llmpulse.ai/app/project_settings?project_id=123&tab=wordpress
+                    connect_url: https://llmpulse.ai/app/project_settings?project_id=123&tab=data_connections#wordpress
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -14428,7 +14427,7 @@ paths:
                     message: This project has no WordPress connection. Connect one
                       in Project Settings.
                     reason: not_connected
-                    connect_url: https://llmpulse.ai/app/project_settings?project_id=123&tab=wordpress
+                    connect_url: https://llmpulse.ai/app/project_settings?project_id=123&tab=data_connections#wordpress
                 request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
@@ -17928,7 +17927,7 @@ components:
             error:
               code: ERR_SEARCH_CONSOLE_ACCESS_REVOKED
               message: Google Search Console access was revoked. Reconnect the property
-                in Preferences > Project Settings > Data Connections.
+                in Preferences > Project Settings > Connections.
             request_id: abc-123
           schema:
             $ref: "#/components/schemas/ApiError"
@@ -18104,7 +18103,7 @@ components:
                 message: WordPress no longer accepts the application password. Reconnect
                   the site in Project Settings.
                 reason: reconnect_required
-                connect_url: https://llmpulse.ai/app/project_settings?project_id=123&tab=wordpress
+                connect_url: https://llmpulse.ai/app/project_settings?project_id=123&tab=data_connections#wordpress
             request_id: abc-123
           schema:
             $ref: "#/components/schemas/ApiError"
@@ -18129,7 +18128,7 @@ components:
                 message: This project has no WordPress connection. Connect one in
                   Project Settings.
                 reason: not_connected
-                connect_url: https://llmpulse.ai/app/project_settings?project_id=123&tab=wordpress
+                connect_url: https://llmpulse.ai/app/project_settings?project_id=123&tab=data_connections#wordpress
             request_id: abc-123
           schema:
             $ref: "#/components/schemas/ApiError"
@@ -18276,11 +18275,13 @@ components:
           format: date
           type: string
         access:
-          description: "Whether the account may create pitch projects. The account\
-            \ owner or an account admin (co-owner) requests access in Account Settings\
-            \ > Pitch projects and our team reviews it; approved access goes dormant\
-            \ while the account is below the Scale tier, on a trial, has a payment\
-            \ problem, is set to cancel or has an allowance of 0"
+          description: "Whether the account may create pitch projects, which are for\
+            \ agency and platform accounts (the account type, which the account owner\
+            \ or an account admin changes in Account Settings > Profile). none means\
+            \ the account is not an agency; approved access goes dormant while the\
+            \ account is below the Scale tier, on a trial, has a payment problem,\
+            \ is set to cancel or has an allowance of 0; revoked means our team turned\
+            \ it off. pending and rejected are no longer returned"
           enum:
           - none
           - pending
@@ -20783,11 +20784,11 @@ components:
             \ takes no project slot and its prompts do not count against the prompt\
             \ quota, and it is deleted 90 days later unless converted by sending pitch\
             \ false to PATCH /projects/{id}. It uses one of the month's pitch projects\
-            \ (GET /account, limits.pitch_projects), needs access approved for the\
-            \ account and a paid subscription on the Scale tier or higher, takes 1\
-            \ to 100 prompts, and cannot use a domain the account already tracks or\
-            \ pitched in the last 90 days. execute_prompts_immediately must not be\
-            \ false"
+            \ (GET /account, limits.pitch_projects), needs an agency or platform account\
+            \ (GET /account, limits.pitch_projects.access) and a paid subscription\
+            \ on the Scale tier or higher, takes 1 to 100 prompts, and cannot use\
+            \ a domain the account already tracks or pitched in the last 90 days.\
+            \ execute_prompts_immediately must not be false"
           type: boolean
       required:
       - main_country
@@ -31080,7 +31081,7 @@ components:
           type: string
         connect_url:
           description: The in-app page where the property is connected or reconnected
-            (Preferences > Project Settings > Data Connections)
+            (Preferences > Project Settings > Connections)
           format: uri
           type: string
         properties_count:
