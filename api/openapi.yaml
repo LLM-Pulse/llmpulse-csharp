@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.91.0
+  version: 1.92.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -8669,13 +8669,17 @@ paths:
         \ lists the cited Trustpilot profiles with their rating and review count,\
         \ `view=brands` the brand and each competitor with their profile's rating,\
         \ its change since the previous monthly read, review count, read status and\
-        \ citations, and `view=reviews` the reviews published in the window on those\
-        \ profiles; ratings and reviews come from a monthly read of each profile.\
-        \ `view=own_citations` returns the raw citations of the connected profile\
-        \ only and stays empty until a profile is connected. For Reddit use /dimensions/owned_media/summary?provider=reddit\
-        \ for the summary and /dimensions/reddit for cited-content tables. A team\
-        \ member also needs the YouTube Intelligence permission for provider=youtube.\
-        \ Requires the Growth plan or above."
+        \ citations, plus how the business answers its reviews (reviews_held, replied_count,\
+        \ not_replied_count, reply_rate_pct and median_reply_hours, counted among\
+        \ the reviews LLM Pulse holds for the profile, the newest ones from each monthly\
+        \ read, whatever the date window), and `view=reviews` the reviews published\
+        \ in the window on those profiles; ratings and reviews come from a monthly\
+        \ read of each profile. `view=own_citations` returns the raw citations of\
+        \ the connected profile only and stays empty until a profile is connected.\
+        \ For Reddit use /dimensions/owned_media/summary?provider=reddit for the summary\
+        \ and /dimensions/reddit for cited-content tables. A team member also needs\
+        \ the YouTube Intelligence permission for provider=youtube. Requires the Growth\
+        \ plan or above."
       operationId: listOwnedMedia
       parameters:
       - description: Project ID
@@ -8933,14 +8937,16 @@ paths:
         \ pulse, or regular, shorts and live on YouTube) and age_buckets cover posts\
         \ and videos. provider=mobile_apps adds stores and per-store totals; provider=trustpilot\
         \ counts trustpilot.com citations, yours being those of the profile of the\
-        \ account's own domains; provider=overview returns one rollup per readable\
-        \ platform. provider=reddit adds unique_subreddits, unique_authors, positive_pct,\
-        \ and positive, neutral and negative sentiment counts in activity for the\
-        \ citing AI answers, plus subreddit_activity for the top five subreddits and\
-        \ Others, positions and brand_share. A team member also needs the YouTube\
-        \ Intelligence permission for provider=youtube or Reddit Intelligence for\
-        \ provider=reddit. Defaults to the last 30 days. Requires the Growth plan\
-        \ or above."
+        \ account's own domains, and adds replies: how the brand answers the reviews\
+        \ LLM Pulse holds for its own domain's profile (reviews_held, replied_count,\
+        \ not_replied_count, reply_rate_pct, median_reply_hours), whatever the date\
+        \ window; provider=overview returns one rollup per readable platform. provider=reddit\
+        \ adds unique_subreddits, unique_authors, positive_pct, and positive, neutral\
+        \ and negative sentiment counts in activity for the citing AI answers, plus\
+        \ subreddit_activity for the top five subreddits and Others, positions and\
+        \ brand_share. A team member also needs the YouTube Intelligence permission\
+        \ for provider=youtube or Reddit Intelligence for provider=reddit. Defaults\
+        \ to the last 30 days. Requires the Growth plan or above."
       operationId: getOwnedMediaSummary
       parameters:
       - description: Project ID
@@ -22584,7 +22590,8 @@ components:
         \ url, avatar_url, followers, unique_posts), own_citations (url, citation_date,\
         \ position, model), apps (domain, total_responses, rank, global_rank), the\
         \ Trustpilot views profiles (key, name, rating, reviews_count, url, competitor_id),\
-        \ brands (name, domain, key, rating, rating_change, reviews_count, status,\
+        \ brands (name, domain, key, rating, rating_change, reviews_count, reviews_held,\
+        \ replied_count, not_replied_count, reply_rate_pct, median_reply_hours, status,\
         \ url, competitor_id) and reviews (id, brand, rating, title, text, author,\
         \ published_at, replied, url, competitor_id), and activity (date, entity_id,\
         \ entity_name, entity_url, yours, citations, plus store and competitor_id\
@@ -22609,6 +22616,11 @@ components:
         text: text
         author: author
         replied: true
+        reviews_held: 2
+        replied_count: 4
+        not_replied_count: 7
+        reply_rate_pct: 1.2315135367772556
+        median_reply_hours: 1.0246457001441578
         title: title
         url: url
         channel_name: channel_name
@@ -22623,24 +22635,24 @@ components:
         thumbnail_url: thumbnail_url
         avatar_url: avatar_url
         content_type: content_type
-        citations: 2
-        unique_videos: 4
+        citations: 1
+        unique_videos: 6
         unique_posts: 7
         followers: 1
-        likes: 1
-        comments: 1
+        likes: 4
+        comments: 5
         views: ""
         published_at: published_at
         posted_at: posted_at
-        avg_position: 6.84685269835264
+        avg_position: 9.965781217890562
         yours: true
         citation_date: 2000-01-23T04:56:07.000+00:00
-        position: 7
+        position: 9
         model: model
         domain: domain
-        total_responses: 1
-        rank: 4
-        global_rank: 5
+        total_responses: 6
+        rank: 8
+        global_rank: 9
       properties:
         date:
           description: The start date of the actual reporting period (view=activity)
@@ -22712,6 +22724,35 @@ components:
           description: "Whether the business replied to the review (provider=trustpilot,\
             \ view=reviews)"
           type: boolean
+        reviews_held:
+          description: "How many of the profile's reviews LLM Pulse holds: the newest\
+            \ ones from each monthly read, not every review on Trustpilot (provider=trustpilot,\
+            \ view=brands). The reply fields count among these, whatever the date\
+            \ window; all of them are null until the profile has been read"
+          nullable: true
+          type: integer
+        replied_count:
+          description: "Reviews held that the business replied to (provider=trustpilot,\
+            \ view=brands)"
+          nullable: true
+          type: integer
+        not_replied_count:
+          description: "Reviews held that the business has not replied to (provider=trustpilot,\
+            \ view=brands)"
+          nullable: true
+          type: integer
+        reply_rate_pct:
+          description: "replied_count over reviews_held, on a 0-100 scale; null when\
+            \ no review is held (provider=trustpilot, view=brands)"
+          nullable: true
+          type: number
+        median_reply_hours:
+          description: "Median hours from a held review's publication to the business's\
+            \ reply, over the replied reviews held that carry both dates (a reply\
+            \ dated before its review is left out); null when there is none (provider=trustpilot,\
+            \ view=brands)"
+          nullable: true
+          type: number
         title:
           nullable: true
           type: string
@@ -22849,6 +22890,11 @@ components:
           text: text
           author: author
           replied: true
+          reviews_held: 2
+          replied_count: 4
+          not_replied_count: 7
+          reply_rate_pct: 1.2315135367772556
+          median_reply_hours: 1.0246457001441578
           title: title
           url: url
           channel_name: channel_name
@@ -22863,24 +22909,24 @@ components:
           thumbnail_url: thumbnail_url
           avatar_url: avatar_url
           content_type: content_type
-          citations: 2
-          unique_videos: 4
+          citations: 1
+          unique_videos: 6
           unique_posts: 7
           followers: 1
-          likes: 1
-          comments: 1
+          likes: 4
+          comments: 5
           views: ""
           published_at: published_at
           posted_at: posted_at
-          avg_position: 6.84685269835264
+          avg_position: 9.965781217890562
           yours: true
           citation_date: 2000-01-23T04:56:07.000+00:00
-          position: 7
+          position: 9
           model: model
           domain: domain
-          total_responses: 1
-          rank: 4
-          global_rank: 5
+          total_responses: 6
+          rank: 8
+          global_rank: 9
         - date: 2000-01-23
           entity_id: entity_id
           entity_name: entity_name
@@ -22896,6 +22942,11 @@ components:
           text: text
           author: author
           replied: true
+          reviews_held: 2
+          replied_count: 4
+          not_replied_count: 7
+          reply_rate_pct: 1.2315135367772556
+          median_reply_hours: 1.0246457001441578
           title: title
           url: url
           channel_name: channel_name
@@ -22910,24 +22961,24 @@ components:
           thumbnail_url: thumbnail_url
           avatar_url: avatar_url
           content_type: content_type
-          citations: 2
-          unique_videos: 4
+          citations: 1
+          unique_videos: 6
           unique_posts: 7
           followers: 1
-          likes: 1
-          comments: 1
+          likes: 4
+          comments: 5
           views: ""
           published_at: published_at
           posted_at: posted_at
-          avg_position: 6.84685269835264
+          avg_position: 9.965781217890562
           yours: true
           citation_date: 2000-01-23T04:56:07.000+00:00
-          position: 7
+          position: 9
           model: model
           domain: domain
-          total_responses: 1
-          rank: 4
-          global_rank: 5
+          total_responses: 6
+          rank: 8
+          global_rank: 9
         request_id: request_id
       properties:
         project_id:
@@ -23369,6 +23420,12 @@ components:
           is_brand: true
           citations: 7
           share_pct: 5.533258397034986
+        replies:
+          reviews_held: 3
+          replied_count: 4
+          not_replied_count: 0
+          reply_rate_pct: 6.628464275087742
+          median_reply_hours: 4.258773108174356
         request_id: request_id
       properties:
         project_id:
@@ -23460,8 +23517,47 @@ components:
           items:
             $ref: "#/components/schemas/RedditBrandShare"
           type: array
+        replies:
+          $ref: "#/components/schemas/TrustpilotReplies"
         request_id:
           type: string
+      type: object
+    TrustpilotReplies:
+      description: "provider=trustpilot only. How the brand answers its Trustpilot\
+        \ reviews, on the profile of the project's own domain, among the reviews LLM\
+        \ Pulse holds for it (the newest ones from each monthly read, not every review\
+        \ on Trustpilot), whatever the date window. Every field is null until the\
+        \ profile has been read"
+      example:
+        reviews_held: 3
+        replied_count: 4
+        not_replied_count: 0
+        reply_rate_pct: 6.628464275087742
+        median_reply_hours: 4.258773108174356
+      properties:
+        reviews_held:
+          description: Reviews held for the profile
+          nullable: true
+          type: integer
+        replied_count:
+          description: Reviews held that the brand replied to
+          nullable: true
+          type: integer
+        not_replied_count:
+          description: Reviews held that the brand has not replied to
+          nullable: true
+          type: integer
+        reply_rate_pct:
+          description: "replied_count over reviews_held, on a 0-100 scale; null when\
+            \ no review is held"
+          nullable: true
+          type: number
+        median_reply_hours:
+          description: Median hours from publication to reply over the replied reviews
+            held that carry both dates (a reply dated before its review is left out);
+            null when there is none
+          nullable: true
+          type: number
       type: object
     OwnedMediaSummaryActivityPeriod:
       example:

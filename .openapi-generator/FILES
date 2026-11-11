@@ -343,6 +343,7 @@ docs/models/TimeseriesResponse.md
 docs/models/TimeseriesSeries.md
 docs/models/TopSourcesResponse.md
 docs/models/TopSourcesResponseDataInner.md
+docs/models/TrustpilotReplies.md
 docs/models/UpdateAnnotationRequest.md
 docs/models/UpdateCollectionRequest.md
 docs/models/UpdateCompetitorRequest.md
@@ -722,6 +723,7 @@ src/LLMPulse.SDK/Model/TimeseriesResponse.cs
 src/LLMPulse.SDK/Model/TimeseriesSeries.cs
 src/LLMPulse.SDK/Model/TopSourcesResponse.cs
 src/LLMPulse.SDK/Model/TopSourcesResponseDataInner.cs
+src/LLMPulse.SDK/Model/TrustpilotReplies.cs
 src/LLMPulse.SDK/Model/UpdateAnnotationRequest.cs
 src/LLMPulse.SDK/Model/UpdateCollectionRequest.cs
 src/LLMPulse.SDK/Model/UpdateCompetitorRequest.cs
