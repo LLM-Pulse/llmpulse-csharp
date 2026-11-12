@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.92.0
+  version: 1.93.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -28757,33 +28757,52 @@ components:
       example:
         type: rolling
         range_days: 2
+        custom_from: 2000-01-23
+        custom_to: 2000-01-23
         from: 2000-01-23
         to: 2000-01-23
         label: label
       properties:
         type:
-          description: rolling (the last range_days days) or previous_month (the previous
-            calendar month)
+          description: "rolling (the last range_days days), previous_month (the previous\
+            \ calendar month), previous_3_months (the 3 calendar months before the\
+            \ current one) or custom (fixed dates, custom_from to custom_to)"
           enum:
           - rolling
           - previous_month
+          - previous_3_months
+          - custom
           type: string
         range_days:
-          description: Length of a rolling window; null for previous_month
+          description: Length of a rolling window; null for the other types
           nullable: true
           type: integer
+        custom_from:
+          description: First day chosen for a custom range; null for the other types
+          format: date
+          nullable: true
+          type: string
+        custom_to:
+          description: "Last day chosen for a custom range, which can be after today;\
+            \ null for the other types"
+          format: date
+          nullable: true
+          type: string
         from:
           description: First day of the window as of now (detail only)
           format: date
           type: string
         to:
-          description: Last day of the window as of now (detail only)
+          description: Last day of the window as of now (detail only); a custom range
+            stops at today
           format: date
           type: string
         label:
           description: The window as the report shows it (detail only)
           type: string
       required:
+      - custom_from
+      - custom_to
       - range_days
       - type
       type: object
@@ -28839,6 +28858,8 @@ components:
         date_range:
           type: rolling
           range_days: 2
+          custom_from: 2000-01-23
+          custom_to: 2000-01-23
           from: 2000-01-23
           to: 2000-01-23
           label: label
@@ -28942,6 +28963,8 @@ components:
           date_range:
             type: rolling
             range_days: 2
+            custom_from: 2000-01-23
+            custom_to: 2000-01-23
             from: 2000-01-23
             to: 2000-01-23
             label: label
@@ -28971,6 +28994,8 @@ components:
           date_range:
             type: rolling
             range_days: 2
+            custom_from: 2000-01-23
+            custom_to: 2000-01-23
             from: 2000-01-23
             to: 2000-01-23
             label: label
@@ -29094,7 +29119,10 @@ components:
             \ [{ date, value }] }]. donut: slices [{ name, value, color }]. bar: bars\
             \ [{ label, value, color }]. kpi_grid: values and changes (null unless\
             \ the report compares with the previous period). table: rows, one object\
-            \ per row. Null when the widget is not available."
+            \ per row; the monthly_breakdown widget has one row per calendar month\
+            \ of the window with month, from, to, partial (a month the window cuts),\
+            \ responses, mentions, visibility, weighted_visibility, sov_share, citations\
+            \ and avg_mention_position. Null when the widget is not available."
           nullable: true
           type: object
       required:
@@ -29112,6 +29140,8 @@ components:
         date_range:
           type: rolling
           range_days: 2
+          custom_from: 2000-01-23
+          custom_to: 2000-01-23
           from: 2000-01-23
           to: 2000-01-23
           label: label
