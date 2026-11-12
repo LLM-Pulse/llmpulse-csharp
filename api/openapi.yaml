@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.93.0
+  version: 1.94.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -272,13 +272,15 @@ paths:
       description: "Detailed info for one project: matching_names, additional_owned_domains,\
         \ industry, business model, primary products, target audience, brand voice,\
         \ locale, app store IDs, prompt_limit (the project's own prompt cap, null\
-        \ without one), stats (incl. prompts_by_brand_kind counts and prompts_available,\
-        \ how many prompts can still be added: the lower of the project's free slots\
-        \ and the account's remaining prompts, null when neither caps it), data_coverage\
-        \ (models, countries and languages with data), the status of each data connection\
-        \ (search_console, ai_traffic, agent_traffic) with the connect_url where the\
-        \ user connects it, and for a pitch project its pitch_expires_at and pitch_run\
-        \ (when it ran, the AI models it asked and how many answers arrived)."
+        \ without one), project_type (the pricing agreement type the project is billed\
+        \ as, such as core or lean, null without one), stats (incl. prompts_by_brand_kind\
+        \ counts and prompts_available, how many prompts can still be added: the lower\
+        \ of the project's free slots and the account's remaining prompts, null when\
+        \ neither caps it), data_coverage (models, countries and languages with data),\
+        \ the status of each data connection (search_console, ai_traffic, agent_traffic)\
+        \ with the connect_url where the user connects it, and for a pitch project\
+        \ its pitch_expires_at and pitch_run (when it ran, the AI models it asked\
+        \ and how many answers arrived)."
       operationId: getProjectDetails
       parameters:
       - explode: false
@@ -613,12 +615,15 @@ paths:
         \ platform account (error.meta.access says which), ERR_QUOTA_EXCEEDED when\
         \ the month's pitch projects are used (error.meta.resets_on), ERR_INVALID_PARAM\
         \ for more than 100 prompts or a domain the account tracks or pitched in the\
-        \ last 90 days. The response lists same_domain_projects so an accidental duplicate\
-        \ is visible; it never blocks the create. Its prompts get their first answers\
-        \ within about 24 hours, as far as the account's allowance of AI answers for\
-        \ the cycle covers them; the rest run when the allowance resets. Idempotent\
-        \ via `external_identifier` (embed-enabled accounts only; replay returns 200\
-        \ with the existing project). Requires a `read_write` scope API key."
+        \ last 90 days. Accounts billed per project type under a pricing agreement\
+        \ choose the project's type with project_type (such as core or lean; omitted,\
+        \ the account's default type), which sets its prompt cap and its price. The\
+        \ response lists same_domain_projects so an accidental duplicate is visible;\
+        \ it never blocks the create. Its prompts get their first answers within about\
+        \ 24 hours, as far as the account's allowance of AI answers for the cycle\
+        \ covers them; the rest run when the allowance resets. Idempotent via `external_identifier`\
+        \ (embed-enabled accounts only; replay returns 200 with the existing project).\
+        \ Requires a `read_write` scope API key."
       operationId: createProject
       requestBody:
         content:
@@ -751,8 +756,12 @@ paths:
         \ it; here a co-owner, like every team member, also needs Projects update):\
         \ any other team member gets ERR_INSUFFICIENT_PERMISSION, and a key limited\
         \ to some projects ERR_KEY_PROJECT_SCOPED, with nothing applied. A request\
-        \ that sends only prompt_limit is applied even while a rematch runs. pitch\
-        \ false, sent on its own, converts a pitch project into a tracked project,\
+        \ that sends only prompt_limit is applied even while a rematch runs. project_type,\
+        \ for accounts billed per project type under a pricing agreement and sent\
+        \ on its own, moves the project to another of the account's types (such as\
+        \ core or lean): the new type's prompt cap applies at once and its price from\
+        \ the next renewal; it follows the prompt_limit rules on who may send it.\
+        \ pitch false, sent on its own, converts a pitch project into a tracked project,\
         \ like Convert in the app: it keeps its answers and metrics, is no longer\
         \ deleted, takes a project slot, and its prompts count against the prompt\
         \ quota and run on the account's schedule from the next run. It cannot be\
@@ -801,9 +810,10 @@ paths:
           description: "A write with a read-only key answers ERR_INSUFFICIENT_SCOPE.\
             \ A team member whose permissions do not grant Projects update (a co-owner\
             \ included), who sends additional_owned_domains, or who sends prompt_limit\
-            \ without being a co-owner answers ERR_INSUFFICIENT_PERMISSION. A key\
-            \ limited to some projects that sends prompt_limit answers ERR_KEY_PROJECT_SCOPED.\
-            \ All with the same status, and nothing in the request is applied"
+            \ or project_type without being a co-owner answers ERR_INSUFFICIENT_PERMISSION.\
+            \ A key limited to some projects that sends prompt_limit or project_type\
+            \ answers ERR_KEY_PROJECT_SCOPED. All with the same status, and nothing\
+            \ in the request is applied"
         "404":
           content:
             application/json:
@@ -831,9 +841,9 @@ paths:
       - Projects
       x-llms-description: "Update the project profile / Brand Book (brand_name, description,\
         \ industry, business_model, target_audience, brand_voice, goals, primary_products,\
-        \ matching_names), additional_owned_domains (account owner only) and prompt_limit\
-        \ (account owner or a co-owner with Projects update). A matching_names or\
-        \ additional_owned_domains change reprocesses past answers in the background."
+        \ matching_names), additional_owned_domains (account owner only), prompt_limit\
+        \ and project_type (account owner or a co-owner with Projects update). A matching_names\
+        \ or additional_owned_domains change reprocesses past answers in the background."
       x-mcp-tool: update_project
       x-write: true
   /metrics/timeseries:
@@ -18450,6 +18460,12 @@ components:
               \ applies either way"
             nullable: true
             type: integer
+          project_type:
+            description: "The project type it is billed as under the account's pricing\
+              \ agreement, such as core or lean (its own, else the account's default\
+              \ type). Null for accounts without per-project types and for pitch projects"
+            nullable: true
+            type: string
           stats:
             $ref: "#/components/schemas/ProjectDetails_allOf_stats"
           pitch_run:
@@ -18500,6 +18516,7 @@ components:
         app_store_id: app_store_id
         created_at: 2000-01-23T04:56:07.000+00:00
         prompt_limit: 6
+        project_type: project_type
         stats:
           prompts_count: 1
           prompts_by_brand_kind:
@@ -18573,6 +18590,7 @@ components:
         - additional_owned_domains
         - additional_owned_domains
         prompt_limit: 6
+        project_type: project_type
       properties:
         id:
           type: integer
@@ -18626,11 +18644,18 @@ components:
             \ either way"
           nullable: true
           type: integer
+        project_type:
+          description: "The project type it is billed as under the account's pricing\
+            \ agreement, such as core or lean. Null for accounts without per-project\
+            \ types and for pitch projects"
+          nullable: true
+          type: string
       required:
       - additional_owned_domains
       - id
       - matching_names
       - name
+      - project_type
       - prompt_limit
       type: object
     ProjectUpdateResponse:
@@ -18656,6 +18681,7 @@ components:
           - additional_owned_domains
           - additional_owned_domains
           prompt_limit: 6
+          project_type: project_type
         updated_fields:
         - updated_fields
         - updated_fields
@@ -20714,6 +20740,7 @@ components:
         external_identifier: external_identifier
         execute_prompts_immediately: true
         pitch: false
+        project_type: project_type
       properties:
         website_url:
           description: "Public HTTP(S) URL with a DNS hostname or public IP address.\
@@ -20829,6 +20856,16 @@ components:
             \ a domain the account already tracks or pitched in the last 90 days.\
             \ execute_prompts_immediately must not be false"
           type: boolean
+        project_type:
+          description: "Only for accounts billed per project type under a pricing\
+            \ agreement; any other account gets ERR_INVALID_PARAM. The key of one\
+            \ of the account's project types, such as core or lean, which sets the\
+            \ most prompts the project can hold and the price it is billed at. Omitted,\
+            \ the project takes the account's default type. A type other than the\
+            \ default needs the account owner or a co-owner (ERR_INSUFFICIENT_PERMISSION).\
+            \ An unknown key answers ERR_INVALID_PARAM with the valid keys; a pitch\
+            \ project has no type"
+          type: string
       required:
       - main_country
       - main_language
@@ -30058,6 +30095,20 @@ components:
           minimum: 1
           nullable: true
           type: integer
+        project_type:
+          description: "Only for accounts billed per project type under a pricing\
+            \ agreement; any other account gets ERR_INVALID_PARAM. The key of one\
+            \ of the account's project types, such as core or lean. The new type's\
+            \ prompt cap applies at once and its price from the next renewal. Send\
+            \ it on its own: with other fields it answers ERR_INVALID_PARAM. Moving\
+            \ to a type whose cap is below the prompts the project holds answers ERR_INVALID_PARAM,\
+            \ and so do a pitch project and a project the team set up by hand (included\
+            \ at no cost, paused or with a raised prompt limit), which keeps its type;\
+            \ sending the type the project already has changes nothing. Account owner\
+            \ or a co-owner with Projects update permission only; a key limited to\
+            \ some projects answers ERR_KEY_PROJECT_SCOPED. It is applied even while\
+            \ a rematch runs"
+          type: string
         pitch:
           description: "false converts a pitch project into a tracked project. Send\
             \ it on its own, without other fields; true is rejected"
