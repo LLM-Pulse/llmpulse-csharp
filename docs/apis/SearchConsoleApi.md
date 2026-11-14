@@ -31,7 +31,7 @@ The property's queries with at least min_impressions impressions, most impressio
 |------|------|-------------|-------|
 | **projectId** | **int** | Project ID |  |
 | **property** | **string** | Which Search Console properties to read; /search_console/properties lists them. Omit it for the primary property, or pass one property id (e.g. sc-domain:example.com) to read that one; both answer with property. A comma-separated list of ids, or all, combines several and answers with properties, excluded_properties and property_errors instead: excluded_properties are left out because another selected property already counts them (a URL-prefix property under a domain property), so no click is counted twice; property_errors are properties Google refused, left out of the figures and also named in the X-Search-Console-Property-Errors header. When Google refuses every property, the request fails as a single-property read would. | [optional]  |
-| **range** | **int** | Number of days to look back, today included (alternative to from/to). At most 487, Google&#39;s retention. | [optional]  |
+| **range** | **int** | Number of days to look back, today included (alternative to from/to, which win when both are given). At most 487, Google&#39;s retention. A value that is not a plain positive number returns 422 ERR_INVALID_PARAM even beside from/to. | [optional]  |
 | **from** | **DateOnly** | Start date (YYYY-MM-DD). Defaults to 30 days ago. | [optional]  |
 | **to** | **DateOnly** | End date (YYYY-MM-DD), inclusive. Defaults to today. Google publishes data with a 2-3 day lag, so data_through in the response says how far it reaches. | [optional]  |
 | **minImpressions** | **int** | Smallest impressions a query needs. | [optional] [default to 100] |
@@ -85,7 +85,7 @@ Splits the property's impressions and clicks into branded queries, which contain
 |------|------|-------------|-------|
 | **projectId** | **int** | Project ID |  |
 | **property** | **string** | Which Search Console properties to read; /search_console/properties lists them. Omit it for the primary property, or pass one property id (e.g. sc-domain:example.com) to read that one; both answer with property. A comma-separated list of ids, or all, combines several and answers with properties, excluded_properties and property_errors instead: excluded_properties are left out because another selected property already counts them (a URL-prefix property under a domain property), so no click is counted twice; property_errors are properties Google refused, left out of the figures and also named in the X-Search-Console-Property-Errors header. When Google refuses every property, the request fails as a single-property read would. | [optional]  |
-| **range** | **int** | Number of days to look back, today included (alternative to from/to). At most 487, Google&#39;s retention. | [optional]  |
+| **range** | **int** | Number of days to look back, today included (alternative to from/to, which win when both are given). At most 487, Google&#39;s retention. A value that is not a plain positive number returns 422 ERR_INVALID_PARAM even beside from/to. | [optional]  |
 | **from** | **DateOnly** | Start date (YYYY-MM-DD). Defaults to 30 days ago. | [optional]  |
 | **to** | **DateOnly** | End date (YYYY-MM-DD), inclusive. Defaults to today. Google publishes data with a 2-3 day lag, so data_through in the response says how far it reaches. | [optional]  |
 | **searchType** | **string** | Which search surface to measure. Defaults to web. discover and googleNews carry no query dimension, so Google rejects /search_console/queries for them. | [optional] [default to web] |
@@ -134,7 +134,7 @@ Queries with at least min_impressions impressions for which two or more pages ea
 |------|------|-------------|-------|
 | **projectId** | **int** | Project ID |  |
 | **property** | **string** | Which Search Console properties to read; /search_console/properties lists them. Omit it for the primary property, or pass one property id (e.g. sc-domain:example.com) to read that one; both answer with property. A comma-separated list of ids, or all, combines several and answers with properties, excluded_properties and property_errors instead: excluded_properties are left out because another selected property already counts them (a URL-prefix property under a domain property), so no click is counted twice; property_errors are properties Google refused, left out of the figures and also named in the X-Search-Console-Property-Errors header. When Google refuses every property, the request fails as a single-property read would. | [optional]  |
-| **range** | **int** | Number of days to look back, today included (alternative to from/to). At most 487, Google&#39;s retention. | [optional]  |
+| **range** | **int** | Number of days to look back, today included (alternative to from/to, which win when both are given). At most 487, Google&#39;s retention. A value that is not a plain positive number returns 422 ERR_INVALID_PARAM even beside from/to. | [optional]  |
 | **from** | **DateOnly** | Start date (YYYY-MM-DD). Defaults to 30 days ago. | [optional]  |
 | **to** | **DateOnly** | End date (YYYY-MM-DD), inclusive. Defaults to today. Google publishes data with a 2-3 day lag, so data_through in the response says how far it reaches. | [optional]  |
 | **minImpressions** | **int** | Smallest impressions a query needs. | [optional] [default to 100] |
@@ -188,7 +188,7 @@ Pages (or queries, with dimension=query) that had at least min_clicks clicks in 
 |------|------|-------------|-------|
 | **projectId** | **int** | Project ID |  |
 | **property** | **string** | Which Search Console properties to read; /search_console/properties lists them. Omit it for the primary property, or pass one property id (e.g. sc-domain:example.com) to read that one; both answer with property. A comma-separated list of ids, or all, combines several and answers with properties, excluded_properties and property_errors instead: excluded_properties are left out because another selected property already counts them (a URL-prefix property under a domain property), so no click is counted twice; property_errors are properties Google refused, left out of the figures and also named in the X-Search-Console-Property-Errors header. When Google refuses every property, the request fails as a single-property read would. | [optional]  |
-| **range** | **int** | Number of days to look back, today included (alternative to from/to). At most 487, Google&#39;s retention. | [optional]  |
+| **range** | **int** | Number of days to look back, today included (alternative to from/to, which win when both are given). At most 487, Google&#39;s retention. A value that is not a plain positive number returns 422 ERR_INVALID_PARAM even beside from/to. | [optional]  |
 | **from** | **DateOnly** | Start date (YYYY-MM-DD). Defaults to 30 days ago. | [optional]  |
 | **to** | **DateOnly** | End date (YYYY-MM-DD), inclusive. Defaults to today. Google publishes data with a 2-3 day lag, so data_through in the response says how far it reaches. | [optional]  |
 | **dimension** | **string** | Compare pages or queries. | [optional] [default to page] |
@@ -242,7 +242,7 @@ Queries whose average position is between min_position and max_position (default
 |------|------|-------------|-------|
 | **projectId** | **int** | Project ID |  |
 | **property** | **string** | Which Search Console properties to read; /search_console/properties lists them. Omit it for the primary property, or pass one property id (e.g. sc-domain:example.com) to read that one; both answer with property. A comma-separated list of ids, or all, combines several and answers with properties, excluded_properties and property_errors instead: excluded_properties are left out because another selected property already counts them (a URL-prefix property under a domain property), so no click is counted twice; property_errors are properties Google refused, left out of the figures and also named in the X-Search-Console-Property-Errors header. When Google refuses every property, the request fails as a single-property read would. | [optional]  |
-| **range** | **int** | Number of days to look back, today included (alternative to from/to). At most 487, Google&#39;s retention. | [optional]  |
+| **range** | **int** | Number of days to look back, today included (alternative to from/to, which win when both are given). At most 487, Google&#39;s retention. A value that is not a plain positive number returns 422 ERR_INVALID_PARAM even beside from/to. | [optional]  |
 | **from** | **DateOnly** | Start date (YYYY-MM-DD). Defaults to 30 days ago. | [optional]  |
 | **to** | **DateOnly** | End date (YYYY-MM-DD), inclusive. Defaults to today. Google publishes data with a 2-3 day lag, so data_through in the response says how far it reaches. | [optional]  |
 | **minImpressions** | **int** | Smallest impressions a query needs. | [optional] [default to 100] |
@@ -296,7 +296,7 @@ Top Google Search Console landing pages over a date range, ranked by impressions
 | Name | Type | Description | Notes |
 |------|------|-------------|-------|
 | **projectId** | **int** | Project ID |  |
-| **range** | **int** | Number of days to look back, today included (alternative to from/to). At most 487, Google&#39;s retention. | [optional]  |
+| **range** | **int** | Number of days to look back, today included (alternative to from/to, which win when both are given). At most 487, Google&#39;s retention. A value that is not a plain positive number returns 422 ERR_INVALID_PARAM even beside from/to. | [optional]  |
 | **from** | **DateOnly** | Start date (YYYY-MM-DD). Defaults to 30 days ago. | [optional]  |
 | **to** | **DateOnly** | End date (YYYY-MM-DD), inclusive. Defaults to today. Google publishes data with a 2-3 day lag, so data_through in the response says how far it reaches. | [optional]  |
 | **sort** | **string** |  | [optional] [default to impressions] |
@@ -350,7 +350,7 @@ Top Google Search Console search queries over a date range, ranked by impression
 | Name | Type | Description | Notes |
 |------|------|-------------|-------|
 | **projectId** | **int** | Project ID |  |
-| **range** | **int** | Number of days to look back, today included (alternative to from/to). At most 487, Google&#39;s retention. | [optional]  |
+| **range** | **int** | Number of days to look back, today included (alternative to from/to, which win when both are given). At most 487, Google&#39;s retention. A value that is not a plain positive number returns 422 ERR_INVALID_PARAM even beside from/to. | [optional]  |
 | **from** | **DateOnly** | Start date (YYYY-MM-DD). Defaults to 30 days ago. | [optional]  |
 | **to** | **DateOnly** | End date (YYYY-MM-DD), inclusive. Defaults to today. Google publishes data with a 2-3 day lag, so data_through in the response says how far it reaches. | [optional]  |
 | **sort** | **string** |  | [optional] [default to impressions] |
@@ -405,7 +405,7 @@ Google Search Console rows grouped by 1 to 3 dimensions (date, country, device, 
 |------|------|-------------|-------|
 | **projectId** | **int** | Project ID |  |
 | **dimensions** | **string** | Comma-separated dimensions to group by, 1 to 3 of date, country, device, page, query, searchAppearance, property. Each becomes a field of every row; country and device values are lowercase. property is the Search Console property the row comes from (see the property parameter). |  |
-| **range** | **int** | Number of days to look back, today included (alternative to from/to). At most 487, Google&#39;s retention. | [optional]  |
+| **range** | **int** | Number of days to look back, today included (alternative to from/to, which win when both are given). At most 487, Google&#39;s retention. A value that is not a plain positive number returns 422 ERR_INVALID_PARAM even beside from/to. | [optional]  |
 | **from** | **DateOnly** | Start date (YYYY-MM-DD). Defaults to 30 days ago. | [optional]  |
 | **to** | **DateOnly** | End date (YYYY-MM-DD), inclusive. Defaults to today. Google publishes data with a 2-3 day lag, so data_through in the response says how far it reaches. | [optional]  |
 | **sort** | **string** |  | [optional] [default to impressions] |
@@ -459,7 +459,7 @@ Google Search Console headline totals (impressions, clicks, ctr as a 0..1 fracti
 | Name | Type | Description | Notes |
 |------|------|-------------|-------|
 | **projectId** | **int** | Project ID |  |
-| **range** | **int** | Number of days to look back, today included (alternative to from/to). At most 487, Google&#39;s retention. | [optional]  |
+| **range** | **int** | Number of days to look back, today included (alternative to from/to, which win when both are given). At most 487, Google&#39;s retention. A value that is not a plain positive number returns 422 ERR_INVALID_PARAM even beside from/to. | [optional]  |
 | **from** | **DateOnly** | Start date (YYYY-MM-DD). Defaults to 30 days ago. | [optional]  |
 | **to** | **DateOnly** | End date (YYYY-MM-DD), inclusive. Defaults to today. Google publishes data with a 2-3 day lag, so data_through in the response says how far it reaches. | [optional]  |
 | **dimension** | **string** | Optional breakdown aggregated over the range. country and device are lowercased; page and query keep the casing Google returns, because a page URL is case sensitive. property gives one row per property read (see the property parameter). | [optional]  |
@@ -510,7 +510,7 @@ Google Search Console series (impressions, clicks, ctr, position) bucketed by da
 | Name | Type | Description | Notes |
 |------|------|-------------|-------|
 | **projectId** | **int** | Project ID |  |
-| **range** | **int** | Number of days to look back, today included (alternative to from/to). At most 487, Google&#39;s retention. | [optional]  |
+| **range** | **int** | Number of days to look back, today included (alternative to from/to, which win when both are given). At most 487, Google&#39;s retention. A value that is not a plain positive number returns 422 ERR_INVALID_PARAM even beside from/to. | [optional]  |
 | **from** | **DateOnly** | Start date (YYYY-MM-DD). Defaults to 30 days ago. | [optional]  |
 | **to** | **DateOnly** | End date (YYYY-MM-DD), inclusive. Defaults to today. Google publishes data with a 2-3 day lag, so data_through in the response says how far it reaches. | [optional]  |
 | **granularity** | **string** |  | [optional]  |

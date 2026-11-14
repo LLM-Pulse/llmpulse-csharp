@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.94.0
+  version: 1.95.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -55,7 +55,8 @@ tags:
     \ and sanitized cached content."
   name: Sources & Citation Intelligence
 - description: "Aggregate AI Model Insights report endpoints (summary, position distribution,\
-    \ AI Overview results). All filter by executed_at and share a standard actor shape."
+    \ AI Overview results). All place each answer on the day it was created (Europe/Madrid\
+    \ time), as the app does, and share a standard actor shape."
   name: AI Model Insights
 - description: "What AI sends to your site: referral traffic from AI assistants measured\
     \ by the connected web analytics provider, and AI crawler traffic hitting your\
@@ -867,7 +868,9 @@ paths:
           \ avg_mention_position, net_sentiment, sentiment_very_positive, sentiment_positive,\
           \ sentiment_neutral, sentiment_negative, sentiment_very_negative. Citations\
           \ and citation_rate include visible citations and background source references;\
-          \ avg_position uses visible citations only."
+          \ avg_position uses visible citations only. weighted_visibility (ai_visibility_score)\
+          \ is position-weighted points divided by the days with responses, per period\
+          \ and for the summary total."
         explode: true
         in: query
         name: metrics
@@ -887,7 +890,9 @@ paths:
           type: string
         style: form
       - description: "Number of days to look back, today included. Required unless\
-          \ from is given: a request with neither range nor from returns 422 ERR_INVALID_PARAM."
+          \ from is given, and from/to win when both are given: a request with neither\
+          \ range nor from, or a range that is not a plain positive number (even beside\
+          \ from/to), returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: range
@@ -915,7 +920,8 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM)
+      - description: Comma-separated competitor IDs (a malformed or unknown ID returns
+          ERR_INVALID_PARAM)
         explode: true
         in: query
         name: competitors
@@ -982,12 +988,14 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
       - description: "One prompt type or a comma-separated list: informational, navigational,\
@@ -1111,7 +1119,9 @@ paths:
           \ avg_mention_position, net_sentiment, sentiment_very_positive, sentiment_positive,\
           \ sentiment_neutral, sentiment_negative, sentiment_very_negative. Citations\
           \ and citation_rate include visible citations and background source references;\
-          \ avg_position uses visible citations only."
+          \ avg_position uses visible citations only. weighted_visibility (ai_visibility_score)\
+          \ is position-weighted points divided by the days with responses, per period\
+          \ and for the summary total."
         explode: true
         in: query
         name: metrics
@@ -1131,7 +1141,9 @@ paths:
           type: string
         style: form
       - description: "Number of days to look back, today included. Required unless\
-          \ from is given: a request with neither range nor from returns 422 ERR_INVALID_PARAM."
+          \ from is given, and from/to win when both are given: a request with neither\
+          \ range nor from, or a range that is not a plain positive number (even beside\
+          \ from/to), returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: range
@@ -1159,7 +1171,8 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM)
+      - description: Comma-separated competitor IDs (a malformed or unknown ID returns
+          ERR_INVALID_PARAM)
         explode: true
         in: query
         name: competitors
@@ -1210,12 +1223,14 @@ paths:
           pattern: "^\\d+(,\\d+)*$"
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
       - description: "One prompt type or a comma-separated list: informational, navigational,\
@@ -1338,7 +1353,9 @@ paths:
           type: integer
         style: form
       - description: "Number of days to look back, today included. Required unless\
-          \ from is given: a request with neither range nor from returns 422 ERR_INVALID_PARAM."
+          \ from is given, and from/to win when both are given: a request with neither\
+          \ range nor from, or a range that is not a plain positive number (even beside\
+          \ from/to), returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: range
@@ -1435,12 +1452,14 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
       - description: "One prompt type or a comma-separated list: informational, navigational,\
@@ -1569,7 +1588,9 @@ paths:
           type: integer
         style: form
       - description: "Number of days to look back, today included. Required unless\
-          \ from is given: a request with neither range nor from returns 422 ERR_INVALID_PARAM."
+          \ from is given, and from/to win when both are given: a request with neither\
+          \ range nor from, or a range that is not a plain positive number (even beside\
+          \ from/to), returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: range
@@ -1608,7 +1629,8 @@ paths:
           - month
           type: string
         style: form
-      - description: Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM)
+      - description: Comma-separated competitor IDs (a malformed or unknown ID returns
+          ERR_INVALID_PARAM)
         explode: true
         in: query
         name: competitors
@@ -1659,12 +1681,14 @@ paths:
           pattern: "^\\d+(,\\d+)*$"
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
       - description: "One prompt type or a comma-separated list: informational, navigational,\
@@ -1706,9 +1730,10 @@ paths:
           - csv
           type: string
         style: form
-      - description: "Which Share of Voice projection to flatten. Only valid together\
-          \ with 'output'. 'over_time' (default) is one row per date and actor, 'current'\
-          \ the ranked snapshot, 'breakdown' the Top 4 plus Others."
+      - description: "Which Share of Voice projection to flatten. It applies only\
+          \ together with 'output'; an unknown value returns 422 ERR_INVALID_PARAM\
+          \ with or without it. 'over_time' (default) is one row per date and actor,\
+          \ 'current' the ranked snapshot, 'breakdown' the Top 4 plus Others."
         explode: true
         in: query
         name: view
@@ -1776,7 +1801,9 @@ paths:
           type: integer
         style: form
       - description: "Number of days to look back, today included. Required unless\
-          \ from is given: a request with neither range nor from returns 422 ERR_INVALID_PARAM."
+          \ from is given, and from/to win when both are given: a request with neither\
+          \ range nor from, or a range that is not a plain positive number (even beside\
+          \ from/to), returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: range
@@ -1863,12 +1890,14 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
       - description: "One prompt type or a comma-separated list: informational, navigational,\
@@ -2167,8 +2196,11 @@ paths:
       x-mcp-tool: list_competitor_suggestions
   /competitors:
     post:
-      description: Adds a competitor with its own citation URL matching rule. Honours
-        the per-plan max competitors cap. Requires a `read_write` scope API key.
+      description: "Adds a competitor with its own citation URL matching rule. Honours\
+        \ the per-plan max competitors cap. A `domain` rule on the project's own domain,\
+        \ or one of its subdomains, or a `host` rule on the project's own host, returns\
+        \ ERR_INVALID_PARAM; a `path_prefix` rule on it is accepted. Requires a `read_write`\
+        \ scope API key."
       operationId: createCompetitor
       requestBody:
         content:
@@ -2275,10 +2307,11 @@ paths:
         \ (full replacement list; the brand name is always included automatically),\
         \ color and/or the citation URL matching rule. Website domain/host and citation-rule\
         \ changes share one seven-day cooldown per competitor; other fields remain\
-        \ editable during the cooldown. Name, website or citation-rule changes re-run\
-        \ historical matching in the background: the competitor shows processing=true\
-        \ for a few minutes and further edits are rejected meanwhile. Requires a `read_write`\
-        \ scope API key."
+        \ editable during the cooldown. Moving to a `domain` rule on the project's\
+        \ own domain, or a `host` rule on its own host, returns ERR_INVALID_PARAM.\
+        \ Name, website or citation-rule changes re-run historical matching in the\
+        \ background: the competitor shows processing=true for a few minutes and further\
+        \ edits are rejected meanwhile. Requires a `read_write` scope API key."
       operationId: updateCompetitor
       parameters:
       - explode: false
@@ -2430,12 +2463,14 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
       - description: "One prompt type or a comma-separated list: informational, navigational,\
@@ -2463,7 +2498,10 @@ paths:
           - non_brand
           type: string
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -2471,8 +2509,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -2597,15 +2636,20 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -2613,8 +2657,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -2671,7 +2716,8 @@ paths:
           - no_citations
           type: string
         style: form
-      - description: Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM)
+      - description: Comma-separated competitor IDs (a malformed or unknown ID returns
+          ERR_INVALID_PARAM)
         explode: true
         in: query
         name: competitors
@@ -2873,12 +2919,14 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
       - description: "One prompt type or a comma-separated list: informational, navigational,\
@@ -2906,7 +2954,9 @@ paths:
           - non_brand
           type: string
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -2914,7 +2964,10 @@ paths:
         schema:
           type: integer
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -2922,8 +2975,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -3497,9 +3551,11 @@ paths:
     delete:
       description: "Deletes a prompt (irreversible). The prompt disappears immediately\
         \ and frees a prompt slot; its historical data (executions, mentions, citations,\
-        \ sentiment) is purged by a background job. The prompts of a launched pitch\
-        \ project are fixed, so deleting one returns ERR_INVALID_PARAM with error.meta.reason\
-        \ pitch_prompts_frozen. Requires a `read_write` scope API key."
+        \ sentiment) is purged by a background job. Until that job finishes, its answers,\
+        \ mentions and metrics still count the prompt, so totals can include it for\
+        \ a short while. The prompts of a launched pitch project are fixed, so deleting\
+        \ one returns ERR_INVALID_PARAM with error.meta.reason pitch_prompts_frozen.\
+        \ Requires a `read_write` scope API key."
       operationId: deletePrompt
       parameters:
       - description: Project ID
@@ -4043,13 +4099,40 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
+        style: form
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
+        explode: true
+        in: query
+        name: prompt_type
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
         style: form
       - description: "Filter by which brands are mentioned, as a two-axis matrix (your\
           \ brand x competitors): mentions_you / not_mentions_you, mentions_competitor\
@@ -4099,7 +4182,8 @@ paths:
           - no_citations
           type: string
         style: form
-      - description: Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM)
+      - description: Comma-separated competitor IDs (a malformed or unknown ID returns
+          ERR_INVALID_PARAM)
         explode: true
         in: query
         name: competitors
@@ -4107,7 +4191,10 @@ paths:
         schema:
           type: string
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -4115,8 +4202,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -4333,15 +4421,20 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -4349,8 +4442,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -4398,7 +4492,9 @@ paths:
           - non_brand
           type: string
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -4508,15 +4604,20 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -4524,8 +4625,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -4573,7 +4675,9 @@ paths:
           - non_brand
           type: string
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -4605,7 +4709,8 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM)
+      - description: Comma-separated competitor IDs (a malformed or unknown ID returns
+          ERR_INVALID_PARAM)
         explode: true
         in: query
         name: competitors
@@ -4673,15 +4778,20 @@ paths:
           pattern: "^\\d+(,\\d+)*$"
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -4689,8 +4799,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -4754,7 +4865,9 @@ paths:
           - non_brand
           type: string
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -4788,7 +4901,8 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM)
+      - description: Comma-separated competitor IDs (a malformed or unknown ID returns
+          ERR_INVALID_PARAM)
         explode: true
         in: query
         name: competitors
@@ -4856,15 +4970,20 @@ paths:
           pattern: "^\\d+(,\\d+)*$"
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -4872,8 +4991,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -4937,7 +5057,9 @@ paths:
           - non_brand
           type: string
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -4967,7 +5089,8 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM)
+      - description: Comma-separated competitor IDs (a malformed or unknown ID returns
+          ERR_INVALID_PARAM)
         explode: true
         in: query
         name: competitors
@@ -5035,15 +5158,20 @@ paths:
           pattern: "^\\d+(,\\d+)*$"
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -5051,8 +5179,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -5116,7 +5245,9 @@ paths:
           - non_brand
           type: string
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -5148,7 +5279,8 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM)
+      - description: Comma-separated competitor IDs (a malformed or unknown ID returns
+          ERR_INVALID_PARAM)
         explode: true
         in: query
         name: competitors
@@ -5216,15 +5348,20 @@ paths:
           pattern: "^\\d+(,\\d+)*$"
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -5232,8 +5369,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -5297,7 +5435,9 @@ paths:
           - non_brand
           type: string
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -5376,14 +5516,19 @@ paths:
         schema:
           type: integer
         style: form
-      - explode: true
+      - description: "Keep the sentiments about this competitor. An id that is not\
+          \ a plain positive number, or that names no competitor of the project, returns\
+          \ 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: competitor_id
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
-      - explode: true
+      - description: true keeps only the sentiments about your own brand.
+        explode: true
         in: query
         name: brand_only
         required: false
@@ -5399,10 +5544,9 @@ paths:
         schema:
           type: string
         style: form
-      - description: "Filter by one AI model. Here an unknown value, or a model the\
-          \ API key's user has not enabled, is ignored rather than rejected: the request\
-          \ succeeds and returns the records of every enabled model, as if model were\
-          \ omitted."
+      - description: "Filter by one AI model. It must be a model enabled for the API\
+          \ key's user: an unknown value, or a model the user has not enabled, returns\
+          \ 422 ERR_INVALID_PARAM with the valid values in the message."
         explode: true
         in: query
         name: model
@@ -5457,7 +5601,10 @@ paths:
         schema:
           type: string
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -5465,8 +5612,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -5551,7 +5699,8 @@ paths:
           type: integer
         style: form
       - description: "Number of days to look back, today included (default 28, like\
-          \ the Sentiment page). Ignored when from or to is given."
+          \ the Sentiment page). from or to win over it, but a value that is not a\
+          \ plain positive number returns 422 ERR_INVALID_PARAM even beside them."
         explode: true
         in: query
         name: range
@@ -5801,7 +5950,8 @@ paths:
           type: integer
         style: form
       - description: "Number of days to look back, today included (default 28, like\
-          \ the Sentiment page). Ignored when from or to is given."
+          \ the Sentiment page). from or to win over it, but a value that is not a\
+          \ plain positive number returns 422 ERR_INVALID_PARAM even beside them."
         explode: true
         in: query
         name: range
@@ -6120,15 +6270,20 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -6136,8 +6291,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -6186,7 +6342,8 @@ paths:
           - no_brands
           type: string
         style: form
-      - description: Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM)
+      - description: Comma-separated competitor IDs (a malformed or unknown ID returns
+          ERR_INVALID_PARAM)
         explode: true
         in: query
         name: competitors
@@ -6233,7 +6390,9 @@ paths:
           - non_brand
           type: string
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -6293,7 +6452,7 @@ paths:
         \ can include enabled models outside the seven the model filter accepts) and\
         \ data, one { date, value } point per period that holds a filtered answer,\
         \ so a zero means answers ran and none cited it. Periods date each answer\
-        \ by its executed_at in Europe/Madrid time, the column from and to filter."
+        \ by the day it was created in Europe/Madrid time, the date from and to filter."
       operationId: listCitationGroups
       parameters:
       - description: Project ID
@@ -6420,12 +6579,14 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
       - description: "Filter by brand kind: brand (own brand/products), brand_other\
@@ -6638,12 +6799,14 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
       - description: "Filter by brand kind: brand (own brand/products), brand_other\
@@ -6725,8 +6888,8 @@ paths:
         \ by_model (answers per AI model, largest first, which can include enabled\
         \ models outside the seven the model filter accepts) and data, one { date,\
         \ value } point per period that holds a filtered answer, so a zero means answers\
-        \ ran and none cited it. Periods date each answer by its executed_at in Europe/Madrid\
-        \ time, the column from and to filter."
+        \ ran and none cited it. Periods date each answer by the day it was created\
+        \ in Europe/Madrid time, the date from and to filter."
       operationId: getCitedUrlDetail
       parameters:
       - description: Project ID
@@ -6806,12 +6969,14 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
       - description: "Filter by brand kind: brand (own brand/products), brand_other\
@@ -7050,7 +7215,9 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -7141,7 +7308,8 @@ paths:
           - non_brand
           type: string
         style: form
-      - description: Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM)
+      - description: Comma-separated competitor IDs (a malformed or unknown ID returns
+          ERR_INVALID_PARAM)
         explode: true
         in: query
         name: competitors
@@ -7174,7 +7342,9 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -7324,7 +7494,9 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -7460,7 +7632,9 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -7581,7 +7755,9 @@ paths:
         schema:
           type: integer
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -8082,12 +8258,14 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
       - description: "One prompt type or a comma-separated list: informational, navigational,\
@@ -8115,7 +8293,9 @@ paths:
           - non_brand
           type: string
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -8123,7 +8303,10 @@ paths:
         schema:
           type: integer
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -8131,8 +8314,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -8329,12 +8513,14 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
       - description: "One prompt type or a comma-separated list: informational, navigational,\
@@ -8362,7 +8548,9 @@ paths:
           - non_brand
           type: string
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -8370,7 +8558,10 @@ paths:
         schema:
           type: integer
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -8378,8 +8569,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -8564,12 +8756,14 @@ paths:
         schema:
           type: string
         style: form
-      - description: Filter by prompt ID
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: prompt
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
       - description: "One prompt type or a comma-separated list: informational, navigational,\
@@ -8597,7 +8791,9 @@ paths:
           - non_brand
           type: string
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -8605,7 +8801,10 @@ paths:
         schema:
           type: integer
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -8613,8 +8812,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -8847,7 +9047,9 @@ paths:
           - non_brand
           type: string
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -8855,7 +9057,10 @@ paths:
         schema:
           type: integer
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -8863,8 +9068,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -9059,7 +9265,9 @@ paths:
           - non_brand
           type: string
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -9067,7 +9275,10 @@ paths:
         schema:
           type: integer
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -9075,8 +9286,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -9342,7 +9554,9 @@ paths:
           - non_brand
           type: string
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -9350,7 +9564,10 @@ paths:
         schema:
           type: integer
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -9358,8 +9575,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -9560,7 +9778,8 @@ paths:
         style: form
       - description: "Filter to citations whose scraped Reddit content mentions a\
           \ brand: 'brand' for the tracked brand, or a competitor id. Reads the page\
-          \ content, not the AI answer."
+          \ content, not the AI answer. Any other value, or an id that names no competitor\
+          \ of the project, returns 422 ERR_INVALID_PARAM."
         explode: true
         in: query
         name: brand
@@ -9672,7 +9891,9 @@ paths:
           - non_brand
           type: string
         style: form
-      - description: Number of days to look back (alternative to from/to)
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
         explode: true
         in: query
         name: range
@@ -9680,7 +9901,10 @@ paths:
         schema:
           type: integer
         style: form
-      - explode: true
+      - description: "Start of the window. Sent alone, the window runs from it to\
+          \ the end of today. A from later than to, or a window longer than 1,500\
+          \ days, returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: from
         required: false
@@ -9688,8 +9912,9 @@ paths:
           format: date-time
           type: string
         style: form
-      - description: End of the window. A date-only value such as 2026-09-01 covers
-          that whole day. Pass a full timestamp to end the window earlier.
+      - description: "End of the window. A date-only value such as 2026-09-01 covers\
+          \ that whole day. Pass a full timestamp to end the window earlier. Sent\
+          \ without from, the window covers the 30 days that end on it."
         explode: true
         in: query
         name: to
@@ -10531,7 +10756,9 @@ paths:
           type: integer
         style: form
       - description: "Number of days to look back, today included (alternative to\
-          \ from/to). At most 487, Google's retention."
+          \ from/to, which win when both are given). At most 487, Google's retention.\
+          \ A value that is not a plain positive number returns 422 ERR_INVALID_PARAM\
+          \ even beside from/to."
         explode: true
         in: query
         name: range
@@ -10783,7 +11010,9 @@ paths:
           type: integer
         style: form
       - description: "Number of days to look back, today included (alternative to\
-          \ from/to). At most 487, Google's retention."
+          \ from/to, which win when both are given). At most 487, Google's retention.\
+          \ A value that is not a plain positive number returns 422 ERR_INVALID_PARAM\
+          \ even beside from/to."
         explode: true
         in: query
         name: range
@@ -11031,7 +11260,9 @@ paths:
           type: integer
         style: form
       - description: "Number of days to look back, today included (alternative to\
-          \ from/to). At most 487, Google's retention."
+          \ from/to, which win when both are given). At most 487, Google's retention.\
+          \ A value that is not a plain positive number returns 422 ERR_INVALID_PARAM\
+          \ even beside from/to."
         explode: true
         in: query
         name: range
@@ -11315,7 +11546,9 @@ paths:
           type: integer
         style: form
       - description: "Number of days to look back, today included (alternative to\
-          \ from/to). At most 487, Google's retention."
+          \ from/to, which win when both are given). At most 487, Google's retention.\
+          \ A value that is not a plain positive number returns 422 ERR_INVALID_PARAM\
+          \ even beside from/to."
         explode: true
         in: query
         name: range
@@ -11610,7 +11843,9 @@ paths:
           type: string
         style: form
       - description: "Number of days to look back, today included (alternative to\
-          \ from/to). At most 487, Google's retention."
+          \ from/to, which win when both are given). At most 487, Google's retention.\
+          \ A value that is not a plain positive number returns 422 ERR_INVALID_PARAM\
+          \ even beside from/to."
         explode: true
         in: query
         name: range
@@ -11910,7 +12145,9 @@ paths:
           type: string
         style: form
       - description: "Number of days to look back, today included (alternative to\
-          \ from/to). At most 487, Google's retention."
+          \ from/to, which win when both are given). At most 487, Google's retention.\
+          \ A value that is not a plain positive number returns 422 ERR_INVALID_PARAM\
+          \ even beside from/to."
         explode: true
         in: query
         name: range
@@ -12203,7 +12440,9 @@ paths:
           type: string
         style: form
       - description: "Number of days to look back, today included (alternative to\
-          \ from/to). At most 487, Google's retention."
+          \ from/to, which win when both are given). At most 487, Google's retention.\
+          \ A value that is not a plain positive number returns 422 ERR_INVALID_PARAM\
+          \ even beside from/to."
         explode: true
         in: query
         name: range
@@ -12486,7 +12725,9 @@ paths:
           type: string
         style: form
       - description: "Number of days to look back, today included (alternative to\
-          \ from/to). At most 487, Google's retention."
+          \ from/to, which win when both are given). At most 487, Google's retention.\
+          \ A value that is not a plain positive number returns 422 ERR_INVALID_PARAM\
+          \ even beside from/to."
         explode: true
         in: query
         name: range
@@ -12773,7 +13014,9 @@ paths:
           type: string
         style: form
       - description: "Number of days to look back, today included (alternative to\
-          \ from/to). At most 487, Google's retention."
+          \ from/to, which win when both are given). At most 487, Google's retention.\
+          \ A value that is not a plain positive number returns 422 ERR_INVALID_PARAM\
+          \ even beside from/to."
         explode: true
         in: query
         name: range
@@ -13017,7 +13260,9 @@ paths:
           type: string
         style: form
       - description: "Number of days to look back, today included (alternative to\
-          \ from/to). At most 487, Google's retention."
+          \ from/to, which win when both are given). At most 487, Google's retention.\
+          \ A value that is not a plain positive number returns 422 ERR_INVALID_PARAM\
+          \ even beside from/to."
         explode: true
         in: query
         name: range
@@ -15753,11 +15998,14 @@ paths:
           format: date
           type: string
         style: form
-      - explode: true
+      - description: "Keep the annotations filed under this category, one of the project's\
+          \ or a system category. Any other id returns 422 ERR_INVALID_PARAM."
+        explode: true
         in: query
         name: annotation_category_id
         required: false
         schema:
+          minimum: 1
           type: integer
         style: form
       - explode: true
@@ -17098,7 +17346,8 @@ paths:
         \ still be listed and deleted."
       operationId: listWebhooks
       parameters:
-      - description: Optional project filter
+      - description: "Optional project filter. An id that is not a plain number, or\
+          \ that names no project of the account, returns ERR_PROJECT_NOT_FOUND."
         explode: true
         in: query
         name: project_id
@@ -17150,6 +17399,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Endpoint requires a higher plan tier
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
       summary: List webhook subscriptions
       tags:
       - Webhooks
@@ -17419,9 +17679,10 @@ components:
         type: string
       style: form
     SovView:
-      description: "Which Share of Voice projection to flatten. Only valid together\
-        \ with 'output'. 'over_time' (default) is one row per date and actor, 'current'\
-        \ the ranked snapshot, 'breakdown' the Top 4 plus Others."
+      description: "Which Share of Voice projection to flatten. It applies only together\
+        \ with 'output'; an unknown value returns 422 ERR_INVALID_PARAM with or without\
+        \ it. 'over_time' (default) is one row per date and actor, 'current' the ranked\
+        \ snapshot, 'breakdown' the Top 4 plus Others."
       explode: true
       in: query
       name: view
@@ -17444,7 +17705,8 @@ components:
         type: integer
       style: form
     Competitors:
-      description: Comma-separated competitor IDs (unknown IDs return ERR_INVALID_PARAM)
+      description: Comma-separated competitor IDs (a malformed or unknown ID returns
+        ERR_INVALID_PARAM)
       explode: true
       in: query
       name: competitors
@@ -17480,7 +17742,9 @@ components:
         \ avg_mention_position, net_sentiment, sentiment_very_positive, sentiment_positive,\
         \ sentiment_neutral, sentiment_negative, sentiment_very_negative. Citations\
         \ and citation_rate include visible citations and background source references;\
-        \ avg_position uses visible citations only."
+        \ avg_position uses visible citations only. weighted_visibility (ai_visibility_score)\
+        \ is position-weighted points divided by the days with responses, per period\
+        \ and for the summary total."
       explode: true
       in: query
       name: metrics
@@ -17580,8 +17844,10 @@ components:
         type: string
       style: form
     GscRange:
-      description: "Number of days to look back, today included (alternative to from/to).\
-        \ At most 487, Google's retention."
+      description: "Number of days to look back, today included (alternative to from/to,\
+        \ which win when both are given). At most 487, Google's retention. A value\
+        \ that is not a plain positive number returns 422 ERR_INVALID_PARAM even beside\
+        \ from/to."
       explode: true
       in: query
       name: range
@@ -17635,7 +17901,9 @@ components:
         type: string
       style: form
     Range:
-      description: Number of days to look back (alternative to from/to)
+      description: "Number of days to look back (alternative to from/to, which win\
+        \ when both are given). A value that is not a plain positive number returns\
+        \ 422 ERR_INVALID_PARAM, even beside from/to."
       explode: true
       in: query
       name: range
@@ -17663,9 +17931,35 @@ components:
         format: date-time
         type: string
       style: form
+    ListingFrom:
+      description: "Start of the window. Sent alone, the window runs from it to the\
+        \ end of today. A from later than to, or a window longer than 1,500 days,\
+        \ returns 422 ERR_INVALID_PARAM."
+      explode: true
+      in: query
+      name: from
+      required: false
+      schema:
+        format: date-time
+        type: string
+      style: form
+    ListingTo:
+      description: "End of the window. A date-only value such as 2026-09-01 covers\
+        \ that whole day. Pass a full timestamp to end the window earlier. Sent without\
+        \ from, the window covers the 30 days that end on it."
+      explode: true
+      in: query
+      name: to
+      required: false
+      schema:
+        format: date-time
+        type: string
+      style: form
     MetricsRange:
       description: "Number of days to look back, today included. Required unless from\
-        \ is given: a request with neither range nor from returns 422 ERR_INVALID_PARAM."
+        \ is given, and from/to win when both are given: a request with neither range\
+        \ nor from, or a range that is not a plain positive number (even beside from/to),\
+        \ returns 422 ERR_INVALID_PARAM."
       explode: true
       in: query
       name: range
@@ -17809,12 +18103,14 @@ components:
         type: string
       style: form
     Prompt:
-      description: Filter by prompt ID
+      description: "Filter by prompt ID. An id that is not a plain positive number,\
+        \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
       explode: true
       in: query
       name: prompt
       required: false
       schema:
+        minimum: 1
         type: integer
       style: form
     PromptType:
@@ -20001,12 +20297,12 @@ components:
       - $ref: "#/components/schemas/AiModelInsightsModel"
       - properties:
           weighted_visibility_score:
-            description: The brand's AI Visibility Score points in the model; 0 when
-              it has none
+            description: "The brand's AI Visibility Score in the model, its points\
+              \ there divided by the days the model answered; 0 when it has none"
             type: number
           share_of_total:
-            description: The model's percentage (0-100) of total_weighted_visibility_score;
-              null when that total is 0
+            description: The model's percentage (0-100) of the brand's AI Visibility
+              Score points; null when the brand has none
             nullable: true
             type: number
         type: object
@@ -20222,7 +20518,9 @@ components:
           nullable: true
           type: string
         total_weighted_visibility_score:
-          description: The actor's AI Visibility Score points summed over the models
+          description: "The actor's AI Visibility Score across the enabled models,\
+            \ its points there divided by the project's days with answers in them,\
+            \ so actors compare"
           type: number
         models:
           additionalProperties:
@@ -20235,8 +20533,9 @@ components:
         value: 6.704019297950036
       properties:
         value:
-          description: The actor's AI Visibility Score points in the model; 0 when
-            it has none
+          description: "The actor's AI Visibility Score in the model, its points there\
+            \ divided by the project's days with answers in that model; 0 when it\
+            \ has none"
           type: number
       type: object
     WebAnalyticsSchemaResponse:
@@ -31403,9 +31702,14 @@ components:
         metric:
           type: string
         total:
+          description: "Count metrics sum the buckets; rate, position and sentiment\
+            \ metrics average them. ai_visibility_score (weighted_visibility) is the\
+            \ window's points divided by its data days (the days with responses under\
+            \ the filters), the number the app shows, whatever the granularity."
           type: number
         aggregation:
-          description: How total combines the buckets
+          description: "How total combines the buckets (average for ai_visibility_score,\
+            \ a per-data-day score)"
           enum:
           - sum
           - average
@@ -31638,8 +31942,10 @@ components:
           share_of_total: 6.84685269835264
       properties:
         total_weighted_visibility_score:
-          description: The brand's AI Visibility Score points across the models; 0
-            when it has none
+          description: "The brand's AI Visibility Score across the enabled models,\
+            \ its points there divided by the days with answers in any of them (the\
+            \ Overview's number for the same filters; a model that answered while\
+            \ disabled keeps its row but stays out of it); 0 when it has none"
           type: number
         models:
           items:

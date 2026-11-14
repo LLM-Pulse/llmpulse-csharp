@@ -24,7 +24,7 @@ Aggregated AI bot traffic hitting the project's origin server (GPTBot, Perplexit
 | Name | Type | Description | Notes |
 |------|------|-------------|-------|
 | **projectId** | **int** | Project ID |  |
-| **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
+| **range** | **int** | Number of days to look back (alternative to from/to, which win when both are given). A value that is not a plain positive number returns 422 ERR_INVALID_PARAM, even beside from/to. | [optional]  |
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **bot** | **string** | Filter by bot slug (e.g. gptbot, claudebot, perplexitybot) | [optional]  |
@@ -69,7 +69,7 @@ AI referral traffic for a project: human visits arriving from AI assistants (Cha
 | Name | Type | Description | Notes |
 |------|------|-------------|-------|
 | **projectId** | **int** | Project ID |  |
-| **range** | **int** | Number of days to look back (alternative to from/to) | [optional]  |
+| **range** | **int** | Number of days to look back (alternative to from/to, which win when both are given). A value that is not a plain positive number returns 422 ERR_INVALID_PARAM, even beside from/to. | [optional]  |
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **source** | **string** | Filter by a single AI source slug (e.g. chatgpt, perplexity, gemini, claude) | [optional]  |

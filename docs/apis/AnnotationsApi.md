@@ -102,7 +102,7 @@ Lists project timeline annotations, newest first. Rows can come from manual note
 | **projectId** | **int** | Project ID |  |
 | **from** | **DateOnly** |  | [optional]  |
 | **to** | **DateOnly** |  | [optional]  |
-| **annotationCategoryId** | **int** |  | [optional]  |
+| **annotationCategoryId** | **int** | Keep the annotations filed under this category, one of the project&#39;s or a system category. Any other id returns 422 ERR_INVALID_PARAM. | [optional]  |
 | **page** | **int** |  | [optional] [default to 1] |
 | **perPage** | **int** |  | [optional] [default to 20] |
 

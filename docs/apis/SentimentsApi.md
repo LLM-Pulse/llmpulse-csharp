@@ -23,7 +23,7 @@ One row per tag of the project with at least one analyzed mention, with the posi
 | Name | Type | Description | Notes |
 |------|------|-------------|-------|
 | **projectId** | **int** | Project ID |  |
-| **range** | **int** | Number of days to look back, today included (default 28, like the Sentiment page). Ignored when from or to is given. | [optional]  |
+| **range** | **int** | Number of days to look back, today included (default 28, like the Sentiment page). from or to win over it, but a value that is not a plain positive number returns 422 ERR_INVALID_PARAM even beside them. | [optional]  |
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **model** | **string** | Filter by one AI model. It must be a model enabled for the API key&#39;s user: an unknown value, or a model the user has not enabled, returns 422 ERR_INVALID_PARAM with the valid values in the message. | [optional]  |
@@ -78,7 +78,7 @@ One row per topic AI answers associate with the brand (topics are matched case-i
 | Name | Type | Description | Notes |
 |------|------|-------------|-------|
 | **projectId** | **int** | Project ID |  |
-| **range** | **int** | Number of days to look back, today included (default 28, like the Sentiment page). Ignored when from or to is given. | [optional]  |
+| **range** | **int** | Number of days to look back, today included (default 28, like the Sentiment page). from or to win over it, but a value that is not a plain positive number returns 422 ERR_INVALID_PARAM even beside them. | [optional]  |
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **model** | **string** | Filter by one AI model. It must be a model enabled for the API key&#39;s user: an unknown value, or a model the user has not enabled, returns 422 ERR_INVALID_PARAM with the valid values in the message. | [optional]  |
@@ -171,15 +171,15 @@ Requires the Growth plan; lower tiers receive ERR_PLAN_REQUIRED.
 | Name | Type | Description | Notes |
 |------|------|-------------|-------|
 | **projectId** | **int** | Project ID |  |
-| **competitorId** | **int** |  | [optional]  |
-| **brandOnly** | **bool** |  | [optional]  |
+| **competitorId** | **int** | Keep the sentiments about this competitor. An id that is not a plain positive number, or that names no competitor of the project, returns 422 ERR_INVALID_PARAM. | [optional]  |
+| **brandOnly** | **bool** | true keeps only the sentiments about your own brand. | [optional]  |
 | **analysis** | **string** | One sentiment level or a comma-separated list: very_positive, positive, neutral, negative, very_negative | [optional]  |
-| **model** | **string** | Filter by one AI model. Here an unknown value, or a model the API key&#39;s user has not enabled, is ignored rather than rejected: the request succeeds and returns the records of every enabled model, as if model were omitted. | [optional]  |
+| **model** | **string** | Filter by one AI model. It must be a model enabled for the API key&#39;s user: an unknown value, or a model the user has not enabled, returns 422 ERR_INVALID_PARAM with the valid values in the message. | [optional]  |
 | **collectionId** | **string** | One collection/tag ID or a comma-separated list of IDs. A query value is always a string on the wire, so it is typed as one: the previous integer-or-string union made generators emit a wrapper type they could not serialize. | [optional]  |
 | **countryCode** | **string** | One ISO country code or a comma-separated list (e.g. US,GB,DE) | [optional]  |
 | **languageCode** | **string** | One ISO language code or a comma-separated list (e.g. en,es,de) | [optional]  |
-| **from** | **DateTime** |  | [optional]  |
-| **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
+| **from** | **DateTime** | Start of the window. Sent alone, the window runs from it to the end of today. A from later than to, or a window longer than 1,500 days, returns 422 ERR_INVALID_PARAM. | [optional]  |
+| **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. Sent without from, the window covers the 30 days that end on it. | [optional]  |
 | **page** | **int** |  | [optional] [default to 1] |
 | **perPage** | **int** |  | [optional] [default to 20] |
 

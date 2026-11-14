@@ -101,7 +101,7 @@ Lists active webhook subscriptions for the account, optionally filtered by proje
 
 | Name | Type | Description | Notes |
 |------|------|-------------|-------|
-| **projectId** | **int** | Optional project filter | [optional]  |
+| **projectId** | **int** | Optional project filter. An id that is not a plain number, or that names no project of the account, returns ERR_PROJECT_NOT_FOUND. | [optional]  |
 | **page** | **int** |  | [optional]  |
 | **perPage** | **int** | Max 100 | [optional]  |
 
@@ -125,6 +125,7 @@ Lists active webhook subscriptions for the account, optionally filtered by proje
 | **200** | OK |  -  |
 | **401** | Authentication failed |  -  |
 | **403** | Endpoint requires a higher plan tier |  -  |
+| **404** | Resource not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
 
