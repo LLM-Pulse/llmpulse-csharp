@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.95.0
+  version: 1.97.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -869,7 +869,8 @@ paths:
           \ sentiment_neutral, sentiment_negative, sentiment_very_negative. Citations\
           \ and citation_rate include visible citations and background source references;\
           \ avg_position uses visible citations only. weighted_visibility (ai_visibility_score)\
-          \ is position-weighted points divided by the days with responses, per period\
+          \ is position-weighted points divided by the tracking runs (days, weeks\
+          \ or months at the account's tracking frequency) with responses, per period\
           \ and for the summary total."
         explode: true
         in: query
@@ -1098,11 +1099,14 @@ paths:
         \ Position 2, Position 3+). Citations and citation rate include visible citations\
         \ and background source references. Background references use position 0 and\
         \ are excluded from avg_position and position distributions. `total` is a\
-        \ SUM for count metrics (mentions, citations, responses) and an AVERAGE across\
-        \ periods for rate/percentage and average metrics (visibility/mention_rate,\
-        \ citation_rate, ai_visibility_score, sentiment shares, avg_position, avg_mention_position,\
-        \ net_sentiment); rates are never summed. Each summary row carries an `aggregation`\
-        \ field (`sum` or `average`)."
+        \ SUM for count metrics (mentions, citations, responses). For rate/percentage\
+        \ and average metrics (visibility/mention_rate, citation_rate, sentiment shares,\
+        \ net_sentiment, avg_position, avg_mention_position) it pools the whole window,\
+        \ the number the app shows for the same filters; visibility is all mentions\
+        \ over all responses, never a mean of the period rates, which would weigh\
+        \ a period of 2 responses like one of 200. ai_visibility_score is the window's\
+        \ points over its tracking runs. Rates are never summed. Each summary row\
+        \ carries an `aggregation` field (`sum` or `average`)."
       operationId: getSummary
       parameters:
       - description: Project ID
@@ -1120,7 +1124,8 @@ paths:
           \ sentiment_neutral, sentiment_negative, sentiment_very_negative. Citations\
           \ and citation_rate include visible citations and background source references;\
           \ avg_position uses visible citations only. weighted_visibility (ai_visibility_score)\
-          \ is position-weighted points divided by the days with responses, per period\
+          \ is position-weighted points divided by the tracking runs (days, weeks\
+          \ or months at the account's tracking frequency) with responses, per period\
           \ and for the summary total."
         explode: true
         in: query
@@ -1328,8 +1333,9 @@ paths:
       summary: Aggregated metrics summary
       tags:
       - Metrics
-      x-llms-description: "Aggregated period summary with totals (sum for counts,\
-        \ average for rates; see aggregation field), min/max/last, plus position distribution."
+      x-llms-description: "Aggregated period summary with totals (sum for counts;\
+        \ rates pooled over the window, as the app shows them; see aggregation field),\
+        \ min/max/last, plus position distribution."
       x-mcp-tool: get_summary
   /metrics/prompt_summary:
     get:
@@ -17743,8 +17749,9 @@ components:
         \ sentiment_neutral, sentiment_negative, sentiment_very_negative. Citations\
         \ and citation_rate include visible citations and background source references;\
         \ avg_position uses visible citations only. weighted_visibility (ai_visibility_score)\
-        \ is position-weighted points divided by the days with responses, per period\
-        \ and for the summary total."
+        \ is position-weighted points divided by the tracking runs (days, weeks or\
+        \ months at the account's tracking frequency) with responses, per period and\
+        \ for the summary total."
       explode: true
       in: query
       name: metrics
@@ -20519,8 +20526,8 @@ components:
           type: string
         total_weighted_visibility_score:
           description: "The actor's AI Visibility Score across the enabled models,\
-            \ its points there divided by the project's days with answers in them,\
-            \ so actors compare"
+            \ its points there divided by the project's tracking runs with answers\
+            \ in them, so actors compare"
           type: number
         models:
           additionalProperties:
@@ -20534,8 +20541,8 @@ components:
       properties:
         value:
           description: "The actor's AI Visibility Score in the model, its points there\
-            \ divided by the project's days with answers in that model; 0 when it\
-            \ has none"
+            \ divided by the project's tracking runs with answers in that model; 0\
+            \ when it has none"
           type: number
       type: object
     WebAnalyticsSchemaResponse:
@@ -21060,6 +21067,9 @@ components:
           example: en
           type: string
         brand_name:
+          description: "Defaults to name. Up to 100 characters, the name included\
+            \ when it stands in; a longer one is refused with ERR_INVALID_PARAM"
+          maxLength: 100
           type: string
         description:
           type: string
@@ -30255,6 +30265,9 @@ components:
         name:
           type: string
         brand_name:
+          description: "Defaults to name. Up to 100 characters, the name included\
+            \ when it stands in; finalize refuses a longer one with ERR_INVALID_PARAM"
+          maxLength: 100
           type: string
         description:
           type: string
@@ -30318,8 +30331,10 @@ components:
             \ mention detection unless brand_name is empty. Cannot be blank"
           type: string
         brand_name:
-          description: Brand name used to detect mentions. Applies to future runs;
-            it does not rewrite history
+          description: "Brand name used to detect mentions, up to 100 characters (a\
+            \ longer one is refused with ERR_INVALID_PARAM). Applies to future runs;\
+            \ it does not rewrite history"
+          maxLength: 100
           type: string
         description:
           description: What the brand does. Context for Recommendations and GEO Writer
@@ -31702,14 +31717,21 @@ components:
         metric:
           type: string
         total:
-          description: "Count metrics sum the buckets; rate, position and sentiment\
-            \ metrics average them. ai_visibility_score (weighted_visibility) is the\
-            \ window's points divided by its data days (the days with responses under\
-            \ the filters), the number the app shows, whatever the granularity."
+          description: "Count metrics sum the buckets. Rate, position and sentiment\
+            \ metrics pool the whole window, the number the app shows for the same\
+            \ filters, whatever the granularity; visibility is all mentions over all\
+            \ responses x 100, citation_rate all citations over all responses x 100,\
+            \ a sentiment share all verdicts of that kind over all verdicts x 100,\
+            \ an average position the average of every position recorded in the window.\
+            \ They are never a mean of the bucket values. ai_visibility_score (weighted_visibility)\
+            \ is the window's points divided by its tracking runs (the days, weeks\
+            \ or months at the account's tracking frequency with responses under the\
+            \ filters)."
           type: number
         aggregation:
-          description: "How total combines the buckets (average for ai_visibility_score,\
-            \ a per-data-day score)"
+          description: "How total combines the buckets. sum for counts; average for\
+            \ rates, positions and sentiment, pooled over the window, and for ai_visibility_score,\
+            \ a per-run score"
           enum:
           - sum
           - average
@@ -31943,9 +31965,9 @@ components:
       properties:
         total_weighted_visibility_score:
           description: "The brand's AI Visibility Score across the enabled models,\
-            \ its points there divided by the days with answers in any of them (the\
-            \ Overview's number for the same filters; a model that answered while\
-            \ disabled keeps its row but stays out of it); 0 when it has none"
+            \ its points there divided by the tracking runs with answers in any of\
+            \ them (the Overview's number for the same filters; a model that answered\
+            \ while disabled keeps its row but stays out of it); 0 when it has none"
           type: number
         models:
           items:

@@ -6,7 +6,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **Step** | **string** |  | 
 **Name** | **string** |  | [optional] 
-**BrandName** | **string** |  | [optional] 
+**BrandName** | **string** | Defaults to name. Up to 100 characters, the name included when it stands in; finalize refuses a longer one with ERR_INVALID_PARAM | [optional] 
 **Description** | **string** |  | [optional] 
 **Industry** | **List&lt;string&gt;** |  | [optional] 
 **MatchingNames** | **List&lt;string&gt;** | Brand-name variants used to detect mentions (details step). At most 50 names of up to 100 characters each; the step stores the list as sent, and finalize refuses a longer list or name with ERR_INVALID_PARAM (422) | [optional] 
