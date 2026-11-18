@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.97.0
+  version: 1.98.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -7202,6 +7202,739 @@ paths:
       x-llms-description: Sanitized cached page content for a cited URL plus mention
         evidence.
       x-mcp-tool: get_cited_url_content
+  /url_lists:
+    get:
+      description: "A URL list is a named set of rules, each an exact URL (matched\
+        \ over http and https, with or without www), a URL prefix (every page under\
+        \ host/path) or a domain (the site and its subdomains). Its numbers count\
+        \ the AI answers to the prompts tracked in the project: cited_entries is the\
+        \ entries an answer cited in the window and citations the answers citing any\
+        \ entry, each once. Without from/to or range the window is all time. Requires\
+        \ the Growth plan; lower tiers receive ERR_PLAN_REQUIRED."
+      operationId: listUrlLists
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: "Filter by one AI model. Only chatgpt, ai_overview, ai_mode,\
+          \ perplexity, gemini, naver_ai, baidu_ai, naver_ai_tab, qwen, doubao and\
+          \ bing_ai_mode are accepted: any other value, including another model enabled\
+          \ for the API key's user, returns 422 ERR_INVALID_PARAM (invalid model).\
+          \ One of those eleven that the user has not enabled also returns 422 ERR_INVALID_PARAM,\
+          \ with the valid values in the message."
+        explode: true
+        in: query
+        name: model
+        required: false
+        schema:
+          enum:
+          - chatgpt
+          - perplexity
+          - ai_mode
+          - ai_overview
+          - gemini
+          - copilot
+          - amazon_rufus
+          - claude
+          - grok
+          - deepseek
+          - naver_ai
+          - baidu_ai
+          - meta_ai
+          - naver_ai_tab
+          - qwen
+          - doubao
+          - bing_ai_mode
+          type: string
+        style: form
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
+        explode: true
+        in: query
+        name: collection_id
+        required: false
+        schema:
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
+        style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
+        explode: true
+        in: query
+        name: prompt
+        required: false
+        schema:
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UrlListsResponse"
+          description: URL lists
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Growth plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Endpoint requires the Growth plan or above
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: List URL lists
+      tags:
+      - Sources & Citation Intelligence
+      x-llms-description: "The project's URL lists (exact URLs, URL prefixes and domains\
+        \ it follows) with entries, cited entries, citations and last citation in\
+        \ the window."
+      x-mcp-tool: list_url_lists
+      x-plan: growth
+    post:
+      description: "Creates a URL list. Each entry is a string or an object with value,\
+        \ match_type, added_on (YYYY-MM-DD, default today), cost (in the list currency)\
+        \ and channel. Without a match_type, \"acme.com/blog/*\" is a prefix, a value\
+        \ with a path or query an exact URL and a bare host a domain. A list holds\
+        \ at most 1000 entries and a project at most 100 lists; the name is unique\
+        \ per project, case-insensitive. Refusals answer ERR_INVALID_PARAM with a\
+        \ reason token in error.meta.reason. Requires a `read_write` scope API key\
+        \ and the Growth plan."
+      operationId: createUrlList
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UrlListCreateRequest"
+        required: true
+      responses:
+        "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UrlListCreateResponse"
+          description: Created
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Create a URL list
+      tags:
+      - Sources & Citation Intelligence
+      x-llms-description: "Create a URL list, optionally with its first entries; values\
+        \ that do not parse come back in invalid_entries."
+      x-mcp-tool: create_url_list
+      x-plan: growth
+      x-write: true
+  /url_lists/{id}:
+    delete:
+      description: Deletes a URL list and its entries. Citation data is not affected.
+        Requires a `read_write` scope API key and the Growth plan.
+      operationId: deleteUrlList
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UrlListDeleteResponse"
+          description: Deleted
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+      summary: Delete a URL list
+      tags:
+      - Sources & Citation Intelligence
+      x-llms-description: Delete a URL list and its entries; citation data is kept.
+      x-mcp-tool: delete_url_list
+      x-plan: growth
+      x-write: true
+    get:
+      description: "The list, its summary (entries_count, cited_entries, citations,\
+        \ answers in the window, citation_rate, avg_citation_position, median_days_to_first_citation,\
+        \ total_cost, cost_per_cited_entry) and a page of its entries. An entry's\
+        \ status is cited (an answer cited it in the window), lost (cited before the\
+        \ window, not in it) or not_cited. first_cited_at reads the filtered answers\
+        \ up to the window's end. days_to_first_citation is null before the first\
+        \ citation or when the page was cited before it was added. brand_mentioned\
+        \ is set for exact URLs once their page was read, else null. Without from/to\
+        \ or range the window is all time. Requires the Growth plan."
+      operationId: getUrlList
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: Only entries with this status.
+        explode: true
+        in: query
+        name: status
+        required: false
+        schema:
+          enum:
+          - cited
+          - lost
+          - not_cited
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: order
+        required: false
+        schema:
+          default: citations
+          enum:
+          - value
+          - status
+          - added_on
+          - first_cited_at
+          - days_to_cite
+          - citations
+          - avg_position
+          - cost
+          - channel
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: direction
+        required: false
+        schema:
+          default: desc
+          enum:
+          - asc
+          - desc
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Filter by one AI model. Only chatgpt, ai_overview, ai_mode,\
+          \ perplexity, gemini, naver_ai, baidu_ai, naver_ai_tab, qwen, doubao and\
+          \ bing_ai_mode are accepted: any other value, including another model enabled\
+          \ for the API key's user, returns 422 ERR_INVALID_PARAM (invalid model).\
+          \ One of those eleven that the user has not enabled also returns 422 ERR_INVALID_PARAM,\
+          \ with the valid values in the message."
+        explode: true
+        in: query
+        name: model
+        required: false
+        schema:
+          enum:
+          - chatgpt
+          - perplexity
+          - ai_mode
+          - ai_overview
+          - gemini
+          - copilot
+          - amazon_rufus
+          - claude
+          - grok
+          - deepseek
+          - naver_ai
+          - baidu_ai
+          - meta_ai
+          - naver_ai_tab
+          - qwen
+          - doubao
+          - bing_ai_mode
+          type: string
+        style: form
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
+        explode: true
+        in: query
+        name: collection_id
+        required: false
+        schema:
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
+        style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by prompt ID. An id that is not a plain positive number,\
+          \ or that names no prompt of the project, returns 422 ERR_INVALID_PARAM."
+        explode: true
+        in: query
+        name: prompt
+        required: false
+        schema:
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UrlListDetailResponse"
+          description: URL list report
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Growth plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Endpoint requires the Growth plan or above
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Get a URL list report
+      tags:
+      - Sources & Citation Intelligence
+      x-llms-description: "One URL list with its KPIs, status counts and a page of\
+        \ entries, each with its status, citations, first citation, days to cite,\
+        \ models and brand mention."
+      x-mcp-tool: get_url_list
+      x-plan: growth
+    patch:
+      description: "Changes the name, description or currency of a URL list. Entries\
+        \ are added with POST /url_lists/{id}/entries and removed with POST /url_lists/{id}/entries/remove.\
+        \ Requires a `read_write` scope API key and the Growth plan."
+      operationId: updateUrlList
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UrlListUpdateRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UrlListUpdateResponse"
+          description: Updated
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Update a URL list
+      tags:
+      - Sources & Citation Intelligence
+      x-llms-description: Rename a URL list or change its description or currency.
+      x-mcp-tool: update_url_list
+      x-plan: growth
+      x-write: true
+  /url_lists/{id}/entries:
+    post:
+      description: "Adds entries, as POST /url_lists reads them. A rule the list already\
+        \ holds keeps its place and takes only the added_on, cost and channel this\
+        \ request sends for it. Values that do not parse come back in invalid_entries.\
+        \ Requires a `read_write` scope API key and the Growth plan."
+      operationId: addUrlListEntries
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UrlListEntriesAddRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UrlListEntriesAddResponse"
+          description: Entries written
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Add entries to a URL list
+      tags:
+      - Sources & Citation Intelligence
+      x-llms-description: "Add exact URLs, URL prefixes or domains to a URL list;\
+        \ a rule it already holds takes only the details sent."
+      x-mcp-tool: add_url_list_entries
+      x-plan: growth
+      x-write: true
+  /url_lists/{id}/entries/remove:
+    post:
+      description: "Removes entries by id (from GET /url_lists/{id}) or by value as\
+        \ written (\"https://acme.com/a\", \"acme.com/blog/*\", \"acme.com\"). Sending\
+        \ neither answers ERR_INVALID_PARAM. Requires a `read_write` scope API key\
+        \ and the Growth plan."
+      operationId: removeUrlListEntries
+      parameters:
+      - explode: false
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+        style: simple
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UrlListEntriesRemoveRequest"
+        required: true
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UrlListEntriesRemoveResponse"
+          description: Entries removed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INSUFFICIENT_SCOPE
+                  message: insufficient_scope_write_required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: API key lacks write permission
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Remove entries from a URL list
+      tags:
+      - Sources & Citation Intelligence
+      x-llms-description: Remove entries from a URL list by entry id or by value as
+        written; citation data is kept.
+      x-mcp-tool: remove_url_list_entries
+      x-plan: growth
+      x-write: true
   /reports/ai_model_insights/summary:
     get:
       description: "Per-model mentions, citations, brand net sentiment with raw counts,\
@@ -29959,6 +30692,785 @@ components:
           - matching_names
           mentions: 5
           citations: 2
+    UrlList:
+      example:
+        id: 6
+        name: name
+        description: description
+        currency: USD
+        created_at: 2000-01-23T04:56:07.000+00:00
+        updated_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          nullable: true
+          type: string
+        currency:
+          description: The currency of the entry costs.
+          enum:
+          - USD
+          - EUR
+          - GBP
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+      required:
+      - created_at
+      - currency
+      - description
+      - id
+      - name
+      - updated_at
+      type: object
+    UrlListWithCounts:
+      allOf:
+      - $ref: "#/components/schemas/UrlList"
+      - properties:
+          entries_count:
+            type: integer
+        required:
+        - entries_count
+        type: object
+      example:
+        id: 6
+        name: name
+        description: description
+        currency: USD
+        created_at: 2000-01-23T04:56:07.000+00:00
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        entries_count: 1
+    UrlListWithStats:
+      allOf:
+      - $ref: "#/components/schemas/UrlList"
+      - properties:
+          entries_count:
+            type: integer
+          cited_entries:
+            description: Entries an AI answer cited in the window.
+            type: integer
+          citations:
+            description: "AI answers citing any entry in the window, each once."
+            type: integer
+          last_cited_at:
+            description: "The latest answer citing an entry, up to the window's end."
+            format: date-time
+            nullable: true
+            type: string
+        required:
+        - citations
+        - cited_entries
+        - entries_count
+        - last_cited_at
+        type: object
+      example:
+        id: 5
+        name: name
+        description: description
+        currency: USD
+        created_at: 2000-01-23T04:56:07.000+00:00
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        entries_count: 5
+        cited_entries: 2
+        citations: 7
+        last_cited_at: 2000-01-23T04:56:07.000+00:00
+    UrlListFilters:
+      description: The filters the numbers were read with.
+      example:
+        model: model
+        collection_id: collection_id
+        country_code: country_code
+        language_code: language_code
+        prompt: 6
+        brand_kind: brand_kind
+        from: from
+        to: to
+      properties:
+        model:
+          type: string
+        collection_id:
+          type: string
+        country_code:
+          type: string
+        language_code:
+          type: string
+        prompt:
+          type: integer
+        brand_kind:
+          type: string
+        from:
+          type: string
+        to:
+          type: string
+      type: object
+    UrlListsResponse:
+      example:
+        project_id: 0
+        filters:
+          model: model
+          collection_id: collection_id
+          country_code: country_code
+          language_code: language_code
+          prompt: 6
+          brand_kind: brand_kind
+          from: from
+          to: to
+        total: 1
+        data:
+        - id: 5
+          name: name
+          description: description
+          currency: USD
+          created_at: 2000-01-23T04:56:07.000+00:00
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          entries_count: 5
+          cited_entries: 2
+          citations: 7
+          last_cited_at: 2000-01-23T04:56:07.000+00:00
+        - id: 5
+          name: name
+          description: description
+          currency: USD
+          created_at: 2000-01-23T04:56:07.000+00:00
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          entries_count: 5
+          cited_entries: 2
+          citations: 7
+          last_cited_at: 2000-01-23T04:56:07.000+00:00
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        filters:
+          $ref: "#/components/schemas/UrlListFilters"
+        total:
+          type: integer
+        data:
+          items:
+            $ref: "#/components/schemas/UrlListWithStats"
+          type: array
+        request_id:
+          type: string
+      required:
+      - data
+      - filters
+      - project_id
+      - request_id
+      - total
+      type: object
+    UrlListSummary:
+      example:
+        entries_count: 1
+        cited_entries: 5
+        citations: 5
+        answers: 2
+        citation_rate: 7.061401241503109
+        avg_citation_position: 9.301444243932576
+        median_days_to_first_citation: 3
+        total_cost: 2.027123023002322
+        cost_per_cited_entry: 4.145608029883936
+      properties:
+        entries_count:
+          type: integer
+        cited_entries:
+          type: integer
+        citations:
+          description: "AI answers citing any entry in the window, each once."
+          type: integer
+        answers:
+          description: "AI answers in the window, the citation rate's denominator."
+          type: integer
+        citation_rate:
+          description: "citations over answers, in percent."
+          type: number
+        avg_citation_position:
+          nullable: true
+          type: number
+        median_days_to_first_citation:
+          nullable: true
+          type: integer
+        total_cost:
+          nullable: true
+          type: number
+        cost_per_cited_entry:
+          nullable: true
+          type: number
+      required:
+      - answers
+      - avg_citation_position
+      - citation_rate
+      - citations
+      - cited_entries
+      - cost_per_cited_entry
+      - entries_count
+      - median_days_to_first_citation
+      - total_cost
+      type: object
+    UrlListEntry:
+      example:
+        id: 1
+        value: value
+        match_type: url
+        host: host
+        status: cited
+        added_on: 2000-01-23
+        cost: 4.965218492984954
+        channel: channel
+        citations: 5
+        cited_pages: 9
+        first_cited_at: 2000-01-23T04:56:07.000+00:00
+        last_cited_at: 2000-01-23T04:56:07.000+00:00
+        days_to_first_citation: 9
+        avg_citation_position: 6.683562403749608
+        models:
+        - models
+        - models
+        brand_mentioned: true
+      properties:
+        id:
+          type: integer
+        value:
+          description: "The exact URL, \"host/path\" of a prefix, or the host of a\
+            \ domain rule."
+          type: string
+        match_type:
+          enum:
+          - url
+          - prefix
+          - domain
+          type: string
+        host:
+          type: string
+        status:
+          enum:
+          - cited
+          - lost
+          - not_cited
+          type: string
+        added_on:
+          format: date
+          type: string
+        cost:
+          nullable: true
+          type: number
+        channel:
+          nullable: true
+          type: string
+        citations:
+          type: integer
+        cited_pages:
+          type: integer
+        first_cited_at:
+          format: date-time
+          nullable: true
+          type: string
+        last_cited_at:
+          format: date-time
+          nullable: true
+          type: string
+        days_to_first_citation:
+          nullable: true
+          type: integer
+        avg_citation_position:
+          nullable: true
+          type: number
+        models:
+          items:
+            type: string
+          type: array
+        brand_mentioned:
+          nullable: true
+          type: boolean
+      required:
+      - added_on
+      - avg_citation_position
+      - brand_mentioned
+      - channel
+      - citations
+      - cited_pages
+      - cost
+      - days_to_first_citation
+      - first_cited_at
+      - host
+      - id
+      - last_cited_at
+      - match_type
+      - models
+      - status
+      - value
+      type: object
+    UrlListStatusCounts:
+      example:
+        cited: 7
+        lost: 1
+        not_cited: 1
+      properties:
+        cited:
+          type: integer
+        lost:
+          type: integer
+        not_cited:
+          type: integer
+      required:
+      - cited
+      - lost
+      - not_cited
+      type: object
+    UrlListDetailResponse:
+      example:
+        project_id: 0
+        url_list:
+          id: 6
+          name: name
+          description: description
+          currency: USD
+          created_at: 2000-01-23T04:56:07.000+00:00
+          updated_at: 2000-01-23T04:56:07.000+00:00
+        filters:
+          model: model
+          collection_id: collection_id
+          country_code: country_code
+          language_code: language_code
+          prompt: 6
+          brand_kind: brand_kind
+          from: from
+          to: to
+        summary:
+          entries_count: 1
+          cited_entries: 5
+          citations: 5
+          answers: 2
+          citation_rate: 7.061401241503109
+          avg_citation_position: 9.301444243932576
+          median_days_to_first_citation: 3
+          total_cost: 2.027123023002322
+          cost_per_cited_entry: 4.145608029883936
+        status_counts:
+          cited: 7
+          lost: 1
+          not_cited: 1
+        page: 1
+        per_page: 6
+        total: 7
+        entries:
+        - id: 1
+          value: value
+          match_type: url
+          host: host
+          status: cited
+          added_on: 2000-01-23
+          cost: 4.965218492984954
+          channel: channel
+          citations: 5
+          cited_pages: 9
+          first_cited_at: 2000-01-23T04:56:07.000+00:00
+          last_cited_at: 2000-01-23T04:56:07.000+00:00
+          days_to_first_citation: 9
+          avg_citation_position: 6.683562403749608
+          models:
+          - models
+          - models
+          brand_mentioned: true
+        - id: 1
+          value: value
+          match_type: url
+          host: host
+          status: cited
+          added_on: 2000-01-23
+          cost: 4.965218492984954
+          channel: channel
+          citations: 5
+          cited_pages: 9
+          first_cited_at: 2000-01-23T04:56:07.000+00:00
+          last_cited_at: 2000-01-23T04:56:07.000+00:00
+          days_to_first_citation: 9
+          avg_citation_position: 6.683562403749608
+          models:
+          - models
+          - models
+          brand_mentioned: true
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        url_list:
+          $ref: "#/components/schemas/UrlList"
+        filters:
+          $ref: "#/components/schemas/UrlListFilters"
+        summary:
+          $ref: "#/components/schemas/UrlListSummary"
+        status_counts:
+          $ref: "#/components/schemas/UrlListStatusCounts"
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          type: integer
+        entries:
+          items:
+            $ref: "#/components/schemas/UrlListEntry"
+          type: array
+        request_id:
+          type: string
+      required:
+      - entries
+      - filters
+      - page
+      - per_page
+      - project_id
+      - request_id
+      - status_counts
+      - summary
+      - total
+      - url_list
+      type: object
+    UrlListEntryInput:
+      description: An entry. A plain string is read as its value.
+      example:
+        value: value
+        match_type: url
+        added_on: 2000-01-23
+        cost: 6.027456183070403
+        channel: channel
+      properties:
+        value:
+          description: "An exact URL, a \"host/path/*\" prefix or a domain."
+          type: string
+        match_type:
+          enum:
+          - url
+          - prefix
+          - domain
+          type: string
+        added_on:
+          description: When the URL was published or bought. Default today.
+          format: date
+          type: string
+        cost:
+          description: "What the URL cost, in the list currency."
+          type: number
+        channel:
+          description: "Where it came from, such as a marketplace or PR agency."
+          type: string
+      required:
+      - value
+      type: object
+    UrlListInvalidEntry:
+      example:
+        value: value
+        reason: blank
+        message: message
+      properties:
+        value:
+          type: string
+        reason:
+          enum:
+          - blank
+          - too_long
+          - invalid_url
+          - invalid_match_type
+          - invalid_date
+          - invalid_cost
+          - channel_too_long
+          type: string
+        message:
+          type: string
+      required:
+      - message
+      - reason
+      - value
+      type: object
+    UrlListCreateRequest:
+      example:
+        project_id: 0
+        name: name
+        description: description
+        currency: USD
+        entries:
+        - value: value
+          match_type: url
+          added_on: 2000-01-23
+          cost: 6.027456183070403
+          channel: channel
+        - value: value
+          match_type: url
+          added_on: 2000-01-23
+          cost: 6.027456183070403
+          channel: channel
+        match_type: url
+      properties:
+        project_id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        currency:
+          default: USD
+          enum:
+          - USD
+          - EUR
+          - GBP
+          type: string
+        entries:
+          items:
+            $ref: "#/components/schemas/UrlListEntryInput"
+          type: array
+        match_type:
+          description: Read every entry without its own match_type as this type. Default
+            detects it from each value.
+          enum:
+          - url
+          - prefix
+          - domain
+          type: string
+      required:
+      - name
+      - project_id
+      type: object
+    UrlListCreateResponse:
+      example:
+        project_id: 0
+        url_list:
+          id: 6
+          name: name
+          description: description
+          currency: USD
+          created_at: 2000-01-23T04:56:07.000+00:00
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          entries_count: 1
+        entries_added: 5
+        invalid_entries:
+        - value: value
+          reason: blank
+          message: message
+        - value: value
+          reason: blank
+          message: message
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        url_list:
+          $ref: "#/components/schemas/UrlListWithCounts"
+        entries_added:
+          type: integer
+        invalid_entries:
+          items:
+            $ref: "#/components/schemas/UrlListInvalidEntry"
+          type: array
+        request_id:
+          type: string
+      required:
+      - entries_added
+      - invalid_entries
+      - project_id
+      - request_id
+      - url_list
+      type: object
+    UrlListUpdateRequest:
+      example:
+        project_id: 0
+        name: name
+        description: description
+        currency: USD
+      properties:
+        project_id:
+          type: integer
+        name:
+          type: string
+        description:
+          type: string
+        currency:
+          enum:
+          - USD
+          - EUR
+          - GBP
+          type: string
+      required:
+      - project_id
+      type: object
+    UrlListUpdateResponse:
+      example:
+        project_id: 0
+        url_list:
+          id: 6
+          name: name
+          description: description
+          currency: USD
+          created_at: 2000-01-23T04:56:07.000+00:00
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          entries_count: 1
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        url_list:
+          $ref: "#/components/schemas/UrlListWithCounts"
+        request_id:
+          type: string
+      required:
+      - project_id
+      - request_id
+      - url_list
+      type: object
+    UrlListDeleteResponse:
+      example:
+        project_id: 0
+        deleted: true
+        id: 6
+        name: name
+        entries_removed: 1
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        deleted:
+          type: boolean
+        id:
+          type: integer
+        name:
+          type: string
+        entries_removed:
+          type: integer
+        request_id:
+          type: string
+      required:
+      - deleted
+      - entries_removed
+      - id
+      - name
+      - project_id
+      - request_id
+      type: object
+    UrlListEntriesAddRequest:
+      example:
+        project_id: 0
+        entries:
+        - value: value
+          match_type: url
+          added_on: 2000-01-23
+          cost: 6.027456183070403
+          channel: channel
+        - value: value
+          match_type: url
+          added_on: 2000-01-23
+          cost: 6.027456183070403
+          channel: channel
+        match_type: url
+      properties:
+        project_id:
+          type: integer
+        entries:
+          items:
+            $ref: "#/components/schemas/UrlListEntryInput"
+          type: array
+        match_type:
+          enum:
+          - url
+          - prefix
+          - domain
+          type: string
+      required:
+      - entries
+      - project_id
+      type: object
+    UrlListEntriesAddResponse:
+      example:
+        project_id: 0
+        url_list_id: 6
+        added: 1
+        updated: 5
+        invalid_entries:
+        - value: value
+          reason: blank
+          message: message
+        - value: value
+          reason: blank
+          message: message
+        entries_count: 5
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        url_list_id:
+          type: integer
+        added:
+          type: integer
+        updated:
+          type: integer
+        invalid_entries:
+          items:
+            $ref: "#/components/schemas/UrlListInvalidEntry"
+          type: array
+        entries_count:
+          type: integer
+        request_id:
+          type: string
+      required:
+      - added
+      - entries_count
+      - invalid_entries
+      - project_id
+      - request_id
+      - updated
+      - url_list_id
+      type: object
+    UrlListEntriesRemoveRequest:
+      example:
+        project_id: 0
+        entry_ids:
+        - 6
+        - 6
+        values:
+        - values
+        - values
+      properties:
+        project_id:
+          type: integer
+        entry_ids:
+          items:
+            type: integer
+          type: array
+        values:
+          items:
+            type: string
+          type: array
+      required:
+      - project_id
+      type: object
+    UrlListEntriesRemoveResponse:
+      example:
+        project_id: 0
+        url_list_id: 6
+        removed: 1
+        entries_count: 5
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        url_list_id:
+          type: integer
+        removed:
+          type: integer
+        entries_count:
+          type: integer
+        request_id:
+          type: string
+      required:
+      - entries_count
+      - project_id
+      - removed
+      - request_id
+      - url_list_id
+      type: object
     ApiError:
       example:
         error:
