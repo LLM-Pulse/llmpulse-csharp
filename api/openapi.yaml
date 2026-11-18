@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.98.0
+  version: 1.99.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -8354,6 +8354,186 @@ paths:
       x-llms-description: Google AI Overview result-availability data with by-prompt
         result-rate table.
       x-mcp-tool: get_ai_overview_results
+  /reports/ai_model_insights/declined_answers:
+    get:
+      description: "The Declined answers tab of AI Model Insights. A model declines\
+        \ a prompt for its own safety filters (safety_filter) or because it refuses\
+        \ the topic itself, such as tobacco, gambling or alcohol (topic_refusal);\
+        \ today only Gemini declines. A declined answer counts as no answer and never\
+        \ lowers visibility. The chart has one point per tracking period at the account's\
+        \ cadence that holds an answer of the model, and the window starts at the\
+        \ tracking period holding its first day."
+      operationId: getDeclinedAnswers
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: "Number of days to look back (alternative to from/to, which win\
+          \ when both are given). A value that is not a plain positive number returns\
+          \ 422 ERR_INVALID_PARAM, even beside from/to."
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: End of the window. A date-only value such as 2026-09-01 covers
+          that whole day. Pass a full timestamp to end the window earlier.
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date-time
+          type: string
+        style: form
+      - description: "The model whose declines to read, whether or not it is enabled\
+          \ for the API key's user. Default: gemini. Any other model returns 422 ERR_INVALID_PARAM\
+          \ (invalid model)."
+        explode: true
+        in: query
+        name: model
+        required: false
+        schema:
+          enum:
+          - gemini
+          type: string
+        style: form
+      - description: "One collection/tag ID or a comma-separated list of IDs. A query\
+          \ value is always a string on the wire, so it is typed as one: the previous\
+          \ integer-or-string union made generators emit a wrapper type they could\
+          \ not serialize."
+        example: "12,34"
+        explode: true
+        in: query
+        name: collection_id
+        required: false
+        schema:
+          pattern: "^\\d+(,\\d+)*$"
+          type: string
+        style: form
+      - description: "One ISO country code or a comma-separated list (e.g. US,GB,DE)"
+        explode: true
+        in: query
+        name: country_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One ISO language code or a comma-separated list (e.g. en,es,de)"
+        explode: true
+        in: query
+        name: language_code
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "One prompt type or a comma-separated list: informational, navigational,\
+          \ commercial, transactional"
+        explode: true
+        in: query
+        name: prompt_type
+        required: false
+        schema:
+          type: string
+        style: form
+      - description: "Filter by brand kind: brand (own brand/products), brand_other\
+          \ (competitors/other brands), non_brand (generic, no brand named). For fair\
+          \ 1:1 brand-vs-competitor comparisons (visibility, share of voice), use\
+          \ non_brand: brand-focused prompts skew results toward the brand they name.\
+          \ The in-app Overview page applies non_brand by default."
+        explode: true
+        in: query
+        name: brand_kind
+        required: false
+        schema:
+          enum:
+          - brand
+          - brand_other
+          - non_brand
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiModelDeclinedAnswersResponse"
+          description: "Decline counts and rates for the window, per tracking period\
+            \ and per prompt"
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Declined answers (decline rate)
+      tags:
+      - AI Model Insights
+      x-llms-description: "How often an AI model declined to answer (today only Gemini):\
+        \ decline rate per tracking period by reason, plus a by-prompt table sorted\
+        \ by decline rate."
+      x-mcp-tool: get_declined_answers
   /metrics/agent_traffic:
     get:
       description: "Aggregated AI bot traffic hitting the project's origin server\
@@ -21278,6 +21458,148 @@ components:
             \ when it has none"
           type: number
       type: object
+    AiModelDeclinedAnswersResponse:
+      description: "How often one AI model declined to answer the project's prompts.\
+        \ An answer is a finished run of the model, a declined one included; a declined\
+        \ answer counts as no answer and never enters the metrics. The window starts\
+        \ at the tracking period holding its first day, and summary, chart and by_prompt\
+        \ count that same window."
+      example:
+        project_id: 0
+        from: 2000-01-23T04:56:07.000+00:00
+        to: 2000-01-23T04:56:07.000+00:00
+        model: gemini
+        cadence: cadence
+        filters:
+          model: model
+          country_code: country_code
+          language_code: language_code
+          collection_id: collection_id
+          prompt_type: prompt_type
+          brand_kind: brand_kind
+        summary:
+          answers: 6
+          declined: 1
+          decline_rate: 5.962133916683182
+          safety_filter: 5
+          safety_filter_rate: 2.3021358869347655
+          topic_refusal: 7
+          topic_refusal_rate: 9.301444243932576
+          last_declined_at: 2000-01-23T04:56:07.000+00:00
+        chart:
+        - date: 2000-01-23
+          answers: 3
+          declined: 2
+          decline_rate: 4.145608029883936
+          safety_filter: 7
+          safety_filter_rate: 1.2315135367772556
+          topic_refusal: 1
+          topic_refusal_rate: 1.4894159098541704
+        - date: 2000-01-23
+          answers: 3
+          declined: 2
+          decline_rate: 4.145608029883936
+          safety_filter: 7
+          safety_filter_rate: 1.2315135367772556
+          topic_refusal: 1
+          topic_refusal_rate: 1.4894159098541704
+        by_prompt:
+          page: 6
+          per_page: 7
+          total: 1
+          data:
+          - prompt_id: 4
+            prompt_text: prompt_text
+            last_declined_at: 2000-01-23T04:56:07.000+00:00
+            answers: 5
+            declined: 9
+            decline_rate: 9.369310271410669
+            safety_filter: 6
+            safety_filter_rate: 8.762042012749001
+            topic_refusal: 9
+            topic_refusal_rate: 6.438423552598547
+          - prompt_id: 4
+            prompt_text: prompt_text
+            last_declined_at: 2000-01-23T04:56:07.000+00:00
+            answers: 5
+            declined: 9
+            decline_rate: 9.369310271410669
+            safety_filter: 6
+            safety_filter_rate: 8.762042012749001
+            topic_refusal: 9
+            topic_refusal_rate: 6.438423552598547
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        from:
+          description: Start of the tracking period holding the first day asked for
+          format: date-time
+          type: string
+        to:
+          format: date-time
+          type: string
+        model:
+          description: The model the counts are for
+          enum:
+          - gemini
+          type: string
+        cadence:
+          description: "The account's current tracking cadence: daily, weekly or monthly.\
+            \ Chart periods before a switch from weekly to daily stay weekly."
+          type: string
+        filters:
+          $ref: "#/components/schemas/AiModelDeclinedAnswersResponse_filters"
+        summary:
+          $ref: "#/components/schemas/AiModelDeclinedAnswersResponse_summary"
+        chart:
+          description: "One point per tracking period holding an answer, oldest first.\
+            \ A period without answers has no point; a period with answers and no\
+            \ declines is a real 0."
+          items:
+            $ref: "#/components/schemas/AiModelDeclinedAnswersResponse_chart_inner"
+          type: array
+        by_prompt:
+          $ref: "#/components/schemas/AiModelDeclinedAnswersResponse_by_prompt"
+        request_id:
+          type: string
+      required:
+      - by_prompt
+      - cadence
+      - chart
+      - from
+      - model
+      - project_id
+      - summary
+      - to
+      type: object
+    AiModelDeclineCounts:
+      description: "Answers and declined answers, by reason. A rate is a percentage\
+        \ of the answers, null with no answer behind it."
+      properties:
+        answers:
+          description: "Finished runs of the model, declined ones included"
+          type: integer
+        declined:
+          description: Answers the model declined
+          type: integer
+        decline_rate:
+          nullable: true
+          type: number
+        safety_filter:
+          description: Answers declined by the model's own safety filters
+          type: integer
+        safety_filter_rate:
+          nullable: true
+          type: number
+        topic_refusal:
+          description: "Answers that declined the topic itself, such as tobacco, gambling\
+            \ or alcohol"
+          type: integer
+        topic_refusal_rate:
+          nullable: true
+          type: number
+      type: object
     WebAnalyticsSchemaResponse:
       example:
         project_id: 0
@@ -33701,6 +34023,143 @@ components:
           $ref: "#/components/schemas/AiModelInsightsSummaryResponse_summary_sentiment_market_share"
         weighted_visibility_market_share:
           $ref: "#/components/schemas/AiModelInsightsSummaryResponse_summary_weighted_visibility_market_share"
+      type: object
+    AiModelDeclinedAnswersResponse_filters:
+      description: "The prompt filters the counts were computed with, as the server\
+        \ resolved them. A filter that was not given is left out; model is always\
+        \ there."
+      example:
+        model: model
+        country_code: country_code
+        language_code: language_code
+        collection_id: collection_id
+        prompt_type: prompt_type
+        brand_kind: brand_kind
+      properties:
+        model:
+          type: string
+        country_code:
+          description: Comma-separated country codes
+          type: string
+        language_code:
+          description: Comma-separated language codes
+          type: string
+        collection_id:
+          description: Comma-separated collection ids
+          type: string
+        prompt_type:
+          description: Comma-separated prompt types
+          type: string
+        brand_kind:
+          type: string
+      type: object
+    AiModelDeclinedAnswersResponse_summary:
+      allOf:
+      - $ref: "#/components/schemas/AiModelDeclineCounts"
+      - properties:
+          last_declined_at:
+            description: When the latest declined answer of the window was created;
+              null when none was declined
+            format: date-time
+            nullable: true
+            type: string
+        type: object
+      example:
+        answers: 6
+        declined: 1
+        decline_rate: 5.962133916683182
+        safety_filter: 5
+        safety_filter_rate: 2.3021358869347655
+        topic_refusal: 7
+        topic_refusal_rate: 9.301444243932576
+        last_declined_at: 2000-01-23T04:56:07.000+00:00
+    AiModelDeclinedAnswersResponse_chart_inner:
+      allOf:
+      - properties:
+          date:
+            description: First day of the tracking period
+            format: date
+            type: string
+        required:
+        - date
+        type: object
+      - $ref: "#/components/schemas/AiModelDeclineCounts"
+      example:
+        date: 2000-01-23
+        answers: 3
+        declined: 2
+        decline_rate: 4.145608029883936
+        safety_filter: 7
+        safety_filter_rate: 1.2315135367772556
+        topic_refusal: 1
+        topic_refusal_rate: 1.4894159098541704
+    AiModelDeclinedAnswersResponse_by_prompt_data_inner:
+      allOf:
+      - properties:
+          prompt_id:
+            type: integer
+          prompt_text:
+            nullable: true
+            type: string
+          last_declined_at:
+            description: When the prompt's latest declined answer of the window was
+              created; null when none was declined
+            format: date-time
+            nullable: true
+            type: string
+        type: object
+      - $ref: "#/components/schemas/AiModelDeclineCounts"
+      example:
+        prompt_id: 4
+        prompt_text: prompt_text
+        last_declined_at: 2000-01-23T04:56:07.000+00:00
+        answers: 5
+        declined: 9
+        decline_rate: 9.369310271410669
+        safety_filter: 6
+        safety_filter_rate: 8.762042012749001
+        topic_refusal: 9
+        topic_refusal_rate: 6.438423552598547
+    AiModelDeclinedAnswersResponse_by_prompt:
+      description: "One row per prompt with an answer in the window, highest decline\
+        \ rate first, then more declines, more answers and the prompt id"
+      example:
+        page: 6
+        per_page: 7
+        total: 1
+        data:
+        - prompt_id: 4
+          prompt_text: prompt_text
+          last_declined_at: 2000-01-23T04:56:07.000+00:00
+          answers: 5
+          declined: 9
+          decline_rate: 9.369310271410669
+          safety_filter: 6
+          safety_filter_rate: 8.762042012749001
+          topic_refusal: 9
+          topic_refusal_rate: 6.438423552598547
+        - prompt_id: 4
+          prompt_text: prompt_text
+          last_declined_at: 2000-01-23T04:56:07.000+00:00
+          answers: 5
+          declined: 9
+          decline_rate: 9.369310271410669
+          safety_filter: 6
+          safety_filter_rate: 8.762042012749001
+          topic_refusal: 9
+          topic_refusal_rate: 6.438423552598547
+      properties:
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          description: Prompts with an answer in the window
+          type: integer
+        data:
+          items:
+            $ref: "#/components/schemas/AiModelDeclinedAnswersResponse_by_prompt_data_inner"
+          type: array
       type: object
     WebAnalyticsQueryResponse_columns_inner:
       example:

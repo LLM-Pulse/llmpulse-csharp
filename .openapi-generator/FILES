@@ -40,6 +40,13 @@ docs/models/AgentBot.md
 docs/models/AgentBotsResponse.md
 docs/models/AgentTrafficResponse.md
 docs/models/AiModelCitationsRow.md
+docs/models/AiModelDeclineCounts.md
+docs/models/AiModelDeclinedAnswersResponse.md
+docs/models/AiModelDeclinedAnswersResponseByPrompt.md
+docs/models/AiModelDeclinedAnswersResponseByPromptDataInner.md
+docs/models/AiModelDeclinedAnswersResponseChartInner.md
+docs/models/AiModelDeclinedAnswersResponseFilters.md
+docs/models/AiModelDeclinedAnswersResponseSummary.md
 docs/models/AiModelInsightsFiltersEcho.md
 docs/models/AiModelInsightsModel.md
 docs/models/AiModelInsightsSummaryResponse.md
@@ -440,6 +447,13 @@ src/LLMPulse.SDK/Model/AgentBot.cs
 src/LLMPulse.SDK/Model/AgentBotsResponse.cs
 src/LLMPulse.SDK/Model/AgentTrafficResponse.cs
 src/LLMPulse.SDK/Model/AiModelCitationsRow.cs
+src/LLMPulse.SDK/Model/AiModelDeclineCounts.cs
+src/LLMPulse.SDK/Model/AiModelDeclinedAnswersResponse.cs
+src/LLMPulse.SDK/Model/AiModelDeclinedAnswersResponseByPrompt.cs
+src/LLMPulse.SDK/Model/AiModelDeclinedAnswersResponseByPromptDataInner.cs
+src/LLMPulse.SDK/Model/AiModelDeclinedAnswersResponseChartInner.cs
+src/LLMPulse.SDK/Model/AiModelDeclinedAnswersResponseFilters.cs
+src/LLMPulse.SDK/Model/AiModelDeclinedAnswersResponseSummary.cs
 src/LLMPulse.SDK/Model/AiModelInsightsFiltersEcho.cs
 src/LLMPulse.SDK/Model/AiModelInsightsModel.cs
 src/LLMPulse.SDK/Model/AiModelInsightsSummaryResponse.cs
