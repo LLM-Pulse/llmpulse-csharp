@@ -4,6 +4,7 @@
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**PlanRequiredFields** | **List&lt;string&gt;** | The row fields left out because they need a higher plan (the sentiment fields below Growth); empty when none is | 
 **ProjectId** | **int** |  | [optional] 
 **From** | **DateTime** |  | [optional] 
 **To** | **DateTime** |  | [optional] 

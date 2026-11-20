@@ -5,6 +5,7 @@ One entry per AI model the account has enabled or that answered in the window, i
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
+**PlanRequiredFields** | **List&lt;string&gt;** | The summary sections left out because they need a higher plan (brand_net_sentiment_by_model and sentiment_market_share below Growth); empty when none is | 
 **ProjectId** | **int** |  | [optional] 
 **From** | **DateTime** |  | [optional] 
 **To** | **DateTime** |  | [optional] 

@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.99.0
+  version: 1.100.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -871,7 +871,9 @@ paths:
           \ avg_position uses visible citations only. weighted_visibility (ai_visibility_score)\
           \ is position-weighted points divided by the tracking runs (days, weeks\
           \ or months at the account's tracking frequency) with responses, per period\
-          \ and for the summary total."
+          \ and for the summary total. The sentiment metrics (net_sentiment and the\
+          \ five sentiment_* shares) need the Growth plan or above: below it a request\
+          \ that names one answers 403 ERR_PLAN_REQUIRED."
         explode: true
         in: query
         name: metrics
@@ -1064,6 +1066,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Growth plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Endpoint requires the Growth plan or above
         "404":
           content:
             application/json:
@@ -1126,7 +1139,9 @@ paths:
           \ avg_position uses visible citations only. weighted_visibility (ai_visibility_score)\
           \ is position-weighted points divided by the tracking runs (days, weeks\
           \ or months at the account's tracking frequency) with responses, per period\
-          \ and for the summary total."
+          \ and for the summary total. The sentiment metrics (net_sentiment and the\
+          \ five sentiment_* shares) need the Growth plan or above: below it a request\
+          \ that names one answers 403 ERR_PLAN_REQUIRED."
         explode: true
         in: query
         name: metrics
@@ -1319,6 +1334,17 @@ paths:
               schema:
                 $ref: "#/components/schemas/ApiError"
           description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Growth plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Endpoint requires the Growth plan or above
         "404":
           content:
             application/json:
@@ -1343,11 +1369,13 @@ paths:
         \ citations, mention_rate, citation_rate, avg_mention_position and avg_position\
         \ per prompt, plus the brand sentiment of its responses (sentiment_responses,\
         \ the five sentiment percentages and net_sentiment, computed like the sentiment\
-        \ timeseries) and the prompt's classification (country_code, language_code,\
-        \ prompt_type, brand_kind and tags, as in /dimensions/prompts). Citations\
-        \ and citation rate include visible citations and background source references;\
-        \ avg_position uses visible citations only. Pass `breakdown=model` to split\
-        \ each prompt by model."
+        \ timeseries; they need the Growth plan or above, and below it they are left\
+        \ out of every row and listed in `plan_required_fields`, which is always present\
+        \ and empty when nothing is left out) and the prompt's classification (country_code,\
+        \ language_code, prompt_type, brand_kind and tags, as in /dimensions/prompts).\
+        \ Citations and citation rate include visible citations and background source\
+        \ references; avg_position uses visible citations only. Pass `breakdown=model`\
+        \ to split each prompt by model."
       operationId: getPromptSummary
       parameters:
       - description: Project ID
@@ -6674,7 +6702,9 @@ paths:
           - background
           type: string
         style: form
-      - explode: true
+      - description: "Keeps the citations of answers with a negative brand sentiment.\
+          \ Needs the Growth plan or above: below it the filter answers 403 ERR_PLAN_REQUIRED."
+        explode: true
         in: query
         name: sentiment
         required: false
@@ -6699,6 +6729,17 @@ paths:
       responses:
         "200":
           description: Grouped citation intelligence
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Growth plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Endpoint requires the Growth plan or above
         "422":
           content:
             application/json:
@@ -7034,7 +7075,9 @@ paths:
           - background
           type: string
         style: form
-      - explode: true
+      - description: "Keeps the citations of answers with a negative brand sentiment.\
+          \ Needs the Growth plan or above: below it the filter answers 403 ERR_PLAN_REQUIRED."
+        explode: true
         in: query
         name: sentiment
         required: false
@@ -7068,6 +7111,17 @@ paths:
       responses:
         "200":
           description: URL-level intelligence
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Growth plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Endpoint requires the Growth plan or above
         "404":
           content:
             application/json:
@@ -7126,9 +7180,31 @@ paths:
           minimum: 1
           type: integer
         style: form
+      - description: "Keeps the occurrences in answers with a negative brand sentiment.\
+          \ Needs the Growth plan or above: below it the filter answers 403 ERR_PLAN_REQUIRED."
+        explode: true
+        in: query
+        name: sentiment
+        required: false
+        schema:
+          enum:
+          - negative
+          type: string
+        style: form
       responses:
         "200":
           description: Paginated occurrences
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Growth plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Endpoint requires the Growth plan or above
         "404":
           content:
             application/json:
@@ -7943,7 +8019,10 @@ paths:
         \ bare (scheme-less) domains. Rows cover the AI models the account has enabled\
         \ or that answered in the window. A share, net sentiment or market share value\
         \ with nothing behind it is null; counts, totals and weighted visibility scores\
-        \ stay 0."
+        \ stay 0. The sentiment sections (brand_net_sentiment_by_model and sentiment_market_share)\
+        \ need the Growth plan or above: below it they are left out and listed in\
+        \ `plan_required_fields`, which is always present and empty when nothing is\
+        \ left out."
       operationId: getAiModelInsightsSummary
       parameters:
       - description: Project ID
@@ -17786,9 +17865,10 @@ paths:
     get:
       description: "Reads back the AI-referred orders a store app pushed for a project:\
         \ totals, one row per AI assistant and a daily series of the days with orders.\
-        \ Revenue values are decimal strings in currency. Team members need read access\
-        \ to AI Traffic. Not available to accounts with a white-label portal or an\
-        \ embed (ERR_INTEGRATION_UNAVAILABLE)."
+        \ Revenue values are decimal strings in currency. Needs the Growth plan or\
+        \ above, like AI Traffic, while the store app keeps pushing orders on every\
+        \ plan. Team members need read access to AI Traffic. Not available to accounts\
+        \ with a white-label portal or an embed (ERR_INTEGRATION_UNAVAILABLE)."
       operationId: listAiOrders
       parameters:
       - description: Project ID
@@ -17839,18 +17919,11 @@ paths:
         "403":
           content:
             application/json:
-              example:
-                error:
-                  code: ERR_INTEGRATION_UNAVAILABLE
-                  message: Store integrations are not available for white-label or
-                    embed accounts
-                request_id: abc-123
               schema:
                 $ref: "#/components/schemas/ApiError"
-          description: "The account has a white-label portal or an embed, so store\
-            \ integrations are not available (ERR_INTEGRATION_UNAVAILABLE). Writes\
-            \ with a read-only key answer ERR_INSUFFICIENT_SCOPE, and a team member\
-            \ without the permission ERR_INSUFFICIENT_PERMISSION, with the same status"
+          description: "A plan below Growth answers ERR_PLAN_REQUIRED, and an account\
+            \ with a white-label portal or an embed ERR_INTEGRATION_UNAVAILABLE, with\
+            \ the same status"
         "404":
           content:
             application/json:
@@ -17879,7 +17952,7 @@ paths:
       x-llms-description: "AI-referred store orders and revenue for a project: totals,\
         \ per AI assistant and a daily series (default last 90 days)."
       x-mcp-tool: get_ai_orders
-      x-mcp-plan: growth
+      x-plan: growth
     put:
       description: "Replaces the daily AI-referred orders and revenue of the from..to\
         \ window. Send the raw referring host or utm_source of each order's first\
@@ -18664,7 +18737,9 @@ components:
         \ avg_position uses visible citations only. weighted_visibility (ai_visibility_score)\
         \ is position-weighted points divided by the tracking runs (days, weeks or\
         \ months at the account's tracking frequency) with responses, per period and\
-        \ for the summary total."
+        \ for the summary total. The sentiment metrics (net_sentiment and the five\
+        \ sentiment_* shares) need the Growth plan or above: below it a request that\
+        \ names one answers 403 ERR_PLAN_REQUIRED."
       explode: true
       in: query
       name: metrics
@@ -20426,7 +20501,8 @@ components:
         sentiment_responses:
           description: "Responses in the window with a sentiment verdict for the brand,\
             \ the base of the sentiment percentages (deduplicated like the sentiment\
-            \ timeseries)"
+            \ timeseries). Needs the Growth plan or above, like every sentiment field\
+            \ of the row; below it they are left out and named in plan_required_fields"
           type: integer
         sentiment_very_positive:
           description: Percentage (0-100) of sentiment_responses whose brand verdict
@@ -20550,6 +20626,9 @@ components:
           sentiment_negative: 4.965218492984954
           sentiment_very_negative: 5.025004791520295
           net_sentiment: 9.965781217890562
+        plan_required_fields:
+        - plan_required_fields
+        - plan_required_fields
         request_id: request_id
       properties:
         project_id:
@@ -20579,8 +20658,16 @@ components:
           items:
             $ref: "#/components/schemas/PromptSummaryRow"
           type: array
+        plan_required_fields:
+          description: The row fields left out because they need a higher plan (the
+            sentiment fields below Growth); empty when none is
+          items:
+            type: string
+          type: array
         request_id:
           type: string
+      required:
+      - plan_required_fields
       type: object
     SovResponse:
       example:
@@ -21069,6 +21156,9 @@ components:
               models:
                 key:
                   value: 6.704019297950036
+        plan_required_fields:
+        - plan_required_fields
+        - plan_required_fields
         request_id: request_id
       properties:
         project_id:
@@ -21089,8 +21179,17 @@ components:
           type: array
         summary:
           $ref: "#/components/schemas/AiModelInsightsSummaryResponse_summary"
+        plan_required_fields:
+          description: The summary sections left out because they need a higher plan
+            (brand_net_sentiment_by_model and sentiment_market_share below Growth);
+            empty when none is
+          items:
+            type: string
+          type: array
         request_id:
           type: string
+      required:
+      - plan_required_fields
       type: object
     AiModelInsightsFiltersEcho:
       description: "The filters the summary was computed with, as the server resolved\
@@ -33768,6 +33867,8 @@ components:
           type: array
       type: object
     AiModelInsightsSummaryResponse_summary_brand_net_sentiment_by_model:
+      description: Needs the Growth plan or above; left out below it and named in
+        plan_required_fields
       example:
         total_sentiments: 3
         models:
@@ -33809,6 +33910,8 @@ components:
           type: array
       type: object
     AiModelInsightsSummaryResponse_summary_sentiment_market_share:
+      description: Needs the Growth plan or above; left out below it and named in
+        plan_required_fields
       example:
         actors:
         - type: project

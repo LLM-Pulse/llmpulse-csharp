@@ -197,7 +197,7 @@ Unavailable page content keeps the cited URL and citation metrics. Page metadata
 | **from** | **DateTime** |  | [optional]  |
 | **to** | **DateTime** | End of the window. A date-only value such as 2026-09-01 covers that whole day. Pass a full timestamp to end the window earlier. | [optional]  |
 | **sourceType** | **string** |  | [optional]  |
-| **sentiment** | **string** |  | [optional]  |
+| **sentiment** | **string** | Keeps the citations of answers with a negative brand sentiment. Needs the Growth plan or above: below it the filter answers 403 ERR_PLAN_REQUIRED. | [optional]  |
 | **contentGap** | **string** | mentioned: the cited page mentions your brand. gap: it mentions a competitor but not your brand. Only pages with usable content whose mention analysis has completed for this project match. | [optional]  |
 | **includeSeries** | **bool** | Adds citation_series. Without it the response is unchanged. | [optional] [default to false] |
 
@@ -219,6 +219,7 @@ void (empty response body)
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | URL-level intelligence |  -  |
+| **403** | Endpoint requires the Growth plan or above |  -  |
 | **404** | Resource not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
@@ -354,7 +355,7 @@ Grouped citation intelligence by url / domain / host with per-model breakdown, c
 | **includeSeries** | **bool** | Requires key, else 422 ERR_INVALID_PARAM. Adds citation_series to the group&#39;s row. | [optional] [default to false] |
 | **query** | **string** |  | [optional]  |
 | **sourceType** | **string** |  | [optional]  |
-| **sentiment** | **string** |  | [optional]  |
+| **sentiment** | **string** | Keeps the citations of answers with a negative brand sentiment. Needs the Growth plan or above: below it the filter answers 403 ERR_PLAN_REQUIRED. | [optional]  |
 | **contentGap** | **string** | mentioned: the cited page mentions your brand. gap: it mentions a competitor but not your brand. Only pages with usable content whose mention analysis has completed for this project match. | [optional]  |
 
 ### Return type
@@ -375,13 +376,14 @@ void (empty response body)
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | Grouped citation intelligence |  -  |
+| **403** | Endpoint requires the Growth plan or above |  -  |
 | **422** | Invalid parameters |  -  |
 
 [[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
 
 <a id="listcitedurloccurrences"></a>
 # **ListCitedUrlOccurrences**
-> void ListCitedUrlOccurrences (int projectId, string urlSha256, int page = null, int perPage = null)
+> void ListCitedUrlOccurrences (int projectId, string urlSha256, int page = null, int perPage = null, string sentiment = null)
 
 Cited URL occurrences
 
@@ -394,6 +396,7 @@ Cited URL occurrences
 | **urlSha256** | **string** | 64-character hex SHA-256 of the cited URL |  |
 | **page** | **int** |  | [optional] [default to 1] |
 | **perPage** | **int** |  | [optional] [default to 20] |
+| **sentiment** | **string** | Keeps the occurrences in answers with a negative brand sentiment. Needs the Growth plan or above: below it the filter answers 403 ERR_PLAN_REQUIRED. | [optional]  |
 
 ### Return type
 
@@ -413,6 +416,7 @@ void (empty response body)
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 | **200** | Paginated occurrences |  -  |
+| **403** | Endpoint requires the Growth plan or above |  -  |
 | **404** | Resource not found |  -  |
 
 [[Back to top]](#) [[Back to API list]](../../README.md#documentation-for-api-endpoints) [[Back to Model list]](../../README.md#documentation-for-models) [[Back to README]](../../README.md)
