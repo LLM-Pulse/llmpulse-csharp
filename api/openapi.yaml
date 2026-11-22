@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.100.0
+  version: 1.101.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -80,6 +80,10 @@ tags:
     \ average position) for projects with a connected GSC property: headline totals,\
     \ time series, top queries and top pages. Growth plan and above."
   name: Search Console
+- description: "Bing Webmaster Tools data for projects with a connected Bing site,\
+    \ synced once a day: clicks, impressions and CTR totals, a time series, and the\
+    \ top queries and pages Bing reports each week. Growth plan and above."
+  name: Bing Webmaster Tools
 - description: "The custom reports built under Reports > Custom Reports: list them,\
     \ read one with the data of every widget as its page shows it, and email it to\
     \ its recipients now. Scale plan and above."
@@ -14493,6 +14497,599 @@ paths:
         \ tracks (Growth+)."
       x-mcp-tool: get_search_console_ai_visibility_gaps
       x-plan: growth
+  /bing_webmaster/summary:
+    get:
+      description: "Bing Search clicks, impressions and ctr (a 0..1 fraction) of the\
+        \ project's connected Bing Webmaster Tools site over a date range, summed\
+        \ from the daily site totals synced once a day. Bing reports no average position\
+        \ in its daily totals. About 13 months of history are kept; data_through is\
+        \ the last day synced, and later days are missing, not zero. history_current\
+        \ is false right after the site was changed in Preferences > Project Settings\
+        \ > Connections and before its first sync: the totals are then zero and data_through\
+        \ and last_synced_at null. A connection whose sync_status is on_hold (Bing\
+        \ refused the stored API key, or the site is no longer verified) still answers\
+        \ from the data already synced. Requires a connected Bing Webmaster Tools\
+        \ site and the Growth plan or above; otherwise returns ERR_BING_WEBMASTER_NOT_CONNECTED\
+        \ (with meta.connect_url) or ERR_PLAN_REQUIRED."
+      operationId: getBingWebmasterSummary
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: "Number of days to look back, today included (alternative to\
+          \ from/to, which win when both are given). At most 487, the window the Search\
+          \ Console endpoints accept; about 13 months of Bing data are kept. A value\
+          \ that is not a plain positive number returns 422 ERR_INVALID_PARAM even\
+          \ beside from/to."
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          maximum: 487
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Start date (YYYY-MM-DD). Without from and to, the window is\
+          \ the last 30 days, today included; with only to, from is 30 days before\
+          \ today."
+        explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: "End date (YYYY-MM-DD), inclusive. Defaults to today. data_through\
+          \ in the response says how far the synced data reaches."
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BingWebmasterSummaryResponse"
+          description: Bing Webmaster Tools summary
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Growth plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Endpoint requires the Growth plan or above
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Bing Webmaster Tools summary (Growth+)
+      tags:
+      - Bing Webmaster Tools
+      x-llms-description: "Bing Search clicks, impressions and CTR of the project's\
+        \ connected Bing Webmaster Tools site over a date range, from the daily totals\
+        \ synced once a day; Bing reports no position in them (Growth+)."
+      x-mcp-tool: get_bing_webmaster_summary
+      x-plan: growth
+  /bing_webmaster/timeseries:
+    get:
+      description: "Bing Search clicks, impressions and ctr (a 0..1 fraction) of the\
+        \ project's connected Bing Webmaster Tools site, bucketed by day, week (starting\
+        \ Monday) or month from the daily site totals synced once a day. Days without\
+        \ synced data are left out of the series, not reported as zero. Bing reports\
+        \ no average position in its daily totals. About 13 months of history are\
+        \ kept. history_current is false right after the site was changed and before\
+        \ its first sync: data is then empty. Requires a connected Bing Webmaster\
+        \ Tools site (ERR_BING_WEBMASTER_NOT_CONNECTED) and the Growth plan or above."
+      operationId: getBingWebmasterTimeseries
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: "Number of days to look back, today included (alternative to\
+          \ from/to, which win when both are given). At most 487, the window the Search\
+          \ Console endpoints accept; about 13 months of Bing data are kept. A value\
+          \ that is not a plain positive number returns 422 ERR_INVALID_PARAM even\
+          \ beside from/to."
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          maximum: 487
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Start date (YYYY-MM-DD). Without from and to, the window is\
+          \ the last 30 days, today included; with only to, from is 30 days before\
+          \ today."
+        explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: "End date (YYYY-MM-DD), inclusive. Defaults to today. data_through\
+          \ in the response says how far the synced data reaches."
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: granularity
+        required: false
+        schema:
+          enum:
+          - day
+          - week
+          - month
+          type: string
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BingWebmasterTimeseriesResponse"
+          description: Bing Webmaster Tools time series
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Growth plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Endpoint requires the Growth plan or above
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Bing Webmaster Tools time series (Growth+)
+      tags:
+      - Bing Webmaster Tools
+      x-llms-description: "Bing Search clicks, impressions and CTR of the connected\
+        \ Bing Webmaster Tools site bucketed by day, week or month, from the daily\
+        \ totals synced once a day (Growth+)."
+      x-mcp-tool: get_bing_webmaster_timeseries
+      x-plan: growth
+  /bing_webmaster/queries:
+    get:
+      description: "The Bing search queries of the project's connected Bing Webmaster\
+        \ Tools site, ranked and paginated. Each row sums the weekly figures Bing\
+        \ reports for the weeks whose week_ending (the Friday that closes a Bing week)\
+        \ falls in the window: clicks, impressions, ctr (a 0..1 fraction), avg_impression_position\
+        \ weighted by impressions and avg_click_position weighted by clicks (null\
+        \ without clicks). Bing reports only its top queries of each week, about 100,\
+        \ so the rows are not a complete set and never add up to /bing_webmaster/summary.\
+        \ weeks_covered counts the weeks found in the window and data_through is the\
+        \ last week_ending synced. history_current is false right after the site was\
+        \ changed and before its first sync: data is then empty. Requires a connected\
+        \ Bing Webmaster Tools site (ERR_BING_WEBMASTER_NOT_CONNECTED) and the Growth\
+        \ plan or above."
+      operationId: getBingWebmasterQueries
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: "Number of days to look back, today included (alternative to\
+          \ from/to, which win when both are given). At most 487, the window the Search\
+          \ Console endpoints accept; about 13 months of Bing data are kept. A value\
+          \ that is not a plain positive number returns 422 ERR_INVALID_PARAM even\
+          \ beside from/to."
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          maximum: 487
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Start date (YYYY-MM-DD). Without from and to, the window is\
+          \ the last 30 days, today included; with only to, from is 30 days before\
+          \ today."
+        explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: "End date (YYYY-MM-DD), inclusive. Defaults to today. data_through\
+          \ in the response says how far the synced data reaches."
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: "Sort key. impressions, clicks and ctr sort descending, the two\
+          \ positions ascending; rows without a value sort last."
+        explode: true
+        in: query
+        name: sort
+        required: false
+        schema:
+          default: impressions
+          enum:
+          - impressions
+          - clicks
+          - ctr
+          - avg_impression_position
+          - avg_click_position
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BingWebmasterListResponse"
+          description: Top queries
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Growth plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Endpoint requires the Growth plan or above
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Top Bing Webmaster Tools queries (Growth+)
+      tags:
+      - Bing Webmaster Tools
+      x-llms-description: "Top Bing search queries of the connected Bing Webmaster\
+        \ Tools site, summed over the weeks in a date range, ranked and paginated;\
+        \ Bing reports about 100 queries a week, so they never add up to the totals\
+        \ (Growth+)."
+      x-mcp-tool: get_bing_webmaster_queries
+      x-plan: growth
+  /bing_webmaster/pages:
+    get:
+      description: "The landing pages of the project's connected Bing Webmaster Tools\
+        \ site in Bing Search, ranked and paginated. Each row sums the weekly figures\
+        \ Bing reports for the weeks whose week_ending (the Friday that closes a Bing\
+        \ week) falls in the window: clicks, impressions, ctr (a 0..1 fraction), avg_impression_position\
+        \ weighted by impressions and avg_click_position weighted by clicks (null\
+        \ without clicks). Bing reports only its top pages of each week, about 100,\
+        \ so the rows are not a complete set and never add up to /bing_webmaster/summary.\
+        \ weeks_covered counts the weeks found in the window and data_through is the\
+        \ last week_ending synced. history_current is false right after the site was\
+        \ changed and before its first sync: data is then empty. Requires a connected\
+        \ Bing Webmaster Tools site (ERR_BING_WEBMASTER_NOT_CONNECTED) and the Growth\
+        \ plan or above."
+      operationId: getBingWebmasterPages
+      parameters:
+      - description: Project ID
+        explode: true
+        in: query
+        name: project_id
+        required: true
+        schema:
+          type: integer
+        style: form
+      - description: "Number of days to look back, today included (alternative to\
+          \ from/to, which win when both are given). At most 487, the window the Search\
+          \ Console endpoints accept; about 13 months of Bing data are kept. A value\
+          \ that is not a plain positive number returns 422 ERR_INVALID_PARAM even\
+          \ beside from/to."
+        explode: true
+        in: query
+        name: range
+        required: false
+        schema:
+          maximum: 487
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Start date (YYYY-MM-DD). Without from and to, the window is\
+          \ the last 30 days, today included; with only to, from is 30 days before\
+          \ today."
+        explode: true
+        in: query
+        name: from
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: "End date (YYYY-MM-DD), inclusive. Defaults to today. data_through\
+          \ in the response says how far the synced data reaches."
+        explode: true
+        in: query
+        name: to
+        required: false
+        schema:
+          format: date
+          type: string
+        style: form
+      - description: "Sort key. impressions, clicks and ctr sort descending, the two\
+          \ positions ascending; rows without a value sort last."
+        explode: true
+        in: query
+        name: sort
+        required: false
+        schema:
+          default: impressions
+          enum:
+          - impressions
+          - clicks
+          - ctr
+          - avg_impression_position
+          - avg_click_position
+          type: string
+        style: form
+      - explode: true
+        in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          minimum: 1
+          type: integer
+        style: form
+      - explode: true
+        in: query
+        name: per_page
+        required: false
+        schema:
+          default: 20
+          maximum: 100
+          minimum: 1
+          type: integer
+        style: form
+      - description: "Rectangular output for BI tools (Tableau, Excel, Sheets, ELT).\
+          \ Omit for the default nested JSON. 'flat' returns the same metadata plus\
+          \ 'columns' and 'rows'; 'csv' returns those rows as text/csv. Errors are\
+          \ always returned as JSON."
+        explode: true
+        in: query
+        name: output
+        required: false
+        schema:
+          enum:
+          - flat
+          - csv
+          type: string
+        style: form
+      responses:
+        "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/BingWebmasterListResponse"
+          description: Top pages
+        "401":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_MISSING_AUTH
+                  message: missing_authorization
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Authentication failed
+        "403":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PLAN_REQUIRED
+                  message: Growth plan or above required
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Endpoint requires the Growth plan or above
+        "404":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_PROJECT_NOT_FOUND
+                  message: project_not_found
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Resource not found
+        "422":
+          content:
+            application/json:
+              example:
+                error:
+                  code: ERR_INVALID_PARAM
+                  message: invalid metrics
+                request_id: abc-123
+              schema:
+                $ref: "#/components/schemas/ApiError"
+          description: Invalid parameters
+      summary: Top Bing Webmaster Tools pages (Growth+)
+      tags:
+      - Bing Webmaster Tools
+      x-llms-description: "Top Bing landing pages of the connected Bing Webmaster\
+        \ Tools site, summed over the weeks in a date range, ranked and paginated;\
+        \ Bing reports about 100 pages a week, so they never add up to the totals\
+        \ (Growth+)."
+      x-mcp-tool: get_bing_webmaster_pages
+      x-plan: growth
   /custom_reports:
     get:
       description: "The custom reports of the project, newest first, as the Reports\
@@ -18852,6 +19449,59 @@ components:
         minimum: 1
         type: integer
       style: form
+    BingFrom:
+      description: "Start date (YYYY-MM-DD). Without from and to, the window is the\
+        \ last 30 days, today included; with only to, from is 30 days before today."
+      explode: true
+      in: query
+      name: from
+      required: false
+      schema:
+        format: date
+        type: string
+      style: form
+    BingTo:
+      description: "End date (YYYY-MM-DD), inclusive. Defaults to today. data_through\
+        \ in the response says how far the synced data reaches."
+      explode: true
+      in: query
+      name: to
+      required: false
+      schema:
+        format: date
+        type: string
+      style: form
+    BingRange:
+      description: "Number of days to look back, today included (alternative to from/to,\
+        \ which win when both are given). At most 487, the window the Search Console\
+        \ endpoints accept; about 13 months of Bing data are kept. A value that is\
+        \ not a plain positive number returns 422 ERR_INVALID_PARAM even beside from/to."
+      explode: true
+      in: query
+      name: range
+      required: false
+      schema:
+        maximum: 487
+        minimum: 1
+        type: integer
+      style: form
+    BingSort:
+      description: "Sort key. impressions, clicks and ctr sort descending, the two\
+        \ positions ascending; rows without a value sort last."
+      explode: true
+      in: query
+      name: sort
+      required: false
+      schema:
+        default: impressions
+        enum:
+        - impressions
+        - clicks
+        - ctr
+        - avg_impression_position
+        - avg_click_position
+        type: string
+      style: form
     GscAggregationType:
       description: "How Google counts impressions. auto (default) is what Search Console\
         \ shows (by page when page is grouped or filtered, else by property). Google\
@@ -19765,6 +20415,8 @@ components:
             $ref: "#/components/schemas/ProjectDetails_allOf_data_coverage"
           search_console:
             $ref: "#/components/schemas/ProjectDetails_allOf_search_console"
+          bing_webmaster:
+            $ref: "#/components/schemas/ProjectDetails_allOf_bing_webmaster"
           ai_traffic:
             $ref: "#/components/schemas/ProjectDetails_allOf_ai_traffic"
           agent_traffic:
@@ -19841,6 +20493,11 @@ components:
           property: property
           connect_url: https://openapi-generator.tech
           properties_count: 7
+        bing_webmaster:
+          status: connected
+          site: site
+          last_synced_at: 2000-01-23T04:56:07.000+00:00
+          connect_url: https://openapi-generator.tech
         ai_traffic:
           status: connected
           provider: provider
@@ -29136,6 +29793,225 @@ components:
         request_id:
           type: string
       type: object
+    BingWebmasterMetrics:
+      description: Bing reports no average position in its daily totals.
+      example:
+        impressions: 6
+        clicks: 1
+        ctr: 5.962133916683182
+      properties:
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        ctr:
+          description: 0..1 fraction
+          type: number
+      type: object
+    BingWebmasterSummaryResponse:
+      example:
+        project_id: 0
+        site: site
+        sync_status: sync_status
+        last_synced_at: 2000-01-23T04:56:07.000+00:00
+        history_current: true
+        from: 2000-01-23
+        to: 2000-01-23
+        data_through: 2000-01-23
+        totals:
+          impressions: 6
+          clicks: 1
+          ctr: 5.962133916683182
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        site:
+          description: "The connected site, as Bing Webmaster Tools names it (e.g.\
+            \ https://example.com/)"
+          type: string
+        sync_status:
+          description: "State of the daily sync: pending, syncing, completed, failed\
+            \ or on_hold. on_hold means Bing refused the stored API key or the site\
+            \ is no longer verified: the data already synced still answers but stops\
+            \ updating until the site is reconnected in Preferences > Project Settings\
+            \ > Connections."
+          type: string
+        last_synced_at:
+          description: "When the site last synced. Null before its first sync, or\
+            \ while history_current is false."
+          format: date-time
+          nullable: true
+          type: string
+        history_current:
+          description: False right after the site was changed and before its first
+            sync. Until then the response holds no data and data_through is null.
+          type: boolean
+        from:
+          format: date
+          type: string
+        to:
+          format: date
+          type: string
+        data_through:
+          description: "The last day synced for the site. Later days are missing,\
+            \ not zero."
+          format: date
+          nullable: true
+          type: string
+        totals:
+          $ref: "#/components/schemas/BingWebmasterMetrics"
+        request_id:
+          type: string
+      type: object
+    BingWebmasterTimeseriesResponse:
+      example:
+        project_id: 0
+        site: site
+        sync_status: sync_status
+        last_synced_at: 2000-01-23T04:56:07.000+00:00
+        history_current: true
+        from: 2000-01-23
+        to: 2000-01-23
+        data_through: 2000-01-23
+        granularity: granularity
+        data:
+        - date: 2000-01-23
+          impressions: 6
+          clicks: 1
+          ctr: 5.962133916683182
+        - date: 2000-01-23
+          impressions: 6
+          clicks: 1
+          ctr: 5.962133916683182
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        site:
+          description: "The connected site, as Bing Webmaster Tools names it (e.g.\
+            \ https://example.com/)"
+          type: string
+        sync_status:
+          description: "State of the daily sync: pending, syncing, completed, failed\
+            \ or on_hold (the data already synced still answers, but stops updating\
+            \ until the site is reconnected)"
+          type: string
+        last_synced_at:
+          description: "When the site last synced. Null before its first sync, or\
+            \ while history_current is false."
+          format: date-time
+          nullable: true
+          type: string
+        history_current:
+          description: False right after the site was changed and before its first
+            sync. Until then data is empty and data_through is null.
+          type: boolean
+        from:
+          format: date
+          type: string
+        to:
+          format: date
+          type: string
+        data_through:
+          description: "The last day synced for the site. Later days are missing,\
+            \ not zero."
+          format: date
+          nullable: true
+          type: string
+        granularity:
+          type: string
+        data:
+          description: "One bucket per day, week (starting Monday) or month that has\
+            \ synced days. Days without data are left out, not reported as zero."
+          items:
+            $ref: "#/components/schemas/BingWebmasterTimeseriesResponse_data_inner"
+          type: array
+        request_id:
+          type: string
+      type: object
+    BingWebmasterListResponse:
+      example:
+        project_id: 0
+        site: site
+        sync_status: sync_status
+        last_synced_at: 2000-01-23T04:56:07.000+00:00
+        history_current: true
+        from: 2000-01-23
+        to: 2000-01-23
+        data_through: 2000-01-23
+        page: 6
+        per_page: 1
+        total: 5
+        sort: sort
+        weeks_covered: 5
+        data:
+        - key: key
+          impressions: 2
+          clicks: 7
+          ctr: 9.301444243932576
+          avg_impression_position: 3.616076749251911
+          avg_click_position: 2.027123023002322
+        - key: key
+          impressions: 2
+          clicks: 7
+          ctr: 9.301444243932576
+          avg_impression_position: 3.616076749251911
+          avg_click_position: 2.027123023002322
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        site:
+          description: "The connected site, as Bing Webmaster Tools names it (e.g.\
+            \ https://example.com/)"
+          type: string
+        sync_status:
+          description: "State of the daily sync: pending, syncing, completed, failed\
+            \ or on_hold (the data already synced still answers, but stops updating\
+            \ until the site is reconnected)"
+          type: string
+        last_synced_at:
+          description: "When the site last synced. Null before its first sync, or\
+            \ while history_current is false."
+          format: date-time
+          nullable: true
+          type: string
+        history_current:
+          description: False right after the site was changed and before its first
+            sync. Until then data is empty and data_through is null.
+          type: boolean
+        from:
+          format: date
+          type: string
+        to:
+          format: date
+          type: string
+        data_through:
+          description: The last week_ending synced for the site (the Friday that closes
+            a Bing week)
+          format: date
+          nullable: true
+          type: string
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          description: Distinct pages or queries found in the weeks of the window
+          type: integer
+        sort:
+          type: string
+        weeks_covered:
+          description: Weeks with data whose week_ending falls in the window
+          type: integer
+        data:
+          items:
+            $ref: "#/components/schemas/BingWebmasterListResponse_data_inner"
+          type: array
+        request_id:
+          type: string
+      type: object
     TeamPermissions:
       additionalProperties:
         items:
@@ -33552,6 +34428,40 @@ components:
             its status
           type: integer
       type: object
+    ProjectDetails_allOf_bing_webmaster:
+      description: "Bing Webmaster Tools site behind /bing_webmaster. connected means\
+        \ its endpoints answer; reconnect_required means Bing refused the stored API\
+        \ key or the site is no longer verified, so the endpoints still answer from\
+        \ the data already synced, which stops updating until the site is reconnected\
+        \ at connect_url; not_connected means they return ERR_BING_WEBMASTER_NOT_CONNECTED."
+      example:
+        status: connected
+        site: site
+        last_synced_at: 2000-01-23T04:56:07.000+00:00
+        connect_url: https://openapi-generator.tech
+      properties:
+        status:
+          enum:
+          - connected
+          - reconnect_required
+          - not_connected
+          type: string
+        site:
+          description: "The connected site (e.g. https://example.com/), null when\
+            \ not connected"
+          nullable: true
+          type: string
+        last_synced_at:
+          description: "When that site last synced, null before its first sync"
+          format: date-time
+          nullable: true
+          type: string
+        connect_url:
+          description: The in-app page where the site is connected or reconnected
+            (Preferences > Project Settings > Connections)
+          format: uri
+          type: string
+      type: object
     ProjectDetails_allOf_ai_traffic:
       description: "Web analytics provider behind /metrics/ai_traffic and /web_analytics.\
         \ connected means both answer; reconnect_required means the provider refused\
@@ -35314,6 +36224,55 @@ components:
           nullable: true
           type: string
       type: object
+    BingWebmasterTimeseriesResponse_data_inner:
+      example:
+        date: 2000-01-23
+        impressions: 6
+        clicks: 1
+        ctr: 5.962133916683182
+      properties:
+        date:
+          description: First day of the bucket
+          format: date
+          type: string
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        ctr:
+          description: 0..1 fraction
+          type: number
+      type: object
+    BingWebmasterListResponse_data_inner:
+      example:
+        key: key
+        impressions: 2
+        clicks: 7
+        ctr: 9.301444243932576
+        avg_impression_position: 3.616076749251911
+        avg_click_position: 2.027123023002322
+      properties:
+        key:
+          description: The page URL or the query
+          type: string
+        impressions:
+          type: integer
+        clicks:
+          type: integer
+        ctr:
+          description: 0..1 fraction
+          type: number
+        avg_impression_position:
+          description: "Average position when shown, weighted by impressions (lower\
+            \ is better)"
+          nullable: true
+          type: number
+        avg_click_position:
+          description: "Average position when clicked, weighted by clicks. Null without\
+            \ clicks."
+          nullable: true
+          type: number
+      type: object
     SuggestedPromptsAcceptResponse_accepted_inner:
       example:
         suggestion_id: 6
@@ -35470,6 +36429,7 @@ components:
           - ERR_WEB_ANALYTICS_ACCESS_REVOKED
           - ERR_WEB_ANALYTICS_UPSTREAM
           - ERR_AGENT_TRAFFIC_NOT_CONNECTED
+          - ERR_BING_WEBMASTER_NOT_CONNECTED
           - ERR_INVALID_PARAM
           - ERR_INVALID_RANGE
           - ERR_LIMIT_REACHED
@@ -35481,10 +36441,11 @@ components:
           type: string
         meta:
           description: "Extra detail for some codes. A not-connected or access-revoked\
-            \ error from the Search Console, AI traffic, web analytics or agent traffic\
-            \ endpoints carries connect_url, the in-app page where the user connects\
-            \ or reconnects the source. A prompt write refused because a launched\
-            \ pitch project's prompts are fixed carries reason pitch_prompts_frozen."
+            \ error from the Search Console, Bing Webmaster Tools, AI traffic, web\
+            \ analytics or agent traffic endpoints carries connect_url, the in-app\
+            \ page where the user connects or reconnects the source. A prompt write\
+            \ refused because a launched pitch project's prompts are fixed carries\
+            \ reason pitch_prompts_frozen."
           type: object
       type: object
   securitySchemes:

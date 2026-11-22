@@ -10,6 +10,7 @@ docs/apis/APIKeysApi.md
 docs/apis/AccountApi.md
 docs/apis/AnnotationsApi.md
 docs/apis/AnswersApi.md
+docs/apis/BingWebmasterToolsApi.md
 docs/apis/CollectionsTagsApi.md
 docs/apis/CompetitorsApi.md
 docs/apis/CustomReportsApi.md
@@ -82,6 +83,12 @@ docs/models/ApiError.md
 docs/models/ApiErrorError.md
 docs/models/ApiKeyInfo.md
 docs/models/AssignPromptTagsRequest.md
+docs/models/BingWebmasterListResponse.md
+docs/models/BingWebmasterListResponseDataInner.md
+docs/models/BingWebmasterMetrics.md
+docs/models/BingWebmasterSummaryResponse.md
+docs/models/BingWebmasterTimeseriesResponse.md
+docs/models/BingWebmasterTimeseriesResponseDataInner.md
 docs/models/CatalogProduct.md
 docs/models/CatalogPromptSuggestion.md
 docs/models/CatalogPromptSuggestionIdsRequest.md
@@ -235,6 +242,7 @@ docs/models/ProjectDeleteResponse.md
 docs/models/ProjectDetails.md
 docs/models/ProjectDetailsAllOfAgentTraffic.md
 docs/models/ProjectDetailsAllOfAiTraffic.md
+docs/models/ProjectDetailsAllOfBingWebmaster.md
 docs/models/ProjectDetailsAllOfDataCoverage.md
 docs/models/ProjectDetailsAllOfPitchRun.md
 docs/models/ProjectDetailsAllOfSearchConsole.md
@@ -391,6 +399,7 @@ src/LLMPulse.SDK/Api/APIKeysApi.cs
 src/LLMPulse.SDK/Api/AccountApi.cs
 src/LLMPulse.SDK/Api/AnnotationsApi.cs
 src/LLMPulse.SDK/Api/AnswersApi.cs
+src/LLMPulse.SDK/Api/BingWebmasterToolsApi.cs
 src/LLMPulse.SDK/Api/CollectionsTagsApi.cs
 src/LLMPulse.SDK/Api/CompetitorsApi.cs
 src/LLMPulse.SDK/Api/CustomReportsApi.cs
@@ -489,6 +498,12 @@ src/LLMPulse.SDK/Model/ApiError.cs
 src/LLMPulse.SDK/Model/ApiErrorError.cs
 src/LLMPulse.SDK/Model/ApiKeyInfo.cs
 src/LLMPulse.SDK/Model/AssignPromptTagsRequest.cs
+src/LLMPulse.SDK/Model/BingWebmasterListResponse.cs
+src/LLMPulse.SDK/Model/BingWebmasterListResponseDataInner.cs
+src/LLMPulse.SDK/Model/BingWebmasterMetrics.cs
+src/LLMPulse.SDK/Model/BingWebmasterSummaryResponse.cs
+src/LLMPulse.SDK/Model/BingWebmasterTimeseriesResponse.cs
+src/LLMPulse.SDK/Model/BingWebmasterTimeseriesResponseDataInner.cs
 src/LLMPulse.SDK/Model/CatalogProduct.cs
 src/LLMPulse.SDK/Model/CatalogPromptSuggestion.cs
 src/LLMPulse.SDK/Model/CatalogPromptSuggestionIdsRequest.cs
@@ -642,6 +657,7 @@ src/LLMPulse.SDK/Model/ProjectDeleteResponse.cs
 src/LLMPulse.SDK/Model/ProjectDetails.cs
 src/LLMPulse.SDK/Model/ProjectDetailsAllOfAgentTraffic.cs
 src/LLMPulse.SDK/Model/ProjectDetailsAllOfAiTraffic.cs
+src/LLMPulse.SDK/Model/ProjectDetailsAllOfBingWebmaster.cs
 src/LLMPulse.SDK/Model/ProjectDetailsAllOfDataCoverage.cs
 src/LLMPulse.SDK/Model/ProjectDetailsAllOfPitchRun.cs
 src/LLMPulse.SDK/Model/ProjectDetailsAllOfSearchConsole.cs

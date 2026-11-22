@@ -34,6 +34,7 @@ Name | Type | Description | Notes
 **PitchRun** | [**ProjectDetailsAllOfPitchRun**](ProjectDetailsAllOfPitchRun.md) |  | [optional] 
 **DataCoverage** | [**ProjectDetailsAllOfDataCoverage**](ProjectDetailsAllOfDataCoverage.md) |  | [optional] 
 **SearchConsole** | [**ProjectDetailsAllOfSearchConsole**](ProjectDetailsAllOfSearchConsole.md) |  | [optional] 
+**BingWebmaster** | [**ProjectDetailsAllOfBingWebmaster**](ProjectDetailsAllOfBingWebmaster.md) |  | [optional] 
 **AiTraffic** | [**ProjectDetailsAllOfAiTraffic**](ProjectDetailsAllOfAiTraffic.md) |  | [optional] 
 **AgentTraffic** | [**ProjectDetailsAllOfAgentTraffic**](ProjectDetailsAllOfAgentTraffic.md) |  | [optional] 
 **RequestId** | **string** |  | [optional] 
