@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.101.0
+  version: 1.102.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -964,6 +964,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -1232,6 +1233,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -1459,6 +1461,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -1704,6 +1707,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -1897,6 +1901,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -2470,6 +2475,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -2643,6 +2649,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -2926,6 +2933,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -4106,6 +4114,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -4428,6 +4437,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -4611,6 +4621,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -4801,6 +4812,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -4993,6 +5005,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -5181,6 +5194,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -5371,6 +5385,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -5608,6 +5623,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -5790,6 +5806,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -6041,6 +6058,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -6277,6 +6295,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -6558,11 +6577,11 @@ paths:
           type: string
         style: form
       - description: "Filter by one AI model. Only chatgpt, ai_overview, ai_mode,\
-          \ perplexity, gemini, naver_ai, baidu_ai, naver_ai_tab, qwen, doubao and\
-          \ bing_ai_mode are accepted: any other value, including another model enabled\
-          \ for the API key's user, returns 422 ERR_INVALID_PARAM (invalid model).\
-          \ One of those eleven that the user has not enabled also returns 422 ERR_INVALID_PARAM,\
-          \ with the valid values in the message."
+          \ perplexity, gemini, naver_ai, baidu_ai, naver_ai_tab, qwen, doubao, bing_ai_mode\
+          \ and bing_ai_overview are accepted: any other value, including another\
+          \ model enabled for the API key's user, returns 422 ERR_INVALID_PARAM (invalid\
+          \ model). One of those twelve that the user has not enabled also returns\
+          \ 422 ERR_INVALID_PARAM, with the valid values in the message."
         explode: true
         in: query
         name: model
@@ -6586,6 +6605,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -6791,11 +6811,11 @@ paths:
           type: array
         style: form
       - description: "Filter by one AI model. Only chatgpt, ai_overview, ai_mode,\
-          \ perplexity, gemini, naver_ai, baidu_ai, naver_ai_tab, qwen, doubao and\
-          \ bing_ai_mode are accepted: any other value, including another model enabled\
-          \ for the API key's user, returns 422 ERR_INVALID_PARAM (invalid model).\
-          \ One of those eleven that the user has not enabled also returns 422 ERR_INVALID_PARAM,\
-          \ with the valid values in the message."
+          \ perplexity, gemini, naver_ai, baidu_ai, naver_ai_tab, qwen, doubao, bing_ai_mode\
+          \ and bing_ai_overview are accepted: any other value, including another\
+          \ model enabled for the API key's user, returns 422 ERR_INVALID_PARAM (invalid\
+          \ model). One of those twelve that the user has not enabled also returns\
+          \ 422 ERR_INVALID_PARAM, with the valid values in the message."
         explode: true
         in: query
         name: model
@@ -6819,6 +6839,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -6961,11 +6982,11 @@ paths:
           type: string
         style: simple
       - description: "Filter by one AI model. Only chatgpt, ai_overview, ai_mode,\
-          \ perplexity, gemini, naver_ai, baidu_ai, naver_ai_tab, qwen, doubao and\
-          \ bing_ai_mode are accepted: any other value, including another model enabled\
-          \ for the API key's user, returns 422 ERR_INVALID_PARAM (invalid model).\
-          \ One of those eleven that the user has not enabled also returns 422 ERR_INVALID_PARAM,\
-          \ with the valid values in the message."
+          \ perplexity, gemini, naver_ai, baidu_ai, naver_ai_tab, qwen, doubao, bing_ai_mode\
+          \ and bing_ai_overview are accepted: any other value, including another\
+          \ model enabled for the API key's user, returns 422 ERR_INVALID_PARAM (invalid\
+          \ model). One of those twelve that the user has not enabled also returns\
+          \ 422 ERR_INVALID_PARAM, with the valid values in the message."
         explode: true
         in: query
         name: model
@@ -6989,6 +7010,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -7302,11 +7324,11 @@ paths:
           type: integer
         style: form
       - description: "Filter by one AI model. Only chatgpt, ai_overview, ai_mode,\
-          \ perplexity, gemini, naver_ai, baidu_ai, naver_ai_tab, qwen, doubao and\
-          \ bing_ai_mode are accepted: any other value, including another model enabled\
-          \ for the API key's user, returns 422 ERR_INVALID_PARAM (invalid model).\
-          \ One of those eleven that the user has not enabled also returns 422 ERR_INVALID_PARAM,\
-          \ with the valid values in the message."
+          \ perplexity, gemini, naver_ai, baidu_ai, naver_ai_tab, qwen, doubao, bing_ai_mode\
+          \ and bing_ai_overview are accepted: any other value, including another\
+          \ model enabled for the API key's user, returns 422 ERR_INVALID_PARAM (invalid\
+          \ model). One of those twelve that the user has not enabled also returns\
+          \ 422 ERR_INVALID_PARAM, with the valid values in the message."
         explode: true
         in: query
         name: model
@@ -7330,6 +7352,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -7650,11 +7673,11 @@ paths:
           type: integer
         style: form
       - description: "Filter by one AI model. Only chatgpt, ai_overview, ai_mode,\
-          \ perplexity, gemini, naver_ai, baidu_ai, naver_ai_tab, qwen, doubao and\
-          \ bing_ai_mode are accepted: any other value, including another model enabled\
-          \ for the API key's user, returns 422 ERR_INVALID_PARAM (invalid model).\
-          \ One of those eleven that the user has not enabled also returns 422 ERR_INVALID_PARAM,\
-          \ with the valid values in the message."
+          \ perplexity, gemini, naver_ai, baidu_ai, naver_ai_tab, qwen, doubao, bing_ai_mode\
+          \ and bing_ai_overview are accepted: any other value, including another\
+          \ model enabled for the API key's user, returns 422 ERR_INVALID_PARAM (invalid\
+          \ model). One of those twelve that the user has not enabled also returns\
+          \ 422 ERR_INVALID_PARAM, with the valid values in the message."
         explode: true
         in: query
         name: model
@@ -7678,6 +7701,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -8277,6 +8301,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: Competitor ID for the first comparison brand (omit to compare
@@ -9229,6 +9254,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -9484,6 +9510,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -9727,6 +9754,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -10002,6 +10030,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -10220,6 +10249,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -10509,6 +10539,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -10846,6 +10877,7 @@ paths:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         style: form
       - description: "One collection/tag ID or a comma-separated list of IDs. A query\
@@ -19650,6 +19682,7 @@ components:
         - qwen
         - doubao
         - bing_ai_mode
+        - bing_ai_overview
         type: string
       style: form
     MetricsModel:
@@ -19681,14 +19714,15 @@ components:
         - qwen
         - doubao
         - bing_ai_mode
+        - bing_ai_overview
         type: string
       style: form
     CitationModel:
       description: "Filter by one AI model. Only chatgpt, ai_overview, ai_mode, perplexity,\
-        \ gemini, naver_ai, baidu_ai, naver_ai_tab, qwen, doubao and bing_ai_mode\
-        \ are accepted: any other value, including another model enabled for the API\
-        \ key's user, returns 422 ERR_INVALID_PARAM (invalid model). One of those\
-        \ eleven that the user has not enabled also returns 422 ERR_INVALID_PARAM,\
+        \ gemini, naver_ai, baidu_ai, naver_ai_tab, qwen, doubao, bing_ai_mode and\
+        \ bing_ai_overview are accepted: any other value, including another model\
+        \ enabled for the API key's user, returns 422 ERR_INVALID_PARAM (invalid model).\
+        \ One of those twelve that the user has not enabled also returns 422 ERR_INVALID_PARAM,\
         \ with the valid values in the message."
       explode: true
       in: query
@@ -19713,6 +19747,7 @@ components:
         - qwen
         - doubao
         - bing_ai_mode
+        - bing_ai_overview
         type: string
       style: form
     CollectionId:
@@ -27949,6 +27984,7 @@ components:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         fan_out_queries:
           description: Sub-queries the model issued while answering; null when the
@@ -28085,6 +28121,7 @@ components:
             - qwen
             - doubao
             - bing_ai_mode
+            - bing_ai_overview
             type: string
           type: array
         request_id:
@@ -28407,6 +28444,7 @@ components:
           - qwen
           - doubao
           - bing_ai_mode
+          - bing_ai_overview
           type: string
         analysis:
           enum:
@@ -34341,6 +34379,7 @@ components:
             - qwen
             - doubao
             - bing_ai_mode
+            - bing_ai_overview
             type: string
           type: array
         answers_expected:
@@ -34381,6 +34420,7 @@ components:
             - qwen
             - doubao
             - bing_ai_mode
+            - bing_ai_overview
             type: string
           type: array
         countries:
