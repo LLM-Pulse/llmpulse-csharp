@@ -54,7 +54,7 @@ Starts this month's Brand Reputation report, like the Generate button on the Rep
 
 <a id="getreputationreport"></a>
 # **GetReputationReport**
-> void GetReputationReport (string id, int projectId, int page = null, int perPage = null, string model = null, string brand = null, string dimension = null, string output = null)
+> ReputationReportScoresResponse GetReputationReport (string id, int projectId, int page = null, int perPage = null, string model = null, string brand = null, string dimension = null, string output = null)
 
 Get reputation report scores
 
@@ -76,7 +76,7 @@ One reputation report's scores as flat rows: one row per analyst model, brand, d
 
 ### Return type
 
-void (empty response body)
+[**ReputationReportScoresResponse**](ReputationReportScoresResponse.md)
 
 ### Authorization
 
@@ -99,7 +99,7 @@ void (empty response body)
 
 <a id="getstudy"></a>
 # **GetStudy**
-> void GetStudy (int id)
+> StudyResponse GetStudy (int id)
 
 Get a custom AI study
 
@@ -114,7 +114,7 @@ One study with its brief, the subjects it compares, the dimensions it scores the
 
 ### Return type
 
-void (empty response body)
+[**StudyResponse**](StudyResponse.md)
 
 ### Authorization
 
@@ -136,7 +136,7 @@ void (empty response body)
 
 <a id="getstudyreport"></a>
 # **GetStudyReport**
-> void GetStudyReport (int id, string reportId, int page = null, int perPage = null, string model = null, string subject = null, string dimension = null, string output = null)
+> StudyReportScoresResponse GetStudyReport (int id, string reportId, int page = null, int perPage = null, string model = null, string subject = null, string dimension = null, string output = null)
 
 Get custom study report scores
 
@@ -158,7 +158,7 @@ One custom-study report's scores as flat rows: one row per analyst model, subjec
 
 ### Return type
 
-void (empty response body)
+[**StudyReportScoresResponse**](StudyReportScoresResponse.md)
 
 ### Authorization
 
@@ -181,7 +181,7 @@ void (empty response body)
 
 <a id="listreputationreports"></a>
 # **ListReputationReports**
-> void ListReputationReports (int projectId, int page = null, int perPage = null, string output = null)
+> ReputationReportsResponse ListReputationReports (int projectId, int page = null, int perPage = null, string output = null)
 
 List reputation reports
 
@@ -199,7 +199,7 @@ The monthly multi-model analyst reports scoring the tracked brand and its compet
 
 ### Return type
 
-void (empty response body)
+[**ReputationReportsResponse**](ReputationReportsResponse.md)
 
 ### Authorization
 
@@ -208,7 +208,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details
@@ -220,7 +220,7 @@ void (empty response body)
 
 <a id="liststudies"></a>
 # **ListStudies**
-> void ListStudies (int projectId = null, string status = null, int page = null, int perPage = null, string output = null)
+> StudiesResponse ListStudies (int projectId = null, string status = null, int page = null, int perPage = null, string output = null)
 
 List custom AI studies
 
@@ -239,7 +239,7 @@ The custom AI studies defined on the account: analyst reports over any set of su
 
 ### Return type
 
-void (empty response body)
+[**StudiesResponse**](StudiesResponse.md)
 
 ### Authorization
 
@@ -248,7 +248,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details

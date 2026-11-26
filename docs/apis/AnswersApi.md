@@ -48,7 +48,7 @@ Full answer with mentions, citations, sentiments, sources, shopping_products, br
 
 <a id="listanswers"></a>
 # **ListAnswers**
-> void ListAnswers (int projectId, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, string mentionFilter = null, string citationFilter = null, string competitors = null, DateTime from = null, DateTime to = null, int page = null, int perPage = null, string query = null, bool noResult = null)
+> AnswersResponse ListAnswers (int projectId, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, string mentionFilter = null, string citationFilter = null, string competitors = null, DateTime from = null, DateTime to = null, int page = null, int perPage = null, string query = null, bool noResult = null)
 
 List AI responses
 
@@ -79,7 +79,7 @@ Successful prompt-execution responses with truncated content (max 10,000 chars).
 
 ### Return type
 
-void (empty response body)
+[**AnswersResponse**](AnswersResponse.md)
 
 ### Authorization
 

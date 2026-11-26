@@ -57,7 +57,7 @@ Aggregated AI bot traffic hitting the project's origin server (GPTBot, Perplexit
 
 <a id="getaitraffic"></a>
 # **GetAiTraffic**
-> void GetAiTraffic (int projectId, int range = null, DateTime from = null, DateTime to = null, string source = null, string granularity = null)
+> AiTrafficResponse GetAiTraffic (int projectId, int range = null, DateTime from = null, DateTime to = null, string source = null, string granularity = null)
 
 AI referral traffic (Scale plan or above)
 
@@ -77,7 +77,7 @@ AI referral traffic for a project: human visits arriving from AI assistants (Cha
 
 ### Return type
 
-void (empty response body)
+[**AiTrafficResponse**](AiTrafficResponse.md)
 
 ### Authorization
 

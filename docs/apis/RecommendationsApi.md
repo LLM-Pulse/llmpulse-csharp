@@ -11,7 +11,7 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 
 <a id="getrecommendation"></a>
 # **GetRecommendation**
-> void GetRecommendation (int projectId, int id, string itemStatus = null, bool resolveSourceRefs = null)
+> RecommendationDetailResponse GetRecommendation (int projectId, int id, string itemStatus = null, bool resolveSourceRefs = null)
 
 Get recommendation run with items
 
@@ -27,7 +27,7 @@ Get recommendation run with items
 
 ### Return type
 
-void (empty response body)
+[**RecommendationDetailResponse**](RecommendationDetailResponse.md)
 
 ### Authorization
 
@@ -49,7 +49,7 @@ void (empty response body)
 
 <a id="launchrecommendations"></a>
 # **LaunchRecommendations**
-> void LaunchRecommendations (LaunchRecommendationsRequest launchRecommendationsRequest)
+> RecommendationLaunchResponse LaunchRecommendations (LaunchRecommendationsRequest launchRecommendationsRequest)
 
 Launch a recommendations generation
 
@@ -64,7 +64,7 @@ Launches a full-scope recommendations generation (async job, 1-3 minutes; poll G
 
 ### Return type
 
-void (empty response body)
+[**RecommendationLaunchResponse**](RecommendationLaunchResponse.md)
 
 ### Authorization
 

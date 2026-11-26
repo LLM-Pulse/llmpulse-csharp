@@ -13,7 +13,7 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 
 <a id="listallcitations"></a>
 # **ListAllCitations**
-> void ListAllCitations (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, int range = null)
+> AllCitationsResponse ListAllCitations (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, int range = null)
 
 List all citations (brand + competitor)
 
@@ -42,7 +42,7 @@ Unified citations stream with an `actor_type` field on each record. Includes vis
 
 ### Return type
 
-void (empty response body)
+[**AllCitationsResponse**](AllCitationsResponse.md)
 
 ### Authorization
 
@@ -51,7 +51,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details
@@ -63,7 +63,7 @@ void (empty response body)
 
 <a id="listallmentions"></a>
 # **ListAllMentions**
-> void ListAllMentions (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, int range = null)
+> AllMentionsResponse ListAllMentions (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, int range = null)
 
 List all mentions (brand + competitor)
 
@@ -92,7 +92,7 @@ Unified mentions stream. Each record has an `actor_type` field (`project` or `co
 
 ### Return type
 
-void (empty response body)
+[**AllMentionsResponse**](AllMentionsResponse.md)
 
 ### Authorization
 
@@ -101,7 +101,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details
@@ -162,7 +162,7 @@ Includes visible citations and background source references. Background referenc
 
 <a id="listcompetitorcitations"></a>
 # **ListCompetitorCitations**
-> void ListCompetitorCitations (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, int range = null)
+> CompetitorCitationsResponse ListCompetitorCitations (int projectId, string competitors = null, int page = null, int perPage = null, string model = null, string collectionId = null, int prompt = null, DateTime from = null, DateTime to = null, string output = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, int range = null)
 
 List competitor citations
 
@@ -191,7 +191,7 @@ Includes visible citations and background source references. Background referenc
 
 ### Return type
 
-void (empty response body)
+[**CompetitorCitationsResponse**](CompetitorCitationsResponse.md)
 
 ### Authorization
 
@@ -200,7 +200,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details

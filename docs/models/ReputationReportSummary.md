@@ -1,11 +1,11 @@
 # LLMPulse.SDK.Model.ReputationReportSummary
-One reputation report's status and analyst model coverage
+One reputation or custom-study report's status and analyst model coverage
 
 ## Properties
 
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**Id** | **string** | Report id for GET /reputation/reports/{id} | 
+**Id** | **string** | Report id for GET /reputation/reports/{id}, or GET /studies/{id}/reports/{report_id} for a study report | 
 **Status** | **string** |  | 
 **CreatedAt** | **DateTime** |  | 
 **AvailableModels** | **List&lt;ReputationReportSummary.AvailableModelsEnum&gt;** | Analyst models that produced data | 

@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.104.0
+  version: 1.105.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -386,6 +386,10 @@ paths:
         required: true
       responses:
         "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDraftResponse"
           description: "Draft created; envelope with draft state, suggestions and\
             \ limits"
         "422":
@@ -443,6 +447,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDraftResponse"
           description: Draft envelope
         "403":
           content:
@@ -497,6 +505,10 @@ paths:
         required: true
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectDraftResponse"
           description: Draft envelope with next-step suggestions
         "403":
           content:
@@ -2317,6 +2329,10 @@ paths:
         style: simple
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompetitorDeleteResponse"
           description: Deleted
         "403":
           content:
@@ -2375,6 +2391,10 @@ paths:
         required: true
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompetitorUpdateResponse"
           description: Updated
         "403":
           content:
@@ -3051,6 +3071,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QueryFanOutsResponse"
           description: Paginated fan-out rows
         "422":
           content:
@@ -3624,6 +3648,10 @@ paths:
         style: simple
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PromptDeleteResponse"
           description: Deleted
         "403":
           content:
@@ -3985,6 +4013,10 @@ paths:
         style: simple
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CollectionDeleteResponse"
           description: Deleted
         "403":
           content:
@@ -4035,6 +4067,10 @@ paths:
         required: true
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CollectionUpdateResponse"
           description: Updated
         "403":
           content:
@@ -4305,6 +4341,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnswersResponse"
           description: "Paginated answers. Every item carries app_url, the link that\
             \ opens the answer in the app"
         "422":
@@ -5123,6 +5163,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CompetitorCitationsResponse"
           description: Paginated competitor citations
       summary: List competitor citations
       tags:
@@ -5312,6 +5356,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AllMentionsResponse"
           description: Paginated mentions with actor_type discriminator
       summary: List all mentions (brand + competitor)
       tags:
@@ -5503,6 +5551,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AllCitationsResponse"
           description: Paginated citations with actor_type discriminator
       summary: List all citations (brand + competitor)
       tags:
@@ -5540,6 +5592,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SentimentCategoriesResponse"
           description: Sentiment buckets
         "403":
           content:
@@ -6462,6 +6518,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SourcesResponse"
           description: Paginated sources
         "422":
           content:
@@ -6755,6 +6815,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CitationGroupsResponse"
           description: Grouped citation intelligence
         "403":
           content:
@@ -6920,6 +6984,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CitingDomainMentionShareResponse"
           description: Mention share per citing domain
         "422":
           content:
@@ -7139,6 +7207,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CitedUrlDetailsResponse"
           description: URL-level intelligence
         "403":
           content:
@@ -7222,6 +7294,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CitedUrlOccurrencesResponse"
           description: Paginated occurrences
         "403":
           content:
@@ -7289,6 +7365,10 @@ paths:
         style: simple
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CitedUrlContentResponse"
           description: Sanitized cached content + mention evidence
         "404":
           content:
@@ -8325,6 +8405,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiModelPositionDistributionResponse"
           description: Bucketed position totals + chart-ready series
       summary: Position distribution comparison
       tags:
@@ -8458,6 +8542,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiOverviewResultsResponse"
           description: AI Overview result-availability data + per-prompt table
       summary: Google AI Overview result availability
       tags:
@@ -8835,6 +8923,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiTrafficResponse"
           description: AI referral traffic data
         "403":
           content:
@@ -9372,6 +9464,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ShoppingResponse"
           description: Paginated shopping rows plus totals
         "422":
           content:
@@ -9628,6 +9724,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AdsResponse"
           description: Paginated ad rows plus totals
         "422":
           content:
@@ -10980,6 +11080,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RedditResponse"
           description: Paginated Reddit rows
         "422":
           content:
@@ -11241,6 +11345,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReputationReportsResponse"
           description: Paginated report summaries
       summary: List reputation reports
       tags:
@@ -11424,6 +11532,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ReputationReportScoresResponse"
           description: Paginated score rows plus the report summary
         "404":
           content:
@@ -11519,6 +11631,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudiesResponse"
           description: Paginated study summaries
       summary: List custom AI studies
       tags:
@@ -11543,6 +11659,10 @@ paths:
         style: simple
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudyResponse"
           description: The study
         "404":
           content:
@@ -11650,6 +11770,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/StudyReportScoresResponse"
           description: Paginated score rows plus the report summary
         "404":
           content:
@@ -15446,6 +15570,10 @@ paths:
         required: true
       responses:
         "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationLaunchResponse"
           description: Generation launched (status pending)
         "403":
           content:
@@ -15516,6 +15644,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecommendationDetailResponse"
           description: Recommendation detail with items
         "404":
           content:
@@ -16446,6 +16578,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TechnicalGeoReportsResponse"
           description: "Paginated technical GEO report summaries. Every summary carries\
             \ app_url, the link that opens the report in the app"
         "422":
@@ -16480,6 +16616,10 @@ paths:
         required: true
       responses:
         "201":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TechnicalGeoReportsCreateResponse"
           description: Created. app_urls maps each created report type to the link
             that opens that report in the app
         "403":
@@ -16563,6 +16703,10 @@ paths:
         style: simple
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TechnicalGeoReportResponse"
           description: "Report status and completed result data, plus app_url, the\
             \ link that opens the report in the app"
         "404":
@@ -17663,6 +17807,10 @@ paths:
         style: form
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnnotationsResponse"
           description: Paginated annotations
         "403":
           content:
@@ -17751,6 +17899,10 @@ paths:
         style: simple
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnnotationDeleteResponse"
           description: Deleted
         "403":
           content:
@@ -17803,6 +17955,10 @@ paths:
         required: true
       responses:
         "200":
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AnnotationUpdateResponse"
           description: Updated
         "403":
           content:
@@ -22432,6 +22588,1641 @@ components:
           nullable: true
           type: number
       type: object
+    AiModelInsightsReportFiltersEcho:
+      description: "The filters a position distribution or AI Overview report was\
+        \ computed with, as the server resolved them. A filter that was not given\
+        \ is left out, except from, to, granularity and competitors."
+      example:
+        from: 2000-01-23T04:56:07.000+00:00
+        to: 2000-01-23T04:56:07.000+00:00
+        granularity: day
+        country_code: country_code
+        language_code: language_code
+        collection_id: collection_id
+        prompt_type: prompt_type
+        brand_kind: brand_kind
+        model: chatgpt
+        competitors:
+        - 6
+        - 6
+        brand1: brand1
+        brand2: brand2
+      properties:
+        from:
+          format: date-time
+          type: string
+        to:
+          format: date-time
+          type: string
+        granularity:
+          enum:
+          - day
+          - week
+          - month
+          type: string
+        country_code:
+          description: Comma-separated country codes
+          type: string
+        language_code:
+          description: Comma-separated language codes
+          type: string
+        collection_id:
+          description: Comma-separated collection ids
+          type: string
+        prompt_type:
+          description: Comma-separated prompt types
+          type: string
+        brand_kind:
+          type: string
+        model:
+          description: The model filter; always ai_overview on the AI Overview report
+          enum:
+          - chatgpt
+          - ai_mode
+          - ai_overview
+          - perplexity
+          - gemini
+          - naver_ai
+          - baidu_ai
+          - naver_ai_tab
+          - qwen
+          - doubao
+          - bing_ai_mode
+          - bing_ai_overview
+          type: string
+        competitors:
+          description: Competitor ids from the competitors parameter; empty when it
+            was not given
+          items:
+            type: integer
+          type: array
+        brand1:
+          description: "Position distribution only. The id, as a string, of the competitor\
+            \ compared as the first brand; left out for the project brand"
+          type: string
+        brand2:
+          description: "Position distribution only. The id, as a string, of the competitor\
+            \ compared as the second brand, by default the competitor with the most\
+            \ mentions; left out when the project has none to compare"
+          type: string
+      required:
+      - competitors
+      - from
+      - granularity
+      - to
+      type: object
+    AiModelPositionDistributionResponse:
+      description: "The positions at which one or two brands were mentioned, in four\
+        \ buckets, per period of the window."
+      example:
+        project_id: 0
+        from: 2000-01-23T04:56:07.000+00:00
+        to: 2000-01-23T04:56:07.000+00:00
+        filters:
+          from: 2000-01-23T04:56:07.000+00:00
+          to: 2000-01-23T04:56:07.000+00:00
+          granularity: day
+          country_code: country_code
+          language_code: language_code
+          collection_id: collection_id
+          prompt_type: prompt_type
+          brand_kind: brand_kind
+          model: chatgpt
+          competitors:
+          - 6
+          - 6
+          brand1: brand1
+          brand2: brand2
+        granularity: day
+        brands:
+        - type: type
+          id: 1
+          competitor_id: 5
+          name: name
+          domain: domain
+          buckets:
+          - key: key
+            label: label
+            color: color
+            total: 5
+            data:
+            - date: 2000-01-23
+              value: 2
+            - date: 2000-01-23
+              value: 2
+          - key: key
+            label: label
+            color: color
+            total: 5
+            data:
+            - date: 2000-01-23
+              value: 2
+            - date: 2000-01-23
+              value: 2
+          max_stacked_value: 2
+        - type: type
+          id: 1
+          competitor_id: 5
+          name: name
+          domain: domain
+          buckets:
+          - key: key
+            label: label
+            color: color
+            total: 5
+            data:
+            - date: 2000-01-23
+              value: 2
+            - date: 2000-01-23
+              value: 2
+          - key: key
+            label: label
+            color: color
+            total: 5
+            data:
+            - date: 2000-01-23
+              value: 2
+            - date: 2000-01-23
+              value: 2
+          max_stacked_value: 2
+        max_stacked_value: 7
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        from:
+          format: date-time
+          type: string
+        to:
+          format: date-time
+          type: string
+        filters:
+          $ref: "#/components/schemas/AiModelInsightsReportFiltersEcho"
+        granularity:
+          enum:
+          - day
+          - week
+          - month
+          type: string
+        brands:
+          description: "The first brand (brand1, else the project) and the second\
+            \ (brand2, else the competitor with the most mentions, else the project),\
+            \ each left out when it has no mention in the window"
+          items:
+            $ref: "#/components/schemas/AiModelPositionDistributionBrand"
+          type: array
+        max_stacked_value:
+          description: "The largest mentions count of one period across the brands,\
+            \ for a shared chart axis"
+          type: integer
+        request_id:
+          type: string
+      required:
+      - brands
+      - filters
+      - from
+      - granularity
+      - max_stacked_value
+      - project_id
+      - request_id
+      - to
+      type: object
+    AiModelPositionDistributionBrand:
+      example:
+        type: type
+        id: 1
+        competitor_id: 5
+        name: name
+        domain: domain
+        buckets:
+        - key: key
+          label: label
+          color: color
+          total: 5
+          data:
+          - date: 2000-01-23
+            value: 2
+          - date: 2000-01-23
+            value: 2
+        - key: key
+          label: label
+          color: color
+          total: 5
+          data:
+          - date: 2000-01-23
+            value: 2
+          - date: 2000-01-23
+            value: 2
+        max_stacked_value: 2
+      properties:
+        type:
+          description: project or competitor
+          type: string
+        id:
+          description: "Project id, or competitor id"
+          type: integer
+        competitor_id:
+          description: "Null for the project, the competitor id otherwise"
+          nullable: true
+          type: integer
+        name:
+          type: string
+        domain:
+          description: Bare (scheme-less) domain. Null for the project when it has
+            no URL.
+          nullable: true
+          type: string
+        buckets:
+          description: "One per position bucket, in order: position_1, position_2_3,\
+            \ position_4_7 and position_8_plus"
+          items:
+            $ref: "#/components/schemas/AiModelPositionDistributionBrand_buckets_inner"
+          type: array
+        max_stacked_value:
+          description: "The brand's largest mentions count of one period, its buckets\
+            \ added up"
+          type: integer
+      required:
+      - buckets
+      - competitor_id
+      - domain
+      - id
+      - max_stacked_value
+      - name
+      - type
+      type: object
+    AiOverviewResultsResponse:
+      description: "How often Google AI Overviews returned a result for the project's\
+        \ prompts. A result rate is a percentage (0-100) of the AI Overview runs,\
+        \ 0 when there is none."
+      example:
+        project_id: 0
+        from: 2000-01-23T04:56:07.000+00:00
+        to: 2000-01-23T04:56:07.000+00:00
+        filters:
+          from: 2000-01-23T04:56:07.000+00:00
+          to: 2000-01-23T04:56:07.000+00:00
+          granularity: day
+          country_code: country_code
+          language_code: language_code
+          collection_id: collection_id
+          prompt_type: prompt_type
+          brand_kind: brand_kind
+          model: chatgpt
+          competitors:
+          - 6
+          - 6
+          brand1: brand1
+          brand2: brand2
+        granularity: day
+        summary:
+          total_responses: 6
+          responses_with_results: 1
+          result_rate: 5.962133916683182
+        chart:
+        - date: 2000-01-23
+          total_responses: 5
+          responses_with_results: 2
+          result_rate: 7.061401241503109
+        - date: 2000-01-23
+          total_responses: 5
+          responses_with_results: 2
+          result_rate: 7.061401241503109
+        by_prompt:
+          page: 9
+          per_page: 3
+          total: 2
+          data:
+          - prompt_id: 4
+            prompt_text: prompt_text
+            total_responses: 7
+            responses_with_results: 1
+            result_rate: 1.0246457001441578
+          - prompt_id: 4
+            prompt_text: prompt_text
+            total_responses: 7
+            responses_with_results: 1
+            result_rate: 1.0246457001441578
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        from:
+          format: date-time
+          type: string
+        to:
+          format: date-time
+          type: string
+        filters:
+          $ref: "#/components/schemas/AiModelInsightsReportFiltersEcho"
+        granularity:
+          enum:
+          - day
+          - week
+          - month
+          type: string
+        summary:
+          $ref: "#/components/schemas/AiOverviewResultCounts"
+        chart:
+          description: "One point per period of the window, oldest first, 0 included"
+          items:
+            $ref: "#/components/schemas/AiOverviewResultsResponse_chart_inner"
+          type: array
+        by_prompt:
+          $ref: "#/components/schemas/AiOverviewResultsResponse_by_prompt"
+        request_id:
+          type: string
+      required:
+      - by_prompt
+      - chart
+      - filters
+      - from
+      - granularity
+      - project_id
+      - request_id
+      - summary
+      - to
+      type: object
+    AiOverviewResultCounts:
+      example:
+        total_responses: 6
+        responses_with_results: 1
+        result_rate: 5.962133916683182
+      properties:
+        total_responses:
+          description: AI Overview runs in the window
+          type: integer
+        responses_with_results:
+          description: Runs that returned an AI Overview
+          type: integer
+        result_rate:
+          type: number
+      required:
+      - responses_with_results
+      - result_rate
+      - total_responses
+      type: object
+    AiTrafficResponse:
+      description: "Visits from AI assistants measured by the connected web analytics\
+        \ provider, by day over the window."
+      example:
+        project_id: 0
+        provider: provider
+        from: 2000-01-23
+        to: 2000-01-23
+        granularity: day
+        totals:
+          users: 6
+          sessions: 1
+          conversions: 5
+          conversion_rate: 5.637376656633329
+        by_source:
+        - source: source
+          name: name
+          users: 2
+          sessions: 7
+          conversions: 9
+        - source: source
+          name: name
+          users: 2
+          sessions: 7
+          conversions: 9
+        timeseries:
+          key:
+            key: 3
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        provider:
+          description: "The connected provider: google_analytics, adobe_analytics,\
+            \ adobe_cja, posthog, plausible, matomo or piano"
+          type: string
+        from:
+          format: date
+          type: string
+        to:
+          format: date
+          type: string
+        granularity:
+          enum:
+          - day
+          - week
+          - month
+          type: string
+        totals:
+          $ref: "#/components/schemas/AiTrafficResponse_totals"
+        by_source:
+          description: "One row per AI source with traffic in the window, most sessions\
+            \ first"
+          items:
+            $ref: "#/components/schemas/AiTrafficResponse_by_source_inner"
+          type: array
+        timeseries:
+          additionalProperties:
+            additionalProperties:
+              type: integer
+            type: object
+          description: "Sessions keyed by AI source slug, then by the first day of\
+            \ the period (YYYY-MM-DD); a period without traffic is left out"
+          type: object
+        request_id:
+          type: string
+      required:
+      - by_source
+      - from
+      - granularity
+      - project_id
+      - provider
+      - request_id
+      - timeseries
+      - to
+      - totals
+      type: object
+    SourceRecord:
+      example:
+        id: 5
+        prompt_execution_id: 2
+        domain: domain
+        url: url
+        url_sha256: url_sha256
+        position: 7
+        source_type: source_type
+        is_google_play_link: true
+        is_app_store_link: true
+        created_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        prompt_execution_id:
+          type: integer
+        domain:
+          description: Registrable domain of the cited URL
+          nullable: true
+          type: string
+        url:
+          description: Normalized cited URL (tracking parameters and fragment removed)
+          nullable: true
+          type: string
+        url_sha256:
+          description: "Key of the cited page, as GET /citation_intelligence/urls/{url_sha256}\
+            \ takes it"
+          nullable: true
+          type: string
+        position:
+          description: Rank of the citation in the answer; 0 for a background source
+            reference with no visible rank
+          type: integer
+        source_type:
+          description: "owned (the project's domains), competitor or third_party"
+          type: string
+        is_google_play_link:
+          type: boolean
+        is_app_store_link:
+          type: boolean
+        created_at:
+          format: date-time
+          type: string
+      required:
+      - created_at
+      - domain
+      - id
+      - is_app_store_link
+      - is_google_play_link
+      - position
+      - prompt_execution_id
+      - source_type
+      - url
+      - url_sha256
+      type: object
+    SourcesResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - properties:
+          data:
+            items:
+              $ref: "#/components/schemas/SourceRecord"
+            type: array
+        required:
+        - data
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        data:
+        - id: 5
+          prompt_execution_id: 2
+          domain: domain
+          url: url
+          url_sha256: url_sha256
+          position: 7
+          source_type: source_type
+          is_google_play_link: true
+          is_app_store_link: true
+          created_at: 2000-01-23T04:56:07.000+00:00
+        - id: 5
+          prompt_execution_id: 2
+          domain: domain
+          url: url
+          url_sha256: url_sha256
+          position: 7
+          source_type: source_type
+          is_google_play_link: true
+          is_app_store_link: true
+          created_at: 2000-01-23T04:56:07.000+00:00
+    CitationIntelligenceFiltersEcho:
+      description: "The filters the response was computed with, as the server resolved\
+        \ them. A filter that was not given is left out."
+      example:
+        model: model
+        collection_id: collection_id
+        collection_ids:
+        - 5
+        - 5
+        domains:
+        - domains
+        - domains
+        prompt: 2
+        brand_kind: brand_kind
+        country_code: country_code
+        language_code: language_code
+        from: from
+        to: to
+        key: key
+        query: query
+        source_type: source_type
+        sentiment: sentiment
+        content_gap: content_gap
+      properties:
+        model:
+          type: string
+        collection_id:
+          description: The collection_id parameter as sent (one id or a comma-separated
+            list)
+          type: string
+        collection_ids:
+          items:
+            type: integer
+          type: array
+        domains:
+          description: Lowercased domains
+          items:
+            type: string
+          type: array
+        prompt:
+          description: The prompt id filter
+          type: integer
+        brand_kind:
+          type: string
+        country_code:
+          type: string
+        language_code:
+          type: string
+        from:
+          description: As given
+          type: string
+        to:
+          description: As given
+          type: string
+        key:
+          description: "The group key, as matched"
+          type: string
+        query:
+          type: string
+        source_type:
+          type: string
+        sentiment:
+          type: string
+        content_gap:
+          type: string
+      type: object
+    CitationPageCache:
+      description: What was read on the cited page. Metadata is null when the page
+        has no usable content.
+      example:
+        present: true
+        last_crawled_at: 2000-01-23T04:56:07.000+00:00
+        status_code: 1
+        error_message: error_message
+        content_format: content_format
+        bytes: 1
+        html_title: html_title
+        meta_title: meta_title
+        meta_description: meta_description
+        h1: h1
+        canonical_url: canonical_url
+        language: language
+        mentions_processed: true
+        content_available: true
+      properties:
+        present:
+          description: Whether the page has a saved copy
+          type: boolean
+        last_crawled_at:
+          description: When the saved copy was read; null without usable content
+          format: date-time
+          nullable: true
+          type: string
+        status_code:
+          description: A saved successful response or an observed 404/410; null otherwise
+          nullable: true
+          type: integer
+        error_message:
+          description: Always null; crawl errors are not exposed
+          nullable: true
+          type: string
+        content_format:
+          nullable: true
+          type: string
+        bytes:
+          nullable: true
+          type: integer
+        html_title:
+          nullable: true
+          type: string
+        meta_title:
+          nullable: true
+          type: string
+        meta_description:
+          nullable: true
+          type: string
+        h1:
+          nullable: true
+          type: string
+        canonical_url:
+          nullable: true
+          type: string
+        language:
+          nullable: true
+          type: string
+        mentions_processed:
+          description: Whether the page's mention analysis has completed for this
+            project
+          type: boolean
+        content_available:
+          type: boolean
+      required:
+      - bytes
+      - canonical_url
+      - content_available
+      - content_format
+      - error_message
+      - h1
+      - html_title
+      - language
+      - last_crawled_at
+      - mentions_processed
+      - meta_description
+      - meta_title
+      - present
+      - status_code
+      type: object
+    CitationPageMentions:
+      description: "The brands the cited page mentions, from its analysis for the\
+        \ requesting project. A page not yet analyzed for it has null brand_mentioned,\
+        \ competitor_mentioned and brand_position and empty lists."
+      example:
+        brand_mentioned: true
+        competitor_mentioned: true
+        brand_position: 6
+        content_gap_status: content_gap_status
+        brands:
+        - actor_type: actor_type
+          competitor_id: 7
+          name: name
+          domain: domain
+          position: 1
+        - actor_type: actor_type
+          competitor_id: 7
+          name: name
+          domain: domain
+          position: 1
+        mentions:
+        - id: 4
+          matched_key: matched_key
+          snippet: snippet
+          start_offset: 5
+          end_offset: 9
+          position: 9
+          actor_type: actor_type
+          competitor_id: 6
+          actor_name: actor_name
+          actor_domain: actor_domain
+        - id: 4
+          matched_key: matched_key
+          snippet: snippet
+          start_offset: 5
+          end_offset: 9
+          position: 9
+          actor_type: actor_type
+          competitor_id: 6
+          actor_name: actor_name
+          actor_domain: actor_domain
+      properties:
+        brand_mentioned:
+          nullable: true
+          type: boolean
+        competitor_mentioned:
+          nullable: true
+          type: boolean
+        brand_position:
+          description: Rank of the brand's first mention on the page; null when it
+            has none
+          nullable: true
+          type: integer
+        content_gap_status:
+          description: "missing_page_cache, content_unavailable, mentions_not_processed,\
+            \ mentioned, gap (a competitor but not the brand) or not_mentioned"
+          type: string
+        brands:
+          description: "Each brand the page mentions once, in order of first mention"
+          items:
+            $ref: "#/components/schemas/CitationPageMentions_brands_inner"
+          type: array
+        mentions:
+          description: Every mention on the page with its snippet; not sent on GET
+            /citation_intelligence/groups
+          items:
+            $ref: "#/components/schemas/CitationPageMentions_mentions_inner"
+          type: array
+      required:
+      - brand_mentioned
+      - brand_position
+      - brands
+      - competitor_mentioned
+      - content_gap_status
+      type: object
+    CitationPageDetails:
+      example:
+        url_sha256: url_sha256
+        normalized_url: normalized_url
+        page_cache:
+          present: true
+          last_crawled_at: 2000-01-23T04:56:07.000+00:00
+          status_code: 1
+          error_message: error_message
+          content_format: content_format
+          bytes: 1
+          html_title: html_title
+          meta_title: meta_title
+          meta_description: meta_description
+          h1: h1
+          canonical_url: canonical_url
+          language: language
+          mentions_processed: true
+          content_available: true
+        page_mentions:
+          brand_mentioned: true
+          competitor_mentioned: true
+          brand_position: 6
+          content_gap_status: content_gap_status
+          brands:
+          - actor_type: actor_type
+            competitor_id: 7
+            name: name
+            domain: domain
+            position: 1
+          - actor_type: actor_type
+            competitor_id: 7
+            name: name
+            domain: domain
+            position: 1
+          mentions:
+          - id: 4
+            matched_key: matched_key
+            snippet: snippet
+            start_offset: 5
+            end_offset: 9
+            position: 9
+            actor_type: actor_type
+            competitor_id: 6
+            actor_name: actor_name
+            actor_domain: actor_domain
+          - id: 4
+            matched_key: matched_key
+            snippet: snippet
+            start_offset: 5
+            end_offset: 9
+            position: 9
+            actor_type: actor_type
+            competitor_id: 6
+            actor_name: actor_name
+            actor_domain: actor_domain
+        content:
+          text: text
+          rendered_html: rendered_html
+      properties:
+        url_sha256:
+          type: string
+        normalized_url:
+          nullable: true
+          type: string
+        page_cache:
+          $ref: "#/components/schemas/CitationPageCache"
+        page_mentions:
+          $ref: "#/components/schemas/CitationPageMentions"
+        content:
+          $ref: "#/components/schemas/CitationPageDetails_content"
+      required:
+      - normalized_url
+      - page_cache
+      - page_mentions
+      - url_sha256
+      type: object
+    CitationSeries:
+      description: "The answers citing it under the same filters, by AI model and\
+        \ per period of the account tracking cadence"
+      example:
+        granularity: day
+        total: 6
+        by_model:
+          key: 1
+        data:
+        - date: 2000-01-23
+          value: 2
+        - date: 2000-01-23
+          value: 2
+      properties:
+        granularity:
+          enum:
+          - day
+          - week
+          - month
+          type: string
+        total:
+          description: Equal to total_responses
+          type: integer
+        by_model:
+          additionalProperties:
+            type: integer
+          description: "Answers per AI model, keyed by model, largest first"
+          type: object
+        data:
+          description: "One point per period holding a filtered answer, oldest first;\
+            \ a zero means answers ran and none cited it"
+          items:
+            $ref: "#/components/schemas/AiModelPositionDistributionBrand_buckets_inner_data_inner"
+          type: array
+      required:
+      - by_model
+      - data
+      - granularity
+      - total
+      type: object
+    CitationGroupRow:
+      description: "A cited URL, domain or host (view). url-view rows carry url, url_sha256\
+        \ and normalized_url, plus page_cache and page_mentions when page details\
+        \ are included; domain and host rows carry domain or host and aggregate_details."
+      example:
+        source_id: 7
+        view: view
+        key: key
+        total_responses: 9
+        total_citations: 3
+        citation_rate: 2.027123023002322
+        citation_rate_denominator: 4
+        avg_citation_position: 7.386281948385884
+        first_seen_at: 2000-01-23T04:56:07.000+00:00
+        last_seen_at: 2000-01-23T04:56:07.000+00:00
+        models:
+          key: 1
+        url: url
+        url_sha256: url_sha256
+        normalized_url: normalized_url
+        page_cache:
+          present: true
+          last_crawled_at: 2000-01-23T04:56:07.000+00:00
+          status_code: 1
+          error_message: error_message
+          content_format: content_format
+          bytes: 1
+          html_title: html_title
+          meta_title: meta_title
+          meta_description: meta_description
+          h1: h1
+          canonical_url: canonical_url
+          language: language
+          mentions_processed: true
+          content_available: true
+        page_mentions:
+          brand_mentioned: true
+          competitor_mentioned: true
+          brand_position: 6
+          content_gap_status: content_gap_status
+          brands:
+          - actor_type: actor_type
+            competitor_id: 7
+            name: name
+            domain: domain
+            position: 1
+          - actor_type: actor_type
+            competitor_id: 7
+            name: name
+            domain: domain
+            position: 1
+          mentions:
+          - id: 4
+            matched_key: matched_key
+            snippet: snippet
+            start_offset: 5
+            end_offset: 9
+            position: 9
+            actor_type: actor_type
+            competitor_id: 6
+            actor_name: actor_name
+            actor_domain: actor_domain
+          - id: 4
+            matched_key: matched_key
+            snippet: snippet
+            start_offset: 5
+            end_offset: 9
+            position: 9
+            actor_type: actor_type
+            competitor_id: 6
+            actor_name: actor_name
+            actor_domain: actor_domain
+        domain: domain
+        host: host
+        aggregate_details:
+          unique_urls_count: 8
+          crawled_urls_count: 9
+          brand_mentioned_urls_count: 6
+          competitor_mentioned_urls_count: 3
+          last_crawled_at: 2000-01-23T04:56:07.000+00:00
+        citation_series:
+          granularity: day
+          total: 6
+          by_model:
+            key: 1
+          data:
+          - date: 2000-01-23
+            value: 2
+          - date: 2000-01-23
+            value: 2
+      properties:
+        source_id:
+          description: The group's first citation
+          type: integer
+        view:
+          description: "url, domain or host"
+          type: string
+        key:
+          description: "The URL as cited, the domain or the host"
+          type: string
+        total_responses:
+          description: Answers citing it
+          type: integer
+        total_citations:
+          type: integer
+        citation_rate:
+          description: total_responses as a percentage (0-100) of citation_rate_denominator
+          type: number
+        citation_rate_denominator:
+          description: Answers matching the filters
+          type: integer
+        avg_citation_position:
+          description: Null when no visible citation has a rank
+          nullable: true
+          type: number
+        first_seen_at:
+          format: date-time
+          nullable: true
+          type: string
+        last_seen_at:
+          format: date-time
+          nullable: true
+          type: string
+        models:
+          additionalProperties:
+            type: integer
+          description: "Answers citing it per AI model, keyed by model"
+          type: object
+        url:
+          description: url view only. The URL as cited
+          type: string
+        url_sha256:
+          description: "url view only. Key of the cited page, shared by the URL's\
+            \ variants"
+          nullable: true
+          type: string
+        normalized_url:
+          description: url view only
+          nullable: true
+          type: string
+        page_cache:
+          $ref: "#/components/schemas/CitationPageCache"
+        page_mentions:
+          $ref: "#/components/schemas/CitationPageMentions"
+        domain:
+          description: domain view only
+          type: string
+        host:
+          description: host view only
+          type: string
+        aggregate_details:
+          $ref: "#/components/schemas/CitationGroupRow_aggregate_details"
+        citation_series:
+          $ref: "#/components/schemas/CitationSeries"
+      required:
+      - avg_citation_position
+      - citation_rate
+      - citation_rate_denominator
+      - first_seen_at
+      - key
+      - last_seen_at
+      - models
+      - source_id
+      - total_citations
+      - total_responses
+      - view
+      type: object
+    CitationGroupsResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - properties:
+          view:
+            description: "url, domain or host"
+            type: string
+          filters:
+            $ref: "#/components/schemas/CitationIntelligenceFiltersEcho"
+          data:
+            items:
+              $ref: "#/components/schemas/CitationGroupRow"
+            type: array
+        required:
+        - data
+        - filters
+        - view
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        view: view
+        filters:
+          model: model
+          collection_id: collection_id
+          collection_ids:
+          - 5
+          - 5
+          domains:
+          - domains
+          - domains
+          prompt: 2
+          brand_kind: brand_kind
+          country_code: country_code
+          language_code: language_code
+          from: from
+          to: to
+          key: key
+          query: query
+          source_type: source_type
+          sentiment: sentiment
+          content_gap: content_gap
+        data:
+        - source_id: 7
+          view: view
+          key: key
+          total_responses: 9
+          total_citations: 3
+          citation_rate: 2.027123023002322
+          citation_rate_denominator: 4
+          avg_citation_position: 7.386281948385884
+          first_seen_at: 2000-01-23T04:56:07.000+00:00
+          last_seen_at: 2000-01-23T04:56:07.000+00:00
+          models:
+            key: 1
+          url: url
+          url_sha256: url_sha256
+          normalized_url: normalized_url
+          page_cache:
+            present: true
+            last_crawled_at: 2000-01-23T04:56:07.000+00:00
+            status_code: 1
+            error_message: error_message
+            content_format: content_format
+            bytes: 1
+            html_title: html_title
+            meta_title: meta_title
+            meta_description: meta_description
+            h1: h1
+            canonical_url: canonical_url
+            language: language
+            mentions_processed: true
+            content_available: true
+          page_mentions:
+            brand_mentioned: true
+            competitor_mentioned: true
+            brand_position: 6
+            content_gap_status: content_gap_status
+            brands:
+            - actor_type: actor_type
+              competitor_id: 7
+              name: name
+              domain: domain
+              position: 1
+            - actor_type: actor_type
+              competitor_id: 7
+              name: name
+              domain: domain
+              position: 1
+            mentions:
+            - id: 4
+              matched_key: matched_key
+              snippet: snippet
+              start_offset: 5
+              end_offset: 9
+              position: 9
+              actor_type: actor_type
+              competitor_id: 6
+              actor_name: actor_name
+              actor_domain: actor_domain
+            - id: 4
+              matched_key: matched_key
+              snippet: snippet
+              start_offset: 5
+              end_offset: 9
+              position: 9
+              actor_type: actor_type
+              competitor_id: 6
+              actor_name: actor_name
+              actor_domain: actor_domain
+          domain: domain
+          host: host
+          aggregate_details:
+            unique_urls_count: 8
+            crawled_urls_count: 9
+            brand_mentioned_urls_count: 6
+            competitor_mentioned_urls_count: 3
+            last_crawled_at: 2000-01-23T04:56:07.000+00:00
+          citation_series:
+            granularity: day
+            total: 6
+            by_model:
+              key: 1
+            data:
+            - date: 2000-01-23
+              value: 2
+            - date: 2000-01-23
+              value: 2
+        - source_id: 7
+          view: view
+          key: key
+          total_responses: 9
+          total_citations: 3
+          citation_rate: 2.027123023002322
+          citation_rate_denominator: 4
+          avg_citation_position: 7.386281948385884
+          first_seen_at: 2000-01-23T04:56:07.000+00:00
+          last_seen_at: 2000-01-23T04:56:07.000+00:00
+          models:
+            key: 1
+          url: url
+          url_sha256: url_sha256
+          normalized_url: normalized_url
+          page_cache:
+            present: true
+            last_crawled_at: 2000-01-23T04:56:07.000+00:00
+            status_code: 1
+            error_message: error_message
+            content_format: content_format
+            bytes: 1
+            html_title: html_title
+            meta_title: meta_title
+            meta_description: meta_description
+            h1: h1
+            canonical_url: canonical_url
+            language: language
+            mentions_processed: true
+            content_available: true
+          page_mentions:
+            brand_mentioned: true
+            competitor_mentioned: true
+            brand_position: 6
+            content_gap_status: content_gap_status
+            brands:
+            - actor_type: actor_type
+              competitor_id: 7
+              name: name
+              domain: domain
+              position: 1
+            - actor_type: actor_type
+              competitor_id: 7
+              name: name
+              domain: domain
+              position: 1
+            mentions:
+            - id: 4
+              matched_key: matched_key
+              snippet: snippet
+              start_offset: 5
+              end_offset: 9
+              position: 9
+              actor_type: actor_type
+              competitor_id: 6
+              actor_name: actor_name
+              actor_domain: actor_domain
+            - id: 4
+              matched_key: matched_key
+              snippet: snippet
+              start_offset: 5
+              end_offset: 9
+              position: 9
+              actor_type: actor_type
+              competitor_id: 6
+              actor_name: actor_name
+              actor_domain: actor_domain
+          domain: domain
+          host: host
+          aggregate_details:
+            unique_urls_count: 8
+            crawled_urls_count: 9
+            brand_mentioned_urls_count: 6
+            competitor_mentioned_urls_count: 3
+            last_crawled_at: 2000-01-23T04:56:07.000+00:00
+          citation_series:
+            granularity: day
+            total: 6
+            by_model:
+              key: 1
+            data:
+            - date: 2000-01-23
+              value: 2
+            - date: 2000-01-23
+              value: 2
+    CitingDomainMentionShareResponse:
+      example:
+        project_id: 0
+        filters:
+          model: model
+          collection_id: collection_id
+          collection_ids:
+          - 5
+          - 5
+          domains:
+          - domains
+          - domains
+          prompt: 2
+          brand_kind: brand_kind
+          country_code: country_code
+          language_code: language_code
+          from: from
+          to: to
+          key: key
+          query: query
+          source_type: source_type
+          sentiment: sentiment
+          content_gap: content_gap
+        normalization: normalization
+        data:
+        - domain: domain
+          responses_citing: 6
+          total_mentions: 1
+          actors:
+          - type: type
+            id: 5
+            name: name
+            mentions: 5
+            share: 2.3021358869347655
+          - type: type
+            id: 5
+            name: name
+            mentions: 5
+            share: 2.3021358869347655
+        - domain: domain
+          responses_citing: 6
+          total_mentions: 1
+          actors:
+          - type: type
+            id: 5
+            name: name
+            mentions: 5
+            share: 2.3021358869347655
+          - type: type
+            id: 5
+            name: name
+            mentions: 5
+            share: 2.3021358869347655
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        filters:
+          $ref: "#/components/schemas/CitationIntelligenceFiltersEcho"
+        normalization:
+          description: How the shares are computed
+          type: string
+        data:
+          description: "One row per requested domain (normalized, at most 50), in\
+            \ the order given"
+          items:
+            $ref: "#/components/schemas/CitingDomainMentionShareResponse_data_inner"
+          type: array
+        request_id:
+          type: string
+      required:
+      - data
+      - filters
+      - normalization
+      - project_id
+      - request_id
+      type: object
+    CitedUrlDetailsResponse:
+      example:
+        project_id: 0
+        url_sha256: url_sha256
+        url: url
+        normalized_url: normalized_url
+        domain: domain
+        host: host
+        stats:
+          total_responses: 6
+          total_citations: 1
+          citation_rate: 5.962133916683182
+          citation_rate_denominator: 5
+          avg_citation_position: 2.3021358869347655
+          first_seen_at: 2000-01-23T04:56:07.000+00:00
+          last_seen_at: 2000-01-23T04:56:07.000+00:00
+          distinct_urls: 7
+          source_types:
+            owned: 9
+            competitor: 3
+            third_party: 2
+          models:
+            key: 4
+        urls:
+        - urls
+        - urls
+        page_details:
+          url_sha256: url_sha256
+          normalized_url: normalized_url
+          page_cache:
+            present: true
+            last_crawled_at: 2000-01-23T04:56:07.000+00:00
+            status_code: 1
+            error_message: error_message
+            content_format: content_format
+            bytes: 1
+            html_title: html_title
+            meta_title: meta_title
+            meta_description: meta_description
+            h1: h1
+            canonical_url: canonical_url
+            language: language
+            mentions_processed: true
+            content_available: true
+          page_mentions:
+            brand_mentioned: true
+            competitor_mentioned: true
+            brand_position: 6
+            content_gap_status: content_gap_status
+            brands:
+            - actor_type: actor_type
+              competitor_id: 7
+              name: name
+              domain: domain
+              position: 1
+            - actor_type: actor_type
+              competitor_id: 7
+              name: name
+              domain: domain
+              position: 1
+            mentions:
+            - id: 4
+              matched_key: matched_key
+              snippet: snippet
+              start_offset: 5
+              end_offset: 9
+              position: 9
+              actor_type: actor_type
+              competitor_id: 6
+              actor_name: actor_name
+              actor_domain: actor_domain
+            - id: 4
+              matched_key: matched_key
+              snippet: snippet
+              start_offset: 5
+              end_offset: 9
+              position: 9
+              actor_type: actor_type
+              competitor_id: 6
+              actor_name: actor_name
+              actor_domain: actor_domain
+          content:
+            text: text
+            rendered_html: rendered_html
+        citation_series:
+          granularity: day
+          total: 6
+          by_model:
+            key: 1
+          data:
+          - date: 2000-01-23
+            value: 2
+          - date: 2000-01-23
+            value: 2
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        url_sha256:
+          type: string
+        url:
+          description: The URL as first cited
+          nullable: true
+          type: string
+        normalized_url:
+          type: string
+        domain:
+          nullable: true
+          type: string
+        host:
+          nullable: true
+          type: string
+        stats:
+          $ref: "#/components/schemas/CitedUrlDetailsResponse_stats"
+        urls:
+          description: "Up to 20 spellings of the URL as cited, alphabetically"
+          items:
+            nullable: true
+            type: string
+          type: array
+        page_details:
+          $ref: "#/components/schemas/CitationPageDetails"
+        citation_series:
+          $ref: "#/components/schemas/CitationSeries"
+        request_id:
+          type: string
+      required:
+      - domain
+      - host
+      - normalized_url
+      - page_details
+      - project_id
+      - request_id
+      - stats
+      - url
+      - url_sha256
+      - urls
+      type: object
+    CitedUrlOccurrencesResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - properties:
+          url_sha256:
+            type: string
+          data:
+            description: "One row per citation of the URL, latest answer first"
+            items:
+              $ref: "#/components/schemas/CitedUrlOccurrencesResponse_allOf_data"
+            type: array
+        required:
+        - data
+        - url_sha256
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        url_sha256: url_sha256
+        data:
+        - source_id: 5
+          answer_id: 2
+          prompt_execution_id: 7
+          prompt_id: 9
+          prompt_text: prompt_text
+          model: chatgpt
+          executed_at: 2000-01-23T04:56:07.000+00:00
+          citation_position: 3
+          url: url
+          domain: domain
+          source_type: source_type
+          response_excerpt: response_excerpt
+          response_truncated: true
+          fan_out_queries:
+          - fan_out_queries
+          - fan_out_queries
+        - source_id: 5
+          answer_id: 2
+          prompt_execution_id: 7
+          prompt_id: 9
+          prompt_text: prompt_text
+          model: chatgpt
+          executed_at: 2000-01-23T04:56:07.000+00:00
+          citation_position: 3
+          url: url
+          domain: domain
+          source_type: source_type
+          response_excerpt: response_excerpt
+          response_truncated: true
+          fan_out_queries:
+          - fan_out_queries
+          - fan_out_queries
+    CitedUrlContentResponse:
+      example:
+        project_id: 0
+        url_sha256: url_sha256
+        url: url
+        normalized_url: normalized_url
+        domain: domain
+        host: host
+        page_details:
+          url_sha256: url_sha256
+          normalized_url: normalized_url
+          page_cache:
+            present: true
+            last_crawled_at: 2000-01-23T04:56:07.000+00:00
+            status_code: 1
+            error_message: error_message
+            content_format: content_format
+            bytes: 1
+            html_title: html_title
+            meta_title: meta_title
+            meta_description: meta_description
+            h1: h1
+            canonical_url: canonical_url
+            language: language
+            mentions_processed: true
+            content_available: true
+          page_mentions:
+            brand_mentioned: true
+            competitor_mentioned: true
+            brand_position: 6
+            content_gap_status: content_gap_status
+            brands:
+            - actor_type: actor_type
+              competitor_id: 7
+              name: name
+              domain: domain
+              position: 1
+            - actor_type: actor_type
+              competitor_id: 7
+              name: name
+              domain: domain
+              position: 1
+            mentions:
+            - id: 4
+              matched_key: matched_key
+              snippet: snippet
+              start_offset: 5
+              end_offset: 9
+              position: 9
+              actor_type: actor_type
+              competitor_id: 6
+              actor_name: actor_name
+              actor_domain: actor_domain
+            - id: 4
+              matched_key: matched_key
+              snippet: snippet
+              start_offset: 5
+              end_offset: 9
+              position: 9
+              actor_type: actor_type
+              competitor_id: 6
+              actor_name: actor_name
+              actor_domain: actor_domain
+          content:
+            text: text
+            rendered_html: rendered_html
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        url_sha256:
+          type: string
+        url:
+          description: The URL as first cited
+          nullable: true
+          type: string
+        normalized_url:
+          type: string
+        domain:
+          nullable: true
+          type: string
+        host:
+          nullable: true
+          type: string
+        page_details:
+          $ref: "#/components/schemas/CitationPageDetails"
+        request_id:
+          type: string
+      required:
+      - domain
+      - host
+      - normalized_url
+      - page_details
+      - project_id
+      - request_id
+      - url
+      - url_sha256
+      type: object
     WebAnalyticsSchemaResponse:
       example:
         project_id: 0
@@ -22858,6 +24649,545 @@ components:
       required:
       - plan_required_fields
       type: object
+    ProjectDraftRecord:
+      example:
+        draft_id: draft_id
+        status: status
+        current_step: current_step
+        steps_completed:
+        - steps_completed
+        - steps_completed
+        steps_remaining:
+        - steps_remaining
+        - steps_remaining
+        optional_steps:
+        - optional_steps
+        - optional_steps
+        finalizable: true
+        website_url: website_url
+        main_country: main_country
+        main_language: main_language
+        use_subdomain: true
+        name: name
+        brand_name: brand_name
+        description: description
+        industry:
+        - industry
+        - industry
+        matching_names:
+        - matching_names
+        - matching_names
+        prompts:
+        - prompts
+        - prompts
+        competitors:
+        - domain: domain
+          brand_name: brand_name
+          matching_names:
+          - matching_names
+          - matching_names
+        - domain: domain
+          brand_name: brand_name
+          matching_names:
+          - matching_names
+          - matching_names
+        owned_media:
+          youtube_channel_url: youtube_channel_url
+          instagram_profile_url: instagram_profile_url
+          facebook_page_url: facebook_page_url
+          tiktok_profile_url: tiktok_profile_url
+          app_store_url: app_store_url
+          google_play_url: google_play_url
+        weekly_email_subscribed: true
+        external_identifier: external_identifier
+        execute_prompts_immediately: true
+        project_id: 0
+        expires_at: 2000-01-23T04:56:07.000+00:00
+        created_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        draft_id:
+          description: Draft id (draft_...)
+          type: string
+        status:
+          description: "open, finalized or expired"
+          type: string
+        current_step:
+          description: "The next step to submit (details, prompts, competitors, owned_media),\
+            \ or ready when the draft can be finalized"
+          type: string
+        steps_completed:
+          items:
+            type: string
+          type: array
+        steps_remaining:
+          description: Required steps not submitted yet
+          items:
+            type: string
+          type: array
+        optional_steps:
+          description: Steps the plan allows but finalize does not require (owned_media
+            from Growth)
+          items:
+            type: string
+          type: array
+        finalizable:
+          type: boolean
+        website_url:
+          type: string
+        main_country:
+          type: string
+        main_language:
+          type: string
+        use_subdomain:
+          type: boolean
+        name:
+          description: Null until the details step
+          nullable: true
+          type: string
+        brand_name:
+          nullable: true
+          type: string
+        description:
+          nullable: true
+          type: string
+        industry:
+          items:
+            type: string
+          type: array
+        matching_names:
+          items:
+            type: string
+          type: array
+        prompts:
+          items:
+            type: string
+          type: array
+        competitors:
+          items:
+            $ref: "#/components/schemas/ProjectDraftRecord_competitors_inner"
+          type: array
+        owned_media:
+          $ref: "#/components/schemas/ProjectDraftRecord_owned_media"
+        weekly_email_subscribed:
+          type: boolean
+        external_identifier:
+          nullable: true
+          type: string
+        execute_prompts_immediately:
+          type: boolean
+        project_id:
+          description: The project the draft became; null until finalized
+          nullable: true
+          type: integer
+        expires_at:
+          format: date-time
+          type: string
+        created_at:
+          format: date-time
+          type: string
+      required:
+      - brand_name
+      - competitors
+      - created_at
+      - current_step
+      - description
+      - draft_id
+      - execute_prompts_immediately
+      - expires_at
+      - external_identifier
+      - finalizable
+      - industry
+      - main_country
+      - main_language
+      - matching_names
+      - name
+      - optional_steps
+      - owned_media
+      - project_id
+      - prompts
+      - status
+      - steps_completed
+      - steps_remaining
+      - use_subdomain
+      - website_url
+      - weekly_email_subscribed
+      type: object
+    ProjectDraftSuggestions:
+      description: "AI suggestions for a step. Only the key of the suggested step\
+        \ is sent, and only when status is ready"
+      example:
+        step: step
+        status: status
+        details:
+          name: name
+          description: description
+          industry:
+          - industry
+          - industry
+          matching_names:
+          - matching_names
+          - matching_names
+        prompts:
+        - prompts
+        - prompts
+        competitors:
+        - brand_name: brand_name
+          domain: domain
+          matching_names:
+          - matching_names
+          - matching_names
+        - brand_name: brand_name
+          domain: domain
+          matching_names:
+          - matching_names
+          - matching_names
+      properties:
+        step:
+          description: "The step the suggestions are for (details, prompts or competitors)"
+          type: string
+        status:
+          description: "ready, none (not requested, or nothing cached yet) or failed"
+          type: string
+        details:
+          $ref: "#/components/schemas/ProjectDraftSuggestions_details"
+        prompts:
+          items:
+            type: string
+          type: array
+        competitors:
+          items:
+            $ref: "#/components/schemas/ProjectDraftSuggestions_competitors_inner"
+          type: array
+      required:
+      - status
+      type: object
+    ProjectDraftResponse:
+      example:
+        draft:
+          draft_id: draft_id
+          status: status
+          current_step: current_step
+          steps_completed:
+          - steps_completed
+          - steps_completed
+          steps_remaining:
+          - steps_remaining
+          - steps_remaining
+          optional_steps:
+          - optional_steps
+          - optional_steps
+          finalizable: true
+          website_url: website_url
+          main_country: main_country
+          main_language: main_language
+          use_subdomain: true
+          name: name
+          brand_name: brand_name
+          description: description
+          industry:
+          - industry
+          - industry
+          matching_names:
+          - matching_names
+          - matching_names
+          prompts:
+          - prompts
+          - prompts
+          competitors:
+          - domain: domain
+            brand_name: brand_name
+            matching_names:
+            - matching_names
+            - matching_names
+          - domain: domain
+            brand_name: brand_name
+            matching_names:
+            - matching_names
+            - matching_names
+          owned_media:
+            youtube_channel_url: youtube_channel_url
+            instagram_profile_url: instagram_profile_url
+            facebook_page_url: facebook_page_url
+            tiktok_profile_url: tiktok_profile_url
+            app_store_url: app_store_url
+            google_play_url: google_play_url
+          weekly_email_subscribed: true
+          external_identifier: external_identifier
+          execute_prompts_immediately: true
+          project_id: 0
+          expires_at: 2000-01-23T04:56:07.000+00:00
+          created_at: 2000-01-23T04:56:07.000+00:00
+        suggestions:
+          step: step
+          status: status
+          details:
+            name: name
+            description: description
+            industry:
+            - industry
+            - industry
+            matching_names:
+            - matching_names
+            - matching_names
+          prompts:
+          - prompts
+          - prompts
+          competitors:
+          - brand_name: brand_name
+            domain: domain
+            matching_names:
+            - matching_names
+            - matching_names
+          - brand_name: brand_name
+            domain: domain
+            matching_names:
+            - matching_names
+            - matching_names
+        limits:
+          prompts_available: 6
+          max_prompts_per_request: 1
+          max_competitors: 5
+        request_id: request_id
+      properties:
+        draft:
+          $ref: "#/components/schemas/ProjectDraftRecord"
+        suggestions:
+          $ref: "#/components/schemas/ProjectDraftSuggestions"
+        limits:
+          $ref: "#/components/schemas/ProjectDraftResponse_limits"
+        request_id:
+          type: string
+      required:
+      - draft
+      - limits
+      - request_id
+      - suggestions
+      type: object
+    CompetitorUpdateResponse:
+      example:
+        project_id: 0
+        competitor:
+          id: 6
+          brand_name: brand_name
+          domain: domain
+          citation_match_mode: domain
+          citation_match_path: citation_match_path
+          color: color
+          matching_names:
+          - matching_names
+          - matching_names
+          processing: true
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        competitor:
+          $ref: "#/components/schemas/CompetitorUpdateResponse_competitor"
+        request_id:
+          type: string
+      required:
+      - competitor
+      - project_id
+      - request_id
+      type: object
+    CompetitorDeleteResponse:
+      example:
+        project_id: 0
+        deleted: true
+        id: 6
+        brand_name: brand_name
+        domain: domain
+        total_competitors: 1
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        deleted:
+          description: Always true
+          type: boolean
+        id:
+          type: integer
+        brand_name:
+          type: string
+        domain:
+          type: string
+        total_competitors:
+          description: Competitors left in the project
+          type: integer
+        request_id:
+          type: string
+      required:
+      - brand_name
+      - deleted
+      - domain
+      - id
+      - project_id
+      - request_id
+      - total_competitors
+      type: object
+    CollectionUpdateResponse:
+      example:
+        project_id: 0
+        collection:
+          id: 6
+          name: name
+          description: description
+          prompts_count: 1
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        collection:
+          $ref: "#/components/schemas/CollectionUpdateResponse_collection"
+        request_id:
+          type: string
+      required:
+      - collection
+      - project_id
+      - request_id
+      type: object
+    CollectionDeleteResponse:
+      example:
+        project_id: 0
+        deleted: true
+        id: 6
+        name: name
+        prompts_kept: 1
+        total_collections: 5
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        deleted:
+          description: Always true
+          type: boolean
+        id:
+          type: integer
+        name:
+          type: string
+        prompts_kept:
+          description: Prompts the collection held; they stay in the project
+          type: integer
+        total_collections:
+          description: Collections left in the project
+          type: integer
+        request_id:
+          type: string
+      required:
+      - deleted
+      - id
+      - name
+      - project_id
+      - prompts_kept
+      - request_id
+      - total_collections
+      type: object
+    PromptDeleteResponse:
+      example:
+        project_id: 0
+        deleted: true
+        id: 6
+        raw_input: raw_input
+        total_after: 1
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        deleted:
+          description: Always true
+          type: boolean
+        id:
+          type: integer
+        raw_input:
+          type: string
+        total_after:
+          description: Prompts left in the project
+          type: integer
+        request_id:
+          type: string
+      required:
+      - deleted
+      - id
+      - project_id
+      - raw_input
+      - request_id
+      - total_after
+      type: object
+    QueryFanOutRow:
+      description: "A view=query row carries query_text, count and share; a view=prompt\
+        \ row carries prompt_id, prompt_text, variations_count and total_count"
+      example:
+        query_text: query_text
+        count: 2
+        share: 7.061401241503109
+        prompt_id: 9
+        prompt_text: prompt_text
+        variations_count: 3
+        total_count: 2
+      properties:
+        query_text:
+          description: The sub-query a model issued (view=query)
+          type: string
+        count:
+          description: Times it was issued (view=query)
+          type: integer
+        share:
+          description: "Share of all sub-query occurrences, on a 0-100 scale (view=query)"
+          type: number
+        prompt_id:
+          description: view=prompt
+          type: integer
+        prompt_text:
+          description: view=prompt
+          type: string
+        variations_count:
+          description: Distinct sub-queries issued for the prompt (view=prompt)
+          type: integer
+        total_count:
+          description: "Sub-queries issued for the prompt, repeats included (view=prompt)"
+          type: integer
+      type: object
+    QueryFanOutsResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - properties:
+          view:
+            description: "query or prompt, the row shape of data"
+            type: string
+          total_occurrences:
+            description: Sub-query occurrences across every page (view=query)
+            type: integer
+          data:
+            items:
+              $ref: "#/components/schemas/QueryFanOutRow"
+            type: array
+        required:
+        - data
+        - view
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        view: view
+        total_occurrences: 5
+        data:
+        - query_text: query_text
+          count: 2
+          share: 7.061401241503109
+          prompt_id: 9
+          prompt_text: prompt_text
+          variations_count: 3
+          total_count: 2
+        - query_text: query_text
+          count: 2
+          share: 7.061401241503109
+          prompt_id: 9
+          prompt_text: prompt_text
+          variations_count: 3
+          total_count: 2
     ProjectCreateRequest:
       example:
         website_url: https://acme.com
@@ -27007,7 +29337,8 @@ components:
           type: string
       type: object
     ReputationReportSummary:
-      description: One reputation report's status and analyst model coverage
+      description: One reputation or custom-study report's status and analyst model
+        coverage
       example:
         id: id
         status: pending
@@ -27022,7 +29353,8 @@ components:
         error_message: error_message
       properties:
         id:
-          description: "Report id for GET /reputation/reports/{id}"
+          description: "Report id for GET /reputation/reports/{id}, or GET /studies/{id}/reports/{report_id}\
+            \ for a study report"
           type: string
         status:
           enum:
@@ -27105,6 +29437,1001 @@ components:
       - created
       - project_id
       - report
+      type: object
+    ReputationReportsResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - properties:
+          data:
+            items:
+              $ref: "#/components/schemas/ReputationReportSummary"
+            type: array
+        required:
+        - data
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        data:
+        - id: id
+          status: pending
+          created_at: 2000-01-23T04:56:07.000+00:00
+          processed_at: 2000-01-23T04:56:07.000+00:00
+          available_models:
+          - chatgpt
+          - chatgpt
+          missing_models:
+          - chatgpt
+          - chatgpt
+          error_message: error_message
+        - id: id
+          status: pending
+          created_at: 2000-01-23T04:56:07.000+00:00
+          processed_at: 2000-01-23T04:56:07.000+00:00
+          available_models:
+          - chatgpt
+          - chatgpt
+          missing_models:
+          - chatgpt
+          - chatgpt
+          error_message: error_message
+    AnalystScoreRow:
+      description: One analyst model's score of one brand (a subject in a custom study)
+        on one attribute of one dimension
+      example:
+        brand: brand
+        is_project: true
+        model: chatgpt
+        report_date: 2000-01-23
+        dimension: dimension
+        dimension_name: dimension_name
+        attribute: attribute
+        attribute_name: attribute_name
+        score: ""
+        reasoning: reasoning
+      properties:
+        brand:
+          description: Brand name; the subject name in a custom study
+          type: string
+        is_project:
+          description: "Whether it is the project's own brand; in a custom study,\
+            \ the focus subject"
+          type: boolean
+        model:
+          enum:
+          - chatgpt
+          - perplexity
+          - gemini
+          - deepseek
+          - grok
+          - claude
+          type: string
+        report_date:
+          format: date
+          type: string
+        dimension:
+          description: "Dimension key, as the dimension filter takes it"
+          type: string
+        dimension_name:
+          type: string
+        attribute:
+          description: Attribute key within the dimension
+          type: string
+        attribute_name:
+          type: string
+        score:
+          description: "The 0-100 score as the analyst model wrote it, normally a\
+            \ number, or null when it gave none. Deliberately untyped, as the model's\
+            \ output is stored without coercion"
+        reasoning:
+          description: Why the model gave this score; null when it gave no reasoning
+          nullable: true
+          type: string
+      required:
+      - attribute
+      - attribute_name
+      - brand
+      - dimension
+      - dimension_name
+      - is_project
+      - model
+      - reasoning
+      - report_date
+      - score
+      type: object
+    ReputationReportScoresResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - properties:
+          report:
+            $ref: "#/components/schemas/ReputationReportSummary"
+          data:
+            items:
+              $ref: "#/components/schemas/AnalystScoreRow"
+            type: array
+        required:
+        - data
+        - report
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        report:
+          id: id
+          status: pending
+          created_at: 2000-01-23T04:56:07.000+00:00
+          processed_at: 2000-01-23T04:56:07.000+00:00
+          available_models:
+          - chatgpt
+          - chatgpt
+          missing_models:
+          - chatgpt
+          - chatgpt
+          error_message: error_message
+        data:
+        - brand: brand
+          is_project: true
+          model: chatgpt
+          report_date: 2000-01-23
+          dimension: dimension
+          dimension_name: dimension_name
+          attribute: attribute
+          attribute_name: attribute_name
+          score: ""
+          reasoning: reasoning
+        - brand: brand
+          is_project: true
+          model: chatgpt
+          report_date: 2000-01-23
+          dimension: dimension
+          dimension_name: dimension_name
+          attribute: attribute
+          attribute_name: attribute_name
+          score: ""
+          reasoning: reasoning
+    StudySummary:
+      description: One custom AI study
+      example:
+        id: 5
+        title: title
+        study_type: study_type
+        cadence: cadence
+        status: status
+        project_id: 5
+        subjects_count: 2
+        ai_models:
+        - chatgpt
+        - chatgpt
+        output_language_code: output_language_code
+        created_at: 2000-01-23T04:56:07.000+00:00
+        last_report_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        study_type:
+          description: "brand_set, sector, geo, topic or custom"
+          type: string
+        cadence:
+          description: one_shot or monthly
+          type: string
+        status:
+          description: active or archived
+          type: string
+        project_id:
+          description: The project the study is attached to; null for an account-level
+            study
+          nullable: true
+          type: integer
+        subjects_count:
+          type: integer
+        ai_models:
+          description: Analyst models the study runs on
+          items:
+            enum:
+            - chatgpt
+            - perplexity
+            - gemini
+            - deepseek
+            - grok
+            - claude
+            type: string
+          type: array
+        output_language_code:
+          description: ISO 639-1 code of the language the reports are written in
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        last_report_at:
+          description: When the latest report started; null before the first one
+          format: date-time
+          nullable: true
+          type: string
+      required:
+      - ai_models
+      - cadence
+      - created_at
+      - id
+      - last_report_at
+      - output_language_code
+      - project_id
+      - status
+      - study_type
+      - subjects_count
+      - title
+      type: object
+    StudiesResponse:
+      example:
+        page: 0
+        per_page: 6
+        total: 1
+        data:
+        - id: 5
+          title: title
+          study_type: study_type
+          cadence: cadence
+          status: status
+          project_id: 5
+          subjects_count: 2
+          ai_models:
+          - chatgpt
+          - chatgpt
+          output_language_code: output_language_code
+          created_at: 2000-01-23T04:56:07.000+00:00
+          last_report_at: 2000-01-23T04:56:07.000+00:00
+        - id: 5
+          title: title
+          study_type: study_type
+          cadence: cadence
+          status: status
+          project_id: 5
+          subjects_count: 2
+          ai_models:
+          - chatgpt
+          - chatgpt
+          output_language_code: output_language_code
+          created_at: 2000-01-23T04:56:07.000+00:00
+          last_report_at: 2000-01-23T04:56:07.000+00:00
+        request_id: request_id
+      properties:
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          description: Studies matching the filters across every page
+          type: integer
+        data:
+          items:
+            $ref: "#/components/schemas/StudySummary"
+          type: array
+        request_id:
+          type: string
+      required:
+      - data
+      - page
+      - per_page
+      - request_id
+      - total
+      type: object
+    StudyResponse:
+      description: "One custom AI study with its brief, subjects, dimensions and latest\
+        \ reports"
+      example:
+        id: 0
+        title: title
+        study_type: study_type
+        cadence: cadence
+        status: status
+        project_id: 6
+        subjects_count: 1
+        ai_models:
+        - chatgpt
+        - chatgpt
+        output_language_code: output_language_code
+        created_at: 2000-01-23T04:56:07.000+00:00
+        last_report_at: 2000-01-23T04:56:07.000+00:00
+        brief: brief
+        subjects:
+        - subjects
+        - subjects
+        dimensions:
+        - dimensions
+        - dimensions
+        reports:
+        - id: id
+          status: pending
+          created_at: 2000-01-23T04:56:07.000+00:00
+          processed_at: 2000-01-23T04:56:07.000+00:00
+          available_models:
+          - chatgpt
+          - chatgpt
+          missing_models:
+          - chatgpt
+          - chatgpt
+          error_message: error_message
+        - id: id
+          status: pending
+          created_at: 2000-01-23T04:56:07.000+00:00
+          processed_at: 2000-01-23T04:56:07.000+00:00
+          available_models:
+          - chatgpt
+          - chatgpt
+          missing_models:
+          - chatgpt
+          - chatgpt
+          error_message: error_message
+        request_id: request_id
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        study_type:
+          description: "brand_set, sector, geo, topic or custom"
+          type: string
+        cadence:
+          description: one_shot or monthly
+          type: string
+        status:
+          description: active or archived
+          type: string
+        project_id:
+          description: The project the study is attached to; null for an account-level
+            study
+          nullable: true
+          type: integer
+        subjects_count:
+          type: integer
+        ai_models:
+          description: Analyst models the study runs on
+          items:
+            enum:
+            - chatgpt
+            - perplexity
+            - gemini
+            - deepseek
+            - grok
+            - claude
+            type: string
+          type: array
+        output_language_code:
+          description: ISO 639-1 code of the language the reports are written in
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        last_report_at:
+          description: When the latest report started; null before the first one
+          format: date-time
+          nullable: true
+          type: string
+        brief:
+          description: What the study asks the analyst models; null when none was
+            written
+          nullable: true
+          type: string
+        subjects:
+          description: Names of the subjects it compares
+          items:
+            type: string
+          type: array
+        dimensions:
+          description: "Keys of the dimensions it scores, as the dimension filter\
+            \ takes them"
+          items:
+            type: string
+          type: array
+        reports:
+          description: "The 24 latest reports, newest first"
+          items:
+            $ref: "#/components/schemas/ReputationReportSummary"
+          type: array
+        request_id:
+          type: string
+      required:
+      - ai_models
+      - brief
+      - cadence
+      - created_at
+      - dimensions
+      - id
+      - last_report_at
+      - output_language_code
+      - project_id
+      - reports
+      - request_id
+      - status
+      - study_type
+      - subjects
+      - subjects_count
+      - title
+      type: object
+    StudyReportScoresResponse:
+      example:
+        study_id: 0
+        report:
+          id: id
+          status: pending
+          created_at: 2000-01-23T04:56:07.000+00:00
+          processed_at: 2000-01-23T04:56:07.000+00:00
+          available_models:
+          - chatgpt
+          - chatgpt
+          missing_models:
+          - chatgpt
+          - chatgpt
+          error_message: error_message
+        page: 6
+        per_page: 1
+        total: 5
+        data:
+        - brand: brand
+          is_project: true
+          model: chatgpt
+          report_date: 2000-01-23
+          dimension: dimension
+          dimension_name: dimension_name
+          attribute: attribute
+          attribute_name: attribute_name
+          score: ""
+          reasoning: reasoning
+        - brand: brand
+          is_project: true
+          model: chatgpt
+          report_date: 2000-01-23
+          dimension: dimension
+          dimension_name: dimension_name
+          attribute: attribute
+          attribute_name: attribute_name
+          score: ""
+          reasoning: reasoning
+        request_id: request_id
+      properties:
+        study_id:
+          type: integer
+        report:
+          $ref: "#/components/schemas/ReputationReportSummary"
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          description: Score rows matching the filters across every page
+          type: integer
+        data:
+          items:
+            $ref: "#/components/schemas/AnalystScoreRow"
+          type: array
+        request_id:
+          type: string
+      required:
+      - data
+      - page
+      - per_page
+      - report
+      - request_id
+      - study_id
+      - total
+      type: object
+    RecommendationLaunchResponse:
+      example:
+        project_id: 0
+        recommendation:
+          id: 6
+          recommendation_type: ai_visibility
+          status: status
+          created_at: 2000-01-23T04:56:07.000+00:00
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        recommendation:
+          $ref: "#/components/schemas/RecommendationLaunchResponse_recommendation"
+        request_id:
+          type: string
+      required:
+      - project_id
+      - recommendation
+      - request_id
+      type: object
+    RecommendationDetailResponse:
+      description: One recommendation run with its items
+      example:
+        id: 0
+        project_id: 6
+        recommendation_type: ai_visibility
+        status: pending
+        error_message: error_message
+        generated_at: 2000-01-23T04:56:07.000+00:00
+        created_at: 2000-01-23T04:56:07.000+00:00
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        total_recommendations: 1
+        high_priority_count: 5
+        summary:
+          total_recommendations: 3
+          high_priority_count: 2
+          categories:
+          - categories
+          - categories
+        context: "{}"
+        report_data:
+          key: ""
+        item_counts:
+          active: 5
+          completed: 2
+          archived: 7
+        items:
+        - id: 9
+          recommendation_id: 3
+          recommendation_type: recommendation_type
+          category: category
+          title: title
+          description: description
+          priority: high
+          estimated_impact: estimated_impact
+          action_items:
+          - action_items
+          - action_items
+          source_refs:
+          - source_refs
+          - source_refs
+          status: active
+          status_changed_at: 2000-01-23T04:56:07.000+00:00
+          position: 2
+          metadata:
+            key: ""
+          created_at: 2000-01-23T04:56:07.000+00:00
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          resolved_source_refs:
+          - key: ""
+          - key: ""
+          unresolved_source_refs:
+          - unresolved_source_refs
+          - unresolved_source_refs
+        - id: 9
+          recommendation_id: 3
+          recommendation_type: recommendation_type
+          category: category
+          title: title
+          description: description
+          priority: high
+          estimated_impact: estimated_impact
+          action_items:
+          - action_items
+          - action_items
+          source_refs:
+          - source_refs
+          - source_refs
+          status: active
+          status_changed_at: 2000-01-23T04:56:07.000+00:00
+          position: 2
+          metadata:
+            key: ""
+          created_at: 2000-01-23T04:56:07.000+00:00
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          resolved_source_refs:
+          - key: ""
+          - key: ""
+          unresolved_source_refs:
+          - unresolved_source_refs
+          - unresolved_source_refs
+        request_id: request_id
+      properties:
+        id:
+          type: integer
+        project_id:
+          type: integer
+        recommendation_type:
+          enum:
+          - ai_visibility
+          - social_community
+          - brand_building
+          - sentiment_reputation
+          type: string
+        status:
+          enum:
+          - pending
+          - processing
+          - completed
+          - failed
+          type: string
+        error_message:
+          description: Set only when status is failed
+          nullable: true
+          type: string
+        generated_at:
+          description: Null until the generation completes
+          format: date-time
+          nullable: true
+          type: string
+        created_at:
+          format: date-time
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+        total_recommendations:
+          type: integer
+        high_priority_count:
+          type: integer
+        summary:
+          $ref: "#/components/schemas/RecommendationDetailResponse_summary"
+        context:
+          description: Generation context and run diagnostics as stored; empty until
+            the generation completes. Its keys are not a stable contract
+          type: object
+        report_data:
+          additionalProperties: true
+          description: "The stored run, including the evidence indices (prompts_index,\
+            \ citations_index, own_content_index and others) that the source_refs\
+            \ codes of the items point to. Its keys are not a stable contract"
+          type: object
+        item_counts:
+          $ref: "#/components/schemas/RecommendationDetailResponse_item_counts"
+        items:
+          items:
+            $ref: "#/components/schemas/RecommendationItem"
+          type: array
+        request_id:
+          type: string
+      required:
+      - context
+      - created_at
+      - error_message
+      - generated_at
+      - high_priority_count
+      - id
+      - item_counts
+      - items
+      - project_id
+      - recommendation_type
+      - report_data
+      - request_id
+      - status
+      - summary
+      - total_recommendations
+      - updated_at
+      type: object
+    TechnicalGeoReportSummary:
+      description: One technical GEO report's status and score
+      example:
+        id: 5
+        report_type: report_type
+        project_id: 2
+        batch_id: 7
+        url: url
+        domain: domain
+        country_code: country_code
+        output_language_code: output_language_code
+        status: status
+        result_available: true
+        overall_score: 9.301444243932576
+        created_at: 2000-01-23T04:56:07.000+00:00
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        app_url: https://openapi-generator.tech
+      properties:
+        id:
+          type: integer
+        report_type:
+          description: The report_type requested (agent_readiness for ai_readiness)
+          type: string
+        project_id:
+          type: integer
+        batch_id:
+          description: Bundle the report was created in; null for a report created
+            on its own
+          nullable: true
+          type: integer
+        url:
+          description: "The page analysed; null for the domain-level types (robots_txt,\
+            \ agent_readiness, llms_txt, ai_visibility)"
+          nullable: true
+          type: string
+        domain:
+          type: string
+        country_code:
+          description: Set only on llms_txt and ai_visibility reports
+          nullable: true
+          type: string
+        output_language_code:
+          description: ISO 639-1 code an llms_txt report was requested in; null for
+            an llms_txt report written in the website's own language and for every
+            other type
+          nullable: true
+          type: string
+        status:
+          description: Depends on report_type. Every type ends completed or failed;
+            ai_visibility can also end insufficient_data
+          type: string
+        result_available:
+          description: Whether status is completed
+          type: boolean
+        overall_score:
+          description: "Null until the report completes, and always for llms_txt"
+          nullable: true
+          type: number
+        created_at:
+          format: date-time
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+        app_url:
+          description: Opens this report in the app
+          format: uri
+          type: string
+      required:
+      - batch_id
+      - country_code
+      - created_at
+      - domain
+      - id
+      - output_language_code
+      - overall_score
+      - project_id
+      - report_type
+      - result_available
+      - status
+      - updated_at
+      - url
+      type: object
+    TechnicalGeoReportsResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - properties:
+          report_type:
+            description: The report_type requested (agent_readiness for ai_readiness)
+            type: string
+          data:
+            items:
+              $ref: "#/components/schemas/TechnicalGeoReportSummary"
+            type: array
+        required:
+        - data
+        - report_type
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        report_type: report_type
+        data:
+        - id: 5
+          report_type: report_type
+          project_id: 2
+          batch_id: 7
+          url: url
+          domain: domain
+          country_code: country_code
+          output_language_code: output_language_code
+          status: status
+          result_available: true
+          overall_score: 9.301444243932576
+          created_at: 2000-01-23T04:56:07.000+00:00
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          app_url: https://openapi-generator.tech
+        - id: 5
+          report_type: report_type
+          project_id: 2
+          batch_id: 7
+          url: url
+          domain: domain
+          country_code: country_code
+          output_language_code: output_language_code
+          status: status
+          result_available: true
+          overall_score: 9.301444243932576
+          created_at: 2000-01-23T04:56:07.000+00:00
+          updated_at: 2000-01-23T04:56:07.000+00:00
+          app_url: https://openapi-generator.tech
+    TechnicalGeoReportResponse:
+      description: One technical GEO report with its result
+      example:
+        id: 0
+        report_type: report_type
+        project_id: 6
+        batch_id: 1
+        url: url
+        domain: domain
+        country_code: country_code
+        output_language_code: output_language_code
+        status: status
+        result_available: true
+        overall_score: 5.962133916683182
+        created_at: 2000-01-23T04:56:07.000+00:00
+        updated_at: 2000-01-23T04:56:07.000+00:00
+        result_data:
+          key: ""
+        error_message: error_message
+        poll_after_seconds: 5
+        app_url: https://openapi-generator.tech
+        request_id: request_id
+      properties:
+        id:
+          type: integer
+        report_type:
+          description: The report_type requested (agent_readiness for ai_readiness)
+          type: string
+        project_id:
+          type: integer
+        batch_id:
+          description: Bundle the report was created in; null for a report created
+            on its own
+          nullable: true
+          type: integer
+        url:
+          description: "The page analysed; null for the domain-level types (robots_txt,\
+            \ agent_readiness, llms_txt, ai_visibility)"
+          nullable: true
+          type: string
+        domain:
+          type: string
+        country_code:
+          description: Set only on llms_txt and ai_visibility reports
+          nullable: true
+          type: string
+        output_language_code:
+          description: ISO 639-1 code an llms_txt report was requested in; null for
+            an llms_txt report written in the website's own language and for every
+            other type
+          nullable: true
+          type: string
+        status:
+          description: Depends on report_type. Every type ends completed or failed;
+            ai_visibility can also end insufficient_data
+          type: string
+        result_available:
+          description: Whether status is completed
+          type: boolean
+        overall_score:
+          description: "Null until the report completes, and always for llms_txt"
+          nullable: true
+          type: number
+        created_at:
+          format: date-time
+          type: string
+        updated_at:
+          format: date-time
+          type: string
+        result_data:
+          additionalProperties: true
+          description: The full result once the report has completed; null before
+            that. Its shape depends on report_type; an llms_txt report returns its
+            files as LlmsTxtTechnicalGeoReport describes
+          nullable: true
+          type: object
+        error_message:
+          description: "Why the report failed, or why an ai_visibility report found\
+            \ insufficient data; null otherwise"
+          nullable: true
+          type: string
+        poll_after_seconds:
+          description: Seconds to wait before polling again while the report runs;
+            null once it has finished
+          nullable: true
+          type: integer
+        app_url:
+          description: Opens this report in the app
+          format: uri
+          type: string
+        request_id:
+          type: string
+      required:
+      - batch_id
+      - country_code
+      - created_at
+      - domain
+      - error_message
+      - id
+      - output_language_code
+      - overall_score
+      - poll_after_seconds
+      - project_id
+      - report_type
+      - request_id
+      - result_available
+      - result_data
+      - status
+      - updated_at
+      - url
+      type: object
+    TechnicalGeoReportsCreateResponse:
+      example:
+        project_id: 0
+        url: url
+        country_code: country_code
+        output_language_code: output_language_code
+        batch_id: 6
+        created_reports:
+        - created_reports
+        - created_reports
+        report_ids:
+          key: 1
+        app_urls:
+          key: https://openapi-generator.tech
+        failed_reports:
+        - type: type
+          errors:
+          - errors
+          - errors
+        - type: type
+          errors:
+          - errors
+          - errors
+        next_endpoint: next_endpoint
+        poll_after_seconds: 5
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        url:
+          description: The URL analysed
+          type: string
+        country_code:
+          description: "The country used, the project country when none was sent"
+          type: string
+        output_language_code:
+          description: "ISO 639-1 code the llms.txt files are written in, or auto\
+            \ for the website's own language"
+          type: string
+        batch_id:
+          description: "Bundle id, for the batch_id filter of GET /technical_geo_reports;\
+            \ null when no report was created"
+          nullable: true
+          type: integer
+        created_reports:
+          description: The report_type of every report created
+          items:
+            type: string
+          type: array
+        report_ids:
+          additionalProperties:
+            type: integer
+          description: "The id of each created report, by report_type"
+          type: object
+        app_urls:
+          additionalProperties:
+            format: uri
+            type: string
+          description: "The link that opens each created report in the app, by report_type"
+          type: object
+        failed_reports:
+          description: "Reports that could not be created, with the reasons"
+          items:
+            $ref: "#/components/schemas/TechnicalGeoReportsCreateResponse_failed_reports_inner"
+          type: array
+        next_endpoint:
+          description: Path template to poll each created report
+          type: string
+        poll_after_seconds:
+          description: Seconds to wait before the first poll
+          type: integer
+        request_id:
+          type: string
+      required:
+      - app_urls
+      - batch_id
+      - country_code
+      - created_reports
+      - failed_reports
+      - next_endpoint
+      - output_language_code
+      - poll_after_seconds
+      - project_id
+      - report_ids
+      - request_id
+      - url
       type: object
     GeoAuditRunResponse:
       allOf:
@@ -27630,6 +30957,1204 @@ components:
       - request_id
       - total
       type: object
+    CompetitorCitationRecord:
+      example:
+        id: 5
+        competitor_id: 2
+        name: name
+        domain: domain
+        prompt_execution_id: 7
+        url: url
+        position: 9
+        created_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        competitor_id:
+          type: integer
+        name:
+          description: The competitor's brand name
+          type: string
+        domain:
+          description: The competitor's bare domain
+          type: string
+        prompt_execution_id:
+          type: integer
+        url:
+          description: Normalized cited URL (tracking parameters and fragment removed)
+          type: string
+        position:
+          description: Rank of the citation in the answer; 0 for a background source
+            reference with no visible rank
+          nullable: true
+          type: integer
+        created_at:
+          format: date-time
+          type: string
+      required:
+      - competitor_id
+      - created_at
+      - domain
+      - id
+      - name
+      - position
+      - prompt_execution_id
+      - url
+      type: object
+    CompetitorCitationsResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - properties:
+          data:
+            items:
+              $ref: "#/components/schemas/CompetitorCitationRecord"
+            type: array
+        required:
+        - data
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        data:
+        - id: 5
+          competitor_id: 2
+          name: name
+          domain: domain
+          prompt_execution_id: 7
+          url: url
+          position: 9
+          created_at: 2000-01-23T04:56:07.000+00:00
+        - id: 5
+          competitor_id: 2
+          name: name
+          domain: domain
+          prompt_execution_id: 7
+          url: url
+          position: 9
+          created_at: 2000-01-23T04:56:07.000+00:00
+    AllMentionRecord:
+      example:
+        id: 5
+        actor_type: actor_type
+        competitor_id: 2
+        name: name
+        domain: domain
+        prompt_id: 7
+        prompt_execution_id: 9
+        created_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          description: "The mention's id, unique within its actor_type"
+          type: integer
+        actor_type:
+          description: project (your brand) or competitor
+          type: string
+        competitor_id:
+          description: Competitor rows only
+          type: integer
+        name:
+          description: "The project's brand name (its name when no brand name is set),\
+            \ or the competitor's brand name"
+          nullable: true
+          type: string
+        domain:
+          description: The competitor's bare domain (competitor rows only)
+          nullable: true
+          type: string
+        prompt_id:
+          type: integer
+        prompt_execution_id:
+          type: integer
+        created_at:
+          format: date-time
+          type: string
+      required:
+      - actor_type
+      - created_at
+      - id
+      - name
+      - prompt_execution_id
+      - prompt_id
+      type: object
+    AllMentionsResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - properties:
+          data:
+            items:
+              $ref: "#/components/schemas/AllMentionRecord"
+            type: array
+        required:
+        - data
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        data:
+        - id: 5
+          actor_type: actor_type
+          competitor_id: 2
+          name: name
+          domain: domain
+          prompt_id: 7
+          prompt_execution_id: 9
+          created_at: 2000-01-23T04:56:07.000+00:00
+        - id: 5
+          actor_type: actor_type
+          competitor_id: 2
+          name: name
+          domain: domain
+          prompt_id: 7
+          prompt_execution_id: 9
+          created_at: 2000-01-23T04:56:07.000+00:00
+    AllCitationRecord:
+      example:
+        id: 5
+        actor_type: actor_type
+        competitor_id: 2
+        name: name
+        domain: domain
+        prompt_id: 7
+        prompt_execution_id: 9
+        url: url
+        position: 3
+        created_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          description: "The citation's id, unique within its actor_type"
+          type: integer
+        actor_type:
+          description: project (your brand) or competitor
+          type: string
+        competitor_id:
+          description: Competitor rows only
+          type: integer
+        name:
+          description: "The project's brand name (its name when no brand name is set),\
+            \ or the competitor's brand name"
+          nullable: true
+          type: string
+        domain:
+          description: On project rows the host of the cited URL without www. (null
+            when it has no parsable host); on competitor rows the competitor's bare
+            domain
+          nullable: true
+          type: string
+        prompt_id:
+          type: integer
+        prompt_execution_id:
+          type: integer
+        url:
+          description: Normalized cited URL (tracking parameters and fragment removed)
+          type: string
+        position:
+          description: Rank of the citation in the answer; 0 for a background source
+            reference with no visible rank
+          nullable: true
+          type: integer
+        created_at:
+          format: date-time
+          type: string
+      required:
+      - actor_type
+      - created_at
+      - domain
+      - id
+      - name
+      - position
+      - prompt_execution_id
+      - prompt_id
+      - url
+      type: object
+    AllCitationsResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - properties:
+          data:
+            items:
+              $ref: "#/components/schemas/AllCitationRecord"
+            type: array
+        required:
+        - data
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        data:
+        - id: 5
+          actor_type: actor_type
+          competitor_id: 2
+          name: name
+          domain: domain
+          prompt_id: 7
+          prompt_execution_id: 9
+          url: url
+          position: 3
+          created_at: 2000-01-23T04:56:07.000+00:00
+        - id: 5
+          actor_type: actor_type
+          competitor_id: 2
+          name: name
+          domain: domain
+          prompt_id: 7
+          prompt_execution_id: 9
+          url: url
+          position: 3
+          created_at: 2000-01-23T04:56:07.000+00:00
+    AnswerRecord:
+      description: One answer. Without query a row carries response and response_truncated;
+        with query it carries snippet and match_count instead
+      example:
+        id: 5
+        prompt_id: 2
+        prompt_text: prompt_text
+        model: chatgpt
+        executed_at: 2000-01-23T04:56:07.000+00:00
+        duration_ms: 7.061401241503109
+        no_result: true
+        no_result_reason: declined
+        mentions_count: 9
+        citations_count: 3
+        app_url: https://openapi-generator.tech
+        response: response
+        response_truncated: true
+        snippet: snippet
+        match_count: 2
+      properties:
+        id:
+          type: integer
+        prompt_id:
+          type: integer
+        prompt_text:
+          type: string
+        model:
+          enum:
+          - chatgpt
+          - perplexity
+          - ai_mode
+          - ai_overview
+          - gemini
+          - copilot
+          - amazon_rufus
+          - claude
+          - grok
+          - deepseek
+          - naver_ai
+          - baidu_ai
+          - meta_ai
+          - naver_ai_tab
+          - qwen
+          - doubao
+          - bing_ai_mode
+          - bing_ai_overview
+          type: string
+        executed_at:
+          format: date-time
+          nullable: true
+          type: string
+        duration_ms:
+          description: "Milliseconds our pipeline spent processing the collected answer,\
+            \ rounded to one decimal place"
+          nullable: true
+          type: number
+        no_result:
+          description: "True for a sentinel non-answer (no answer could be collected\
+            \ after all retries, or the model declined to answer, today only Gemini);\
+            \ excluded from platform metrics"
+          type: boolean
+        no_result_reason:
+          description: Present only when no_result is true. declined = the model declined
+            to answer and response holds its reply; no_answer = no answer could be
+            collected
+          enum:
+          - declined
+          - no_answer
+          type: string
+        mentions_count:
+          description: Mentions of your brand in the answer
+          type: integer
+        citations_count:
+          description: Citations of your brand in the answer
+          type: integer
+        app_url:
+          description: "Opens this answer in the app. The link names its project,\
+            \ so it opens there for any user with access to that project"
+          format: uri
+          type: string
+        response:
+          description: "The answer text, cut to 10,000 characters (without query)"
+          type: string
+        response_truncated:
+          description: Whether response was cut (without query)
+          type: boolean
+        snippet:
+          description: The text around the first match (with query)
+          type: string
+        match_count:
+          description: Matches of query in the answer (with query)
+          type: integer
+      required:
+      - app_url
+      - citations_count
+      - duration_ms
+      - executed_at
+      - id
+      - mentions_count
+      - model
+      - no_result
+      - prompt_id
+      - prompt_text
+      type: object
+    AnswersResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - properties:
+          data:
+            items:
+              $ref: "#/components/schemas/AnswerRecord"
+            type: array
+        required:
+        - data
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        data:
+        - id: 5
+          prompt_id: 2
+          prompt_text: prompt_text
+          model: chatgpt
+          executed_at: 2000-01-23T04:56:07.000+00:00
+          duration_ms: 7.061401241503109
+          no_result: true
+          no_result_reason: declined
+          mentions_count: 9
+          citations_count: 3
+          app_url: https://openapi-generator.tech
+          response: response
+          response_truncated: true
+          snippet: snippet
+          match_count: 2
+        - id: 5
+          prompt_id: 2
+          prompt_text: prompt_text
+          model: chatgpt
+          executed_at: 2000-01-23T04:56:07.000+00:00
+          duration_ms: 7.061401241503109
+          no_result: true
+          no_result_reason: declined
+          mentions_count: 9
+          citations_count: 3
+          app_url: https://openapi-generator.tech
+          response: response
+          response_truncated: true
+          snippet: snippet
+          match_count: 2
+    SentimentCategory:
+      example:
+        metric: metric
+        key: key
+        label: label
+        color: color
+        score: 6.027456183070403
+      properties:
+        metric:
+          description: The metric key of the level (sentiment_<key>)
+          type: string
+        key:
+          description: "very_positive, positive, neutral, negative or very_negative"
+          type: string
+        label:
+          type: string
+        color:
+          description: Hex color the app shows the level in
+          type: string
+        score:
+          description: "Score of the level, from -1.0 (very_negative) to 1.0 (very_positive)"
+          type: number
+      required:
+      - color
+      - key
+      - label
+      - metric
+      - score
+      type: object
+    SentimentCategoriesResponse:
+      example:
+        project_id: 0
+        sentiments:
+        - metric: metric
+          key: key
+          label: label
+          color: color
+          score: 6.027456183070403
+        - metric: metric
+          key: key
+          label: label
+          color: color
+          score: 6.027456183070403
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        sentiments:
+          items:
+            $ref: "#/components/schemas/SentimentCategory"
+          type: array
+        request_id:
+          type: string
+      required:
+      - project_id
+      - request_id
+      - sentiments
+      type: object
+    RedditAuthorBrand:
+      example:
+        is_brand: true
+        id: 1
+        name: name
+        count: 1
+      properties:
+        is_brand:
+          description: True for your own brand
+          type: boolean
+        id:
+          description: The competitor's id; null for your own brand
+          nullable: true
+          type: integer
+        name:
+          type: string
+        count:
+          description: The author's cited posts whose content names the brand
+          type: integer
+      required:
+      - count
+      - id
+      - is_brand
+      - name
+      type: object
+    RedditRow:
+      description: "One row of /dimensions/reddit. Fields depend on view: subreddits\
+        \ (subreddit, citations, unique_authors, positive, negative, neutral, positive_pct,\
+        \ negative_pct, yours, url), authors (author, citations, subreddits, extra_subreddits,\
+        \ leaning, positive, negative, neutral, brands, yours, url), threads (url,\
+        \ title, subreddit, author, subreddit_yours, author_yours, yours, citations,\
+        \ latest_cited_at, upvotes, comments, avg_position, sentiment, archived, posted_at)\
+        \ and breakdowns (breakdown, key, count, pct)."
+      example:
+        subreddit: subreddit
+        author: author
+        url: url
+        title: title
+        citations: 2
+        unique_authors: 7
+        positive: 9
+        negative: 3
+        neutral: 2
+        positive_pct: 4.145608029883936
+        negative_pct: 7.386281948385884
+        yours: true
+        subreddits:
+        - subreddits
+        - subreddits
+        extra_subreddits: 1
+        leaning: leaning
+        brands:
+        - is_brand: true
+          id: 1
+          name: name
+          count: 1
+        - is_brand: true
+          id: 1
+          name: name
+          count: 1
+        subreddit_yours: true
+        author_yours: true
+        latest_cited_at: 2000-01-23T04:56:07.000+00:00
+        upvotes: ""
+        comments: ""
+        avg_position: 6.84685269835264
+        sentiment: sentiment
+        archived: ""
+        posted_at: 2000-01-23T04:56:07.000+00:00
+        breakdown: breakdown
+        key: key
+        count: 7
+        pct: 1.1730742509559433
+      properties:
+        subreddit:
+          description: Subreddit name without the r/ prefix; null on a thread whose
+            subreddit is unknown
+          nullable: true
+          type: string
+        author:
+          description: Reddit username; null on a thread whose author is unknown
+          nullable: true
+          type: string
+        url:
+          description: "The subreddit, author profile or thread URL"
+          type: string
+        title:
+          description: "Thread title, read from the post or its URL (view=threads)"
+          type: string
+        citations:
+          description: Reddit citations of the row in the window
+          type: integer
+        unique_authors:
+          description: Distinct authors cited in the subreddit (view=subreddits)
+          type: integer
+        positive:
+          description: Citations in answers with a positive or very positive sentiment
+          type: integer
+        negative:
+          description: Citations in answers with a negative or very negative sentiment
+          type: integer
+        neutral:
+          description: Citations in answers with a neutral sentiment
+          type: integer
+        positive_pct:
+          description: "positive over the rated citations, 0-100; null when none is\
+            \ rated (view=subreddits)"
+          nullable: true
+          type: number
+        negative_pct:
+          description: "negative over the rated citations, 0-100; null when none is\
+            \ rated (view=subreddits)"
+          nullable: true
+          type: number
+        yours:
+          description: "Whether the account claims the subreddit or author as its\
+            \ own (on threads, either of them)"
+          type: boolean
+        subreddits:
+          description: The first subreddits the author was cited in (view=authors)
+          items:
+            type: string
+          type: array
+        extra_subreddits:
+          description: "Further subreddits the author was cited in, beyond those listed\
+            \ (view=authors)"
+          type: integer
+        leaning:
+          description: "positive, negative or neutral, whichever sentiment has more\
+            \ of the author's citations (view=authors)"
+          type: string
+        brands:
+          description: "Brands the content of the author's cited posts names, your\
+            \ own first (view=authors)"
+          items:
+            $ref: "#/components/schemas/RedditAuthorBrand"
+          type: array
+        subreddit_yours:
+          description: Whether the account claims the thread's subreddit (view=threads)
+          type: boolean
+        author_yours:
+          description: Whether the account claims the thread's author (view=threads)
+          type: boolean
+        latest_cited_at:
+          description: The thread's most recent citation (view=threads)
+          format: date-time
+          nullable: true
+          type: string
+        upvotes:
+          description: "Upvotes as the scraped post reports them, a number or a numeric\
+            \ string, or null when unknown (view=threads)"
+        comments:
+          description: "Comment count as the scraped post reports it, a number or\
+            \ a numeric string, or null when unknown (view=threads)"
+        avg_position:
+          description: "Average rank of the thread's citations, 1 = first; null when\
+            \ no citation has a visible rank (view=threads)"
+          nullable: true
+          type: number
+        sentiment:
+          description: The most frequent sentiment of the answers that cite the thread;
+            null when none is rated (view=threads)
+          nullable: true
+          type: string
+        archived:
+          description: "Whether the thread is archived as the scraped post reports\
+            \ it, usually a boolean, or null when unknown (view=threads)"
+        posted_at:
+          description: When the thread was posted; null when unknown (view=threads)
+          format: date-time
+          nullable: true
+          type: string
+        breakdown:
+          description: "sentiment, model or country (view=breakdowns)"
+          type: string
+        key:
+          description: "The slice, a sentiment label, a model or an uppercase country\
+            \ code (view=breakdowns)"
+          type: string
+        count:
+          description: Reddit citations in the slice (view=breakdowns)
+          type: integer
+        pct:
+          description: "Share of the slice within its breakdown, 0-100 (view=breakdowns)"
+          type: number
+      type: object
+    RedditResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - properties:
+          view:
+            description: "subreddits, authors, threads or breakdowns"
+            type: string
+          from:
+            description: "Start of the window, 30 days back by default"
+            format: date-time
+            type: string
+          to:
+            format: date-time
+            type: string
+          citations:
+            description: Reddit citations after the filters (view=breakdowns)
+            type: integer
+          data:
+            items:
+              $ref: "#/components/schemas/RedditRow"
+            type: array
+        required:
+        - data
+        - from
+        - to
+        - view
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        view: view
+        from: 2000-01-23T04:56:07.000+00:00
+        to: 2000-01-23T04:56:07.000+00:00
+        citations: 5
+        data:
+        - subreddit: subreddit
+          author: author
+          url: url
+          title: title
+          citations: 2
+          unique_authors: 7
+          positive: 9
+          negative: 3
+          neutral: 2
+          positive_pct: 4.145608029883936
+          negative_pct: 7.386281948385884
+          yours: true
+          subreddits:
+          - subreddits
+          - subreddits
+          extra_subreddits: 1
+          leaning: leaning
+          brands:
+          - is_brand: true
+            id: 1
+            name: name
+            count: 1
+          - is_brand: true
+            id: 1
+            name: name
+            count: 1
+          subreddit_yours: true
+          author_yours: true
+          latest_cited_at: 2000-01-23T04:56:07.000+00:00
+          upvotes: ""
+          comments: ""
+          avg_position: 6.84685269835264
+          sentiment: sentiment
+          archived: ""
+          posted_at: 2000-01-23T04:56:07.000+00:00
+          breakdown: breakdown
+          key: key
+          count: 7
+          pct: 1.1730742509559433
+        - subreddit: subreddit
+          author: author
+          url: url
+          title: title
+          citations: 2
+          unique_authors: 7
+          positive: 9
+          negative: 3
+          neutral: 2
+          positive_pct: 4.145608029883936
+          negative_pct: 7.386281948385884
+          yours: true
+          subreddits:
+          - subreddits
+          - subreddits
+          extra_subreddits: 1
+          leaning: leaning
+          brands:
+          - is_brand: true
+            id: 1
+            name: name
+            count: 1
+          - is_brand: true
+            id: 1
+            name: name
+            count: 1
+          subreddit_yours: true
+          author_yours: true
+          latest_cited_at: 2000-01-23T04:56:07.000+00:00
+          upvotes: ""
+          comments: ""
+          avg_position: 6.84685269835264
+          sentiment: sentiment
+          archived: ""
+          posted_at: 2000-01-23T04:56:07.000+00:00
+          breakdown: breakdown
+          key: key
+          count: 7
+          pct: 1.1730742509559433
+    AdRow:
+      description: "One row of /dimensions/ads. Fields depend on view: advertisers\
+        \ (domain, ads, executions, prompts, avg_position, best_position) and ads\
+        \ (id, model, title, snippet, url, domain, position, is_client, prompt_id,\
+        \ prompt_text, prompt_execution_id, executed_at)."
+      example:
+        domain: domain
+        ads: 4
+        executions: 7
+        prompts: 1
+        avg_position: 1.0246457001441578
+        best_position: 1
+        id: 6
+        model: chatgpt
+        title: title
+        snippet: snippet
+        url: url
+        position: 7
+        is_client: true
+        prompt_id: 1
+        prompt_text: prompt_text
+        prompt_execution_id: 4
+        executed_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        domain:
+          description: Advertising domain; null on a placement that names none (view=ads)
+          nullable: true
+          type: string
+        ads:
+          description: Placements of the domain (view=advertisers)
+          type: integer
+        executions:
+          description: Answers that carried them (view=advertisers)
+          type: integer
+        prompts:
+          description: Distinct prompts that triggered them (view=advertisers)
+          type: integer
+        avg_position:
+          description: "Average position, 1 is the best slot; null when no placement\
+            \ has one (view=advertisers)"
+          nullable: true
+          type: number
+        best_position:
+          description: "Best position, 1 is the best slot (view=advertisers)"
+          nullable: true
+          type: integer
+        id:
+          description: The placement (view=ads)
+          type: integer
+        model:
+          enum:
+          - chatgpt
+          - perplexity
+          - ai_mode
+          - ai_overview
+          - gemini
+          - copilot
+          - amazon_rufus
+          - claude
+          - grok
+          - deepseek
+          - naver_ai
+          - baidu_ai
+          - meta_ai
+          - naver_ai_tab
+          - qwen
+          - doubao
+          - bing_ai_mode
+          - bing_ai_overview
+          type: string
+        title:
+          type: string
+        snippet:
+          nullable: true
+          type: string
+        url:
+          nullable: true
+          type: string
+        position:
+          description: "Position of the placement, 1 is the best slot (view=ads)"
+          nullable: true
+          type: integer
+        is_client:
+          description: Whether the placement is identified as your brand's own (view=ads)
+          type: boolean
+        prompt_id:
+          type: integer
+        prompt_text:
+          nullable: true
+          type: string
+        prompt_execution_id:
+          type: integer
+        executed_at:
+          description: When the answer that carried the placement was collected (view=ads)
+          format: date-time
+          nullable: true
+          type: string
+      required:
+      - domain
+      type: object
+    AdsTotals:
+      example:
+        ads: 5
+        advertisers: 2
+        your_ads: 7
+        your_share: 9.301444243932576
+        avg_position: 3.616076749251911
+        executions_with_ads: 2
+      properties:
+        ads:
+          type: integer
+        advertisers:
+          type: integer
+        your_ads:
+          type: integer
+        your_share:
+          description: "your_ads over ads, 0-100"
+          type: number
+        avg_position:
+          nullable: true
+          type: number
+        executions_with_ads:
+          type: integer
+      required:
+      - ads
+      - advertisers
+      - avg_position
+      - executions_with_ads
+      - your_ads
+      - your_share
+      type: object
+    AdsResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - properties:
+          view:
+            description: advertisers or ads
+            type: string
+          totals:
+            $ref: "#/components/schemas/AdsTotals"
+          data:
+            items:
+              $ref: "#/components/schemas/AdRow"
+            type: array
+        required:
+        - data
+        - totals
+        - view
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        view: view
+        totals:
+          ads: 5
+          advertisers: 2
+          your_ads: 7
+          your_share: 9.301444243932576
+          avg_position: 3.616076749251911
+          executions_with_ads: 2
+        data:
+        - domain: domain
+          ads: 4
+          executions: 7
+          prompts: 1
+          avg_position: 1.0246457001441578
+          best_position: 1
+          id: 6
+          model: chatgpt
+          title: title
+          snippet: snippet
+          url: url
+          position: 7
+          is_client: true
+          prompt_id: 1
+          prompt_text: prompt_text
+          prompt_execution_id: 4
+          executed_at: 2000-01-23T04:56:07.000+00:00
+        - domain: domain
+          ads: 4
+          executions: 7
+          prompts: 1
+          avg_position: 1.0246457001441578
+          best_position: 1
+          id: 6
+          model: chatgpt
+          title: title
+          snippet: snippet
+          url: url
+          position: 7
+          is_client: true
+          prompt_id: 1
+          prompt_text: prompt_text
+          prompt_execution_id: 4
+          executed_at: 2000-01-23T04:56:07.000+00:00
+    ShoppingRow:
+      description: "One row of /dimensions/shopping. Fields depend on view: products\
+        \ (product_key, title, domain, url, merchants, currency, currency_count, min_price,\
+        \ max_price, avg_rating, rating_votes, appearances, is_client, best_rank,\
+        \ models, last_seen_at) and merchants (merchant, appearances, products, currency,\
+        \ min_price, max_price, avg_price, avg_rating)."
+      example:
+        product_key: product_key
+        title: title
+        domain: domain
+        url: url
+        merchants: merchants
+        merchant: merchant
+        products: 4
+        currency: currency
+        currency_count: 7
+        min_price: 1.2315135367772556
+        max_price: 1.0246457001441578
+        avg_price: 1.4894159098541704
+        avg_rating: 6.84685269835264
+        rating_votes: 7
+        appearances: 1
+        is_client: true
+        best_rank: 4
+        models:
+        - chatgpt
+        - chatgpt
+        last_seen_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        product_key:
+          description: "Stable grouping key of the product: its external id, else\
+            \ title: and the lowercased title (view=products)"
+          type: string
+        title:
+          type: string
+        domain:
+          nullable: true
+          type: string
+        url:
+          nullable: true
+          type: string
+        merchants:
+          description: The merchants the product card names (view=products)
+          nullable: true
+          type: string
+        merchant:
+          description: The merchant (view=merchants)
+          type: string
+        products:
+          description: Distinct products the merchant sold (view=merchants)
+          type: integer
+        currency:
+          description: Currency code the prices are in; null when no price names one
+          nullable: true
+          type: string
+        currency_count:
+          description: Currencies the product was priced in; above 1 the row reports
+            its highest-priced listing (view=products)
+          type: integer
+        min_price:
+          nullable: true
+          type: number
+        max_price:
+          nullable: true
+          type: number
+        avg_price:
+          description: Average price in currency (view=merchants)
+          nullable: true
+          type: number
+        avg_rating:
+          nullable: true
+          type: number
+        rating_votes:
+          description: Most rating votes any listing of the product showed (view=products)
+          nullable: true
+          type: integer
+        appearances:
+          type: integer
+        is_client:
+          description: Whether the product is identified as your brand's own (view=products)
+          type: boolean
+        best_rank:
+          description: Best rank the product got in a card list (view=products)
+          nullable: true
+          type: integer
+        models:
+          description: Models that showed the product (view=products)
+          items:
+            enum:
+            - chatgpt
+            - perplexity
+            - ai_mode
+            - ai_overview
+            - gemini
+            - copilot
+            - amazon_rufus
+            - claude
+            - grok
+            - deepseek
+            - naver_ai
+            - baidu_ai
+            - meta_ai
+            - naver_ai_tab
+            - qwen
+            - doubao
+            - bing_ai_mode
+            - bing_ai_overview
+            type: string
+          type: array
+        last_seen_at:
+          description: The latest answer that showed the product (view=products)
+          format: date-time
+          nullable: true
+          type: string
+      required:
+      - appearances
+      - avg_rating
+      - currency
+      - max_price
+      - min_price
+      type: object
+    ShoppingTotals:
+      example:
+        products: 5
+        your_products: 2
+        merchants: 7
+        avg_price: 9.301444243932576
+        avg_price_currency: avg_price_currency
+        avg_rating: 3.616076749251911
+        executions_with_shopping: 2
+      properties:
+        products:
+          type: integer
+        your_products:
+          type: integer
+        merchants:
+          type: integer
+        avg_price:
+          description: Average price in avg_price_currency
+          nullable: true
+          type: number
+        avg_price_currency:
+          description: The currency most prices use
+          nullable: true
+          type: string
+        avg_rating:
+          nullable: true
+          type: number
+        executions_with_shopping:
+          type: integer
+      required:
+      - avg_price
+      - avg_price_currency
+      - avg_rating
+      - executions_with_shopping
+      - merchants
+      - products
+      - your_products
+      type: object
+    ShoppingResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - properties:
+          view:
+            description: products or merchants
+            type: string
+          totals:
+            $ref: "#/components/schemas/ShoppingTotals"
+          data:
+            items:
+              $ref: "#/components/schemas/ShoppingRow"
+            type: array
+        required:
+        - data
+        - totals
+        - view
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        view: view
+        totals:
+          products: 5
+          your_products: 2
+          merchants: 7
+          avg_price: 9.301444243932576
+          avg_price_currency: avg_price_currency
+          avg_rating: 3.616076749251911
+          executions_with_shopping: 2
+        data:
+        - product_key: product_key
+          title: title
+          domain: domain
+          url: url
+          merchants: merchants
+          merchant: merchant
+          products: 4
+          currency: currency
+          currency_count: 7
+          min_price: 1.2315135367772556
+          max_price: 1.0246457001441578
+          avg_price: 1.4894159098541704
+          avg_rating: 6.84685269835264
+          rating_votes: 7
+          appearances: 1
+          is_client: true
+          best_rank: 4
+          models:
+          - chatgpt
+          - chatgpt
+          last_seen_at: 2000-01-23T04:56:07.000+00:00
+        - product_key: product_key
+          title: title
+          domain: domain
+          url: url
+          merchants: merchants
+          merchant: merchant
+          products: 4
+          currency: currency
+          currency_count: 7
+          min_price: 1.2315135367772556
+          max_price: 1.0246457001441578
+          avg_price: 1.4894159098541704
+          avg_rating: 6.84685269835264
+          rating_votes: 7
+          appearances: 1
+          is_client: true
+          best_rank: 4
+          models:
+          - chatgpt
+          - chatgpt
+          last_seen_at: 2000-01-23T04:56:07.000+00:00
     TagRef:
       example:
         id: 1
@@ -28387,7 +32912,7 @@ components:
         high_priority_count:
           type: integer
         summary:
-          $ref: "#/components/schemas/RecommendationSummary_summary"
+          $ref: "#/components/schemas/RecommendationDetailResponse_summary"
         context:
           description: Generation context and run diagnostics as stored; empty until
             the generation completes. Its keys are not a stable contract
@@ -28618,6 +33143,158 @@ components:
       - annotation
       - project_id
       - request_id
+      type: object
+    AnnotationRecord:
+      example:
+        id: 5
+        title: title
+        description: description
+        annotation_date: 2000-01-23
+        color: color
+        category: category
+        origin: origin
+        annotation_category:
+          id: 2
+          name: name
+        editable: true
+        created_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          nullable: true
+          type: string
+        annotation_date:
+          format: date
+          type: string
+        color:
+          nullable: true
+          type: string
+        category:
+          description: user (written by a person) or system (added by the platform)
+          type: string
+        origin:
+          description: "manual, platform (a platform-wide event) or automation (a\
+            \ project change recorded automatically)"
+          type: string
+        annotation_category:
+          $ref: "#/components/schemas/AnnotationRecord_annotation_category"
+        editable:
+          description: Whether the requesting user may update or delete it
+          type: boolean
+        created_at:
+          format: date-time
+          type: string
+      required:
+      - annotation_category
+      - annotation_date
+      - category
+      - color
+      - created_at
+      - description
+      - editable
+      - id
+      - origin
+      - title
+      type: object
+    AnnotationsResponse:
+      allOf:
+      - $ref: "#/components/schemas/PaginatedEnvelope"
+      - properties:
+          data:
+            items:
+              $ref: "#/components/schemas/AnnotationRecord"
+            type: array
+        required:
+        - data
+        type: object
+      example:
+        project_id: 0
+        page: 6
+        per_page: 1
+        total: 5
+        request_id: request_id
+        data:
+        - id: 5
+          title: title
+          description: description
+          annotation_date: 2000-01-23
+          color: color
+          category: category
+          origin: origin
+          annotation_category:
+            id: 2
+            name: name
+          editable: true
+          created_at: 2000-01-23T04:56:07.000+00:00
+        - id: 5
+          title: title
+          description: description
+          annotation_date: 2000-01-23
+          color: color
+          category: category
+          origin: origin
+          annotation_category:
+            id: 2
+            name: name
+          editable: true
+          created_at: 2000-01-23T04:56:07.000+00:00
+    AnnotationUpdateResponse:
+      example:
+        project_id: 0
+        annotation:
+          id: 5
+          title: title
+          description: description
+          annotation_date: 2000-01-23
+          color: color
+          category: category
+          origin: origin
+          annotation_category:
+            id: 2
+            name: name
+          editable: true
+          created_at: 2000-01-23T04:56:07.000+00:00
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        annotation:
+          $ref: "#/components/schemas/AnnotationRecord"
+        request_id:
+          type: string
+      required:
+      - annotation
+      - project_id
+      - request_id
+      type: object
+    AnnotationDeleteResponse:
+      example:
+        project_id: 0
+        deleted: true
+        id: 6
+        title: title
+        request_id: request_id
+      properties:
+        project_id:
+          type: integer
+        deleted:
+          description: Always true
+          type: boolean
+        id:
+          type: integer
+        title:
+          type: string
+        request_id:
+          type: string
+      required:
+      - deleted
+      - id
+      - project_id
+      - request_id
+      - title
       type: object
     CollectionCreateResponse:
       example:
@@ -31008,8 +35685,8 @@ components:
       description: "One recommendation item, in the shape GET /recommendations/{id}\
         \ lists items"
       example:
-        id: 6
-        recommendation_id: 1
+        id: 9
+        recommendation_id: 3
         recommendation_type: recommendation_type
         category: category
         title: title
@@ -31024,7 +35701,7 @@ components:
         - source_refs
         status: active
         status_changed_at: 2000-01-23T04:56:07.000+00:00
-        position: 5
+        position: 2
         metadata:
           key: ""
         created_at: 2000-01-23T04:56:07.000+00:00
@@ -31122,8 +35799,8 @@ components:
       example:
         project_id: 0
         item:
-          id: 6
-          recommendation_id: 1
+          id: 9
+          recommendation_id: 3
           recommendation_type: recommendation_type
           category: category
           title: title
@@ -31138,7 +35815,7 @@ components:
           - source_refs
           status: active
           status_changed_at: 2000-01-23T04:56:07.000+00:00
-          position: 5
+          position: 2
           metadata:
             key: ""
           created_at: 2000-01-23T04:56:07.000+00:00
@@ -31587,11 +36264,17 @@ components:
           description: "Shaped by kind. timeseries: series [{ name, color, points\
             \ [{ date, value }] }]. donut: slices [{ name, value, color }]. bar: bars\
             \ [{ label, value, color }]. kpi_grid: values and changes (null unless\
-            \ the report compares with the previous period). table: rows, one object\
-            \ per row; the monthly_breakdown widget has one row per calendar month\
-            \ of the window with month, from, to, partial (a month the window cuts),\
-            \ responses, mentions, visibility, weighted_visibility, sov_share, citations\
-            \ and avg_mention_position. Null when the widget is not available."
+            \ the report compares with the previous period); performance_kpis values\
+            \ hold responses, weighted_visibility, citation_rate, avg_mention_position,\
+            \ top_1_mention_rate and top_3_mention_rate. table: rows, one object per\
+            \ row; the monthly_breakdown widget has one row per calendar month of\
+            \ the window with month, from, to, partial (a month the window cuts),\
+            \ responses, mentions, visibility, weighted_visibility, sov_share, citations,\
+            \ citation_rate, avg_mention_position, top_1_mention_rate and top_3_mention_rate.\
+            \ top_1_mention_rate and top_3_mention_rate are the percentage of answers\
+            \ to non-brand prompts that name the brand first, or among the first three\
+            \ brands, and null when the window holds no such answer. Null when the\
+            \ widget is not available."
           nullable: true
           type: object
       required:
@@ -35283,6 +39966,576 @@ components:
             $ref: "#/components/schemas/AiModelDeclinedAnswersResponse_by_prompt_data_inner"
           type: array
       type: object
+    AiModelPositionDistributionBrand_buckets_inner_data_inner:
+      example:
+        date: 2000-01-23
+        value: 2
+      properties:
+        date:
+          description: First day of the period
+          format: date
+          type: string
+        value:
+          type: integer
+      required:
+      - date
+      - value
+      type: object
+    AiModelPositionDistributionBrand_buckets_inner:
+      example:
+        key: key
+        label: label
+        color: color
+        total: 5
+        data:
+        - date: 2000-01-23
+          value: 2
+        - date: 2000-01-23
+          value: 2
+      properties:
+        key:
+          type: string
+        label:
+          type: string
+        color:
+          description: Hex color the app charts the bucket with
+          type: string
+        total:
+          description: Mentions in the bucket over the window
+          type: integer
+        data:
+          description: "One point per period of the window, oldest first, 0 included"
+          items:
+            $ref: "#/components/schemas/AiModelPositionDistributionBrand_buckets_inner_data_inner"
+          type: array
+      required:
+      - color
+      - data
+      - key
+      - label
+      - total
+      type: object
+    AiOverviewResultsResponse_chart_inner:
+      example:
+        date: 2000-01-23
+        total_responses: 5
+        responses_with_results: 2
+        result_rate: 7.061401241503109
+      properties:
+        date:
+          description: First day of the period
+          format: date
+          type: string
+        total_responses:
+          type: integer
+        responses_with_results:
+          type: integer
+        result_rate:
+          type: number
+      required:
+      - date
+      - responses_with_results
+      - result_rate
+      - total_responses
+      type: object
+    AiOverviewResultsResponse_by_prompt_data_inner:
+      example:
+        prompt_id: 4
+        prompt_text: prompt_text
+        total_responses: 7
+        responses_with_results: 1
+        result_rate: 1.0246457001441578
+      properties:
+        prompt_id:
+          type: integer
+        prompt_text:
+          nullable: true
+          type: string
+        total_responses:
+          type: integer
+        responses_with_results:
+          type: integer
+        result_rate:
+          type: number
+      required:
+      - prompt_id
+      - prompt_text
+      - responses_with_results
+      - result_rate
+      - total_responses
+      type: object
+    AiOverviewResultsResponse_by_prompt:
+      description: "One row per prompt with an AI Overview run in the window, highest\
+        \ result rate first, then more runs and the prompt id"
+      example:
+        page: 9
+        per_page: 3
+        total: 2
+        data:
+        - prompt_id: 4
+          prompt_text: prompt_text
+          total_responses: 7
+          responses_with_results: 1
+          result_rate: 1.0246457001441578
+        - prompt_id: 4
+          prompt_text: prompt_text
+          total_responses: 7
+          responses_with_results: 1
+          result_rate: 1.0246457001441578
+      properties:
+        page:
+          type: integer
+        per_page:
+          type: integer
+        total:
+          description: Prompts with an AI Overview run in the window
+          type: integer
+        data:
+          items:
+            $ref: "#/components/schemas/AiOverviewResultsResponse_by_prompt_data_inner"
+          type: array
+      required:
+      - data
+      - page
+      - per_page
+      - total
+      type: object
+    AiTrafficResponse_totals:
+      example:
+        users: 6
+        sessions: 1
+        conversions: 5
+        conversion_rate: 5.637376656633329
+      properties:
+        users:
+          type: integer
+        sessions:
+          type: integer
+        conversions:
+          type: integer
+        conversion_rate:
+          description: conversions as a percentage (0-100) of sessions; 0 without
+            sessions
+          type: number
+      required:
+      - conversion_rate
+      - conversions
+      - sessions
+      - users
+      type: object
+    AiTrafficResponse_by_source_inner:
+      example:
+        source: source
+        name: name
+        users: 2
+        sessions: 7
+        conversions: 9
+      properties:
+        source:
+          description: "AI source slug, such as chatgpt or perplexity"
+          type: string
+        name:
+          description: Display name of the source
+          type: string
+        users:
+          type: integer
+        sessions:
+          type: integer
+        conversions:
+          type: integer
+      required:
+      - conversions
+      - name
+      - sessions
+      - source
+      - users
+      type: object
+    CitationPageMentions_brands_inner:
+      example:
+        actor_type: actor_type
+        competitor_id: 7
+        name: name
+        domain: domain
+        position: 1
+      properties:
+        actor_type:
+          description: project or competitor
+          type: string
+        competitor_id:
+          description: Null for the project
+          nullable: true
+          type: integer
+        name:
+          type: string
+        domain:
+          description: "The competitor's domain, or the project's URL (null when it\
+            \ has none)"
+          nullable: true
+          type: string
+        position:
+          nullable: true
+          type: integer
+      required:
+      - actor_type
+      - competitor_id
+      - domain
+      - name
+      - position
+      type: object
+    CitationPageMentions_mentions_inner:
+      example:
+        id: 4
+        matched_key: matched_key
+        snippet: snippet
+        start_offset: 5
+        end_offset: 9
+        position: 9
+        actor_type: actor_type
+        competitor_id: 6
+        actor_name: actor_name
+        actor_domain: actor_domain
+      properties:
+        id:
+          type: integer
+        matched_key:
+          description: The name that matched
+          type: string
+        snippet:
+          nullable: true
+          type: string
+        start_offset:
+          type: integer
+        end_offset:
+          type: integer
+        position:
+          nullable: true
+          type: integer
+        actor_type:
+          description: project or competitor
+          type: string
+        competitor_id:
+          description: Null for the project
+          nullable: true
+          type: integer
+        actor_name:
+          nullable: true
+          type: string
+        actor_domain:
+          description: "The competitor's domain, or the project's URL"
+          nullable: true
+          type: string
+      required:
+      - actor_domain
+      - actor_name
+      - actor_type
+      - competitor_id
+      - end_offset
+      - id
+      - matched_key
+      - position
+      - snippet
+      - start_offset
+      type: object
+    CitationPageDetails_content:
+      description: "GET /citation_intelligence/urls/{url_sha256}/content only. Both\
+        \ null when the page has no usable content."
+      example:
+        text: text
+        rendered_html: rendered_html
+      properties:
+        text:
+          description: The page text
+          nullable: true
+          type: string
+        rendered_html:
+          description: Sanitized HTML of the page
+          nullable: true
+          type: string
+      required:
+      - rendered_html
+      - text
+      type: object
+    CitationGroupRow_aggregate_details:
+      description: domain and host views only. The distinct cited pages of the group.
+      example:
+        unique_urls_count: 8
+        crawled_urls_count: 9
+        brand_mentioned_urls_count: 6
+        competitor_mentioned_urls_count: 3
+        last_crawled_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        unique_urls_count:
+          type: integer
+        crawled_urls_count:
+          description: Pages with usable content
+          type: integer
+        brand_mentioned_urls_count:
+          description: Pages analyzed for the project that mention the brand; null
+            when none is analyzed
+          nullable: true
+          type: integer
+        competitor_mentioned_urls_count:
+          description: Pages analyzed for the project that mention a competitor; null
+            when none is analyzed
+          nullable: true
+          type: integer
+        last_crawled_at:
+          format: date-time
+          nullable: true
+          type: string
+      required:
+      - brand_mentioned_urls_count
+      - competitor_mentioned_urls_count
+      - crawled_urls_count
+      - last_crawled_at
+      - unique_urls_count
+      type: object
+    CitingDomainMentionShareResponse_data_inner_actors_inner:
+      example:
+        type: type
+        id: 5
+        name: name
+        mentions: 5
+        share: 2.3021358869347655
+      properties:
+        type:
+          description: brand or competitor
+          type: string
+        id:
+          description: "Null for the brand, the competitor id otherwise"
+          nullable: true
+          type: integer
+        name:
+          type: string
+        mentions:
+          type: integer
+        share:
+          description: mentions as a percentage (0-100) of total_mentions
+          type: number
+      required:
+      - id
+      - mentions
+      - name
+      - share
+      - type
+      type: object
+    CitingDomainMentionShareResponse_data_inner:
+      example:
+        domain: domain
+        responses_citing: 6
+        total_mentions: 1
+        actors:
+        - type: type
+          id: 5
+          name: name
+          mentions: 5
+          share: 2.3021358869347655
+        - type: type
+          id: 5
+          name: name
+          mentions: 5
+          share: 2.3021358869347655
+      properties:
+        domain:
+          type: string
+        responses_citing:
+          description: Answers citing the domain
+          type: integer
+        total_mentions:
+          description: "Brand and competitor mentions in those answers, each answer\
+            \ counted once per brand"
+          type: integer
+        actors:
+          description: "The brand and every competitor, most mentions first; empty\
+            \ when no answer cites the domain"
+          items:
+            $ref: "#/components/schemas/CitingDomainMentionShareResponse_data_inner_actors_inner"
+          type: array
+      required:
+      - actors
+      - domain
+      - responses_citing
+      - total_mentions
+      type: object
+    CitedUrlDetailsResponse_stats_source_types:
+      description: Citations by ownership
+      example:
+        owned: 9
+        competitor: 3
+        third_party: 2
+      properties:
+        owned:
+          type: integer
+        competitor:
+          type: integer
+        third_party:
+          type: integer
+      required:
+      - competitor
+      - owned
+      - third_party
+      type: object
+    CitedUrlDetailsResponse_stats:
+      example:
+        total_responses: 6
+        total_citations: 1
+        citation_rate: 5.962133916683182
+        citation_rate_denominator: 5
+        avg_citation_position: 2.3021358869347655
+        first_seen_at: 2000-01-23T04:56:07.000+00:00
+        last_seen_at: 2000-01-23T04:56:07.000+00:00
+        distinct_urls: 7
+        source_types:
+          owned: 9
+          competitor: 3
+          third_party: 2
+        models:
+          key: 4
+      properties:
+        total_responses:
+          description: Answers citing the URL under the filters
+          type: integer
+        total_citations:
+          type: integer
+        citation_rate:
+          description: total_responses as a percentage (0-100) of citation_rate_denominator
+          type: number
+        citation_rate_denominator:
+          description: Answers matching the filters
+          type: integer
+        avg_citation_position:
+          description: Null when no visible citation has a rank
+          nullable: true
+          type: number
+        first_seen_at:
+          description: Null when no citation matches the filters
+          format: date-time
+          nullable: true
+          type: string
+        last_seen_at:
+          description: Null when no citation matches the filters
+          format: date-time
+          nullable: true
+          type: string
+        distinct_urls:
+          description: "Spellings of the URL cited (tracking parameters, a trailing\
+            \ slash)"
+          type: integer
+        source_types:
+          $ref: "#/components/schemas/CitedUrlDetailsResponse_stats_source_types"
+        models:
+          additionalProperties:
+            type: integer
+          description: "Answers citing the URL per AI model, keyed by model"
+          type: object
+      required:
+      - avg_citation_position
+      - citation_rate
+      - citation_rate_denominator
+      - distinct_urls
+      - first_seen_at
+      - last_seen_at
+      - models
+      - source_types
+      - total_citations
+      - total_responses
+      type: object
+    CitedUrlOccurrencesResponse_allOf_data:
+      example:
+        source_id: 5
+        answer_id: 2
+        prompt_execution_id: 7
+        prompt_id: 9
+        prompt_text: prompt_text
+        model: chatgpt
+        executed_at: 2000-01-23T04:56:07.000+00:00
+        citation_position: 3
+        url: url
+        domain: domain
+        source_type: source_type
+        response_excerpt: response_excerpt
+        response_truncated: true
+        fan_out_queries:
+        - fan_out_queries
+        - fan_out_queries
+      properties:
+        source_id:
+          type: integer
+        answer_id:
+          type: integer
+        prompt_execution_id:
+          description: Same as answer_id
+          type: integer
+        prompt_id:
+          type: integer
+        prompt_text:
+          type: string
+        model:
+          enum:
+          - chatgpt
+          - perplexity
+          - ai_mode
+          - ai_overview
+          - gemini
+          - copilot
+          - amazon_rufus
+          - claude
+          - grok
+          - deepseek
+          - naver_ai
+          - baidu_ai
+          - meta_ai
+          - naver_ai_tab
+          - qwen
+          - doubao
+          - bing_ai_mode
+          - bing_ai_overview
+          type: string
+        executed_at:
+          format: date-time
+          nullable: true
+          type: string
+        citation_position:
+          description: Rank of the citation in the answer; 0 for a background source
+            reference
+          type: integer
+        url:
+          description: Normalized cited URL
+          type: string
+        domain:
+          nullable: true
+          type: string
+        source_type:
+          description: "owned, competitor or third_party"
+          type: string
+        response_excerpt:
+          description: The first 600 characters of the answer
+          type: string
+        response_truncated:
+          type: boolean
+        fan_out_queries:
+          description: Sub-queries the model issued while answering; null when the
+            model reports none
+          items:
+            type: string
+          nullable: true
+          type: array
+      required:
+      - answer_id
+      - citation_position
+      - domain
+      - executed_at
+      - fan_out_queries
+      - model
+      - prompt_execution_id
+      - prompt_id
+      - prompt_text
+      - response_excerpt
+      - response_truncated
+      - source_id
+      - source_type
+      - url
+      type: object
     WebAnalyticsQueryResponse_columns_inner:
       example:
         name: name
@@ -35313,6 +40566,198 @@ components:
         language_code:
           nullable: true
           type: string
+      type: object
+    ProjectDraftRecord_competitors_inner:
+      example:
+        domain: domain
+        brand_name: brand_name
+        matching_names:
+        - matching_names
+        - matching_names
+      properties:
+        domain:
+          type: string
+        brand_name:
+          description: Empty when the step sent none
+          type: string
+        matching_names:
+          items:
+            type: string
+          type: array
+      required:
+      - brand_name
+      - domain
+      - matching_names
+      type: object
+    ProjectDraftRecord_owned_media:
+      description: The owned media fields the owned_media step sent; empty before
+        it
+      example:
+        youtube_channel_url: youtube_channel_url
+        instagram_profile_url: instagram_profile_url
+        facebook_page_url: facebook_page_url
+        tiktok_profile_url: tiktok_profile_url
+        app_store_url: app_store_url
+        google_play_url: google_play_url
+      properties:
+        youtube_channel_url:
+          nullable: true
+          type: string
+        instagram_profile_url:
+          nullable: true
+          type: string
+        facebook_page_url:
+          nullable: true
+          type: string
+        tiktok_profile_url:
+          nullable: true
+          type: string
+        app_store_url:
+          nullable: true
+          type: string
+        google_play_url:
+          nullable: true
+          type: string
+      type: object
+    ProjectDraftSuggestions_details:
+      example:
+        name: name
+        description: description
+        industry:
+        - industry
+        - industry
+        matching_names:
+        - matching_names
+        - matching_names
+      properties:
+        name:
+          nullable: true
+          type: string
+        description:
+          nullable: true
+          type: string
+        industry:
+          items:
+            type: string
+          type: array
+        matching_names:
+          items:
+            type: string
+          type: array
+      required:
+      - description
+      - industry
+      - matching_names
+      - name
+      type: object
+    ProjectDraftSuggestions_competitors_inner:
+      example:
+        brand_name: brand_name
+        domain: domain
+        matching_names:
+        - matching_names
+        - matching_names
+      properties:
+        brand_name:
+          type: string
+        domain:
+          type: string
+        matching_names:
+          items:
+            type: string
+          type: array
+      required:
+      - brand_name
+      - domain
+      - matching_names
+      type: object
+    ProjectDraftResponse_limits:
+      example:
+        prompts_available: 6
+        max_prompts_per_request: 1
+        max_competitors: 5
+      properties:
+        prompts_available:
+          description: Prompts the account can still add; null when unlimited
+          nullable: true
+          type: integer
+        max_prompts_per_request:
+          type: integer
+        max_competitors:
+          description: Competitors the plan allows per project
+          type: integer
+      required:
+      - max_competitors
+      - max_prompts_per_request
+      - prompts_available
+      type: object
+    CompetitorUpdateResponse_competitor:
+      example:
+        id: 6
+        brand_name: brand_name
+        domain: domain
+        citation_match_mode: domain
+        citation_match_path: citation_match_path
+        color: color
+        matching_names:
+        - matching_names
+        - matching_names
+        processing: true
+      properties:
+        id:
+          type: integer
+        brand_name:
+          type: string
+        domain:
+          type: string
+        citation_match_mode:
+          $ref: "#/components/schemas/CitationMatchMode"
+        citation_match_path:
+          description: Set only when citation_match_mode is path_prefix
+          nullable: true
+          type: string
+        color:
+          nullable: true
+          type: string
+        matching_names:
+          items:
+            type: string
+          type: array
+        processing:
+          description: True while historical mention and citation matching is recalculated
+            in the background
+          type: boolean
+      required:
+      - brand_name
+      - citation_match_mode
+      - citation_match_path
+      - color
+      - domain
+      - id
+      - matching_names
+      - processing
+      type: object
+    CollectionUpdateResponse_collection:
+      example:
+        id: 6
+        name: name
+        description: description
+        prompts_count: 1
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+        description:
+          nullable: true
+          type: string
+        prompts_count:
+          type: integer
+      required:
+      - description
+      - id
+      - name
+      - prompts_count
       type: object
     ProjectCreateRequest_collections_inner:
       example:
@@ -35831,6 +41276,89 @@ components:
         \ GEO report type"
       nullable: true
       type: object
+    RecommendationLaunchResponse_recommendation:
+      example:
+        id: 6
+        recommendation_type: ai_visibility
+        status: status
+        created_at: 2000-01-23T04:56:07.000+00:00
+      properties:
+        id:
+          description: "Poll GET /recommendations/{id} with it"
+          type: integer
+        recommendation_type:
+          enum:
+          - ai_visibility
+          - social_community
+          - brand_building
+          - sentiment_reputation
+          type: string
+        status:
+          description: Always pending
+          type: string
+        created_at:
+          format: date-time
+          type: string
+      required:
+      - created_at
+      - id
+      - recommendation_type
+      - status
+      type: object
+    RecommendationDetailResponse_summary:
+      description: Empty until the generation completes
+      example:
+        total_recommendations: 3
+        high_priority_count: 2
+        categories:
+        - categories
+        - categories
+      properties:
+        total_recommendations:
+          type: integer
+        high_priority_count:
+          type: integer
+        categories:
+          items:
+            type: string
+          type: array
+      type: object
+    RecommendationDetailResponse_item_counts:
+      description: "Items of the run per status, whatever item_status filters"
+      example:
+        active: 5
+        completed: 2
+        archived: 7
+      properties:
+        active:
+          type: integer
+        completed:
+          type: integer
+        archived:
+          type: integer
+      required:
+      - active
+      - archived
+      - completed
+      type: object
+    TechnicalGeoReportsCreateResponse_failed_reports_inner:
+      example:
+        type: type
+        errors:
+        - errors
+        - errors
+      properties:
+        type:
+          description: The report_type
+          type: string
+        errors:
+          items:
+            type: string
+          type: array
+      required:
+      - errors
+      - type
+      type: object
     GeoAuditComparison_changes_inner:
       example:
         check_key: check_key
@@ -35898,24 +41426,6 @@ components:
         message:
           type: string
       type: object
-    RecommendationSummary_summary:
-      description: Empty until the generation completes
-      example:
-        total_recommendations: 3
-        high_priority_count: 2
-        categories:
-        - categories
-        - categories
-      properties:
-        total_recommendations:
-          type: integer
-        high_priority_count:
-          type: integer
-        categories:
-          items:
-            type: string
-          type: array
-      type: object
     AnnotationCreateResponse_annotation:
       example:
         id: 6
@@ -35949,6 +41459,20 @@ components:
       - description
       - id
       - title
+      type: object
+    AnnotationRecord_annotation_category:
+      example:
+        id: 2
+        name: name
+      nullable: true
+      properties:
+        id:
+          type: integer
+        name:
+          type: string
+      required:
+      - id
+      - name
       type: object
     CollectionCreateResponse_collection:
       example:

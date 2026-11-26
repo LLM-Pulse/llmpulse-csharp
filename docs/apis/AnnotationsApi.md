@@ -49,7 +49,7 @@ Marks a date in the project timeseries with a title + description. Available on 
 
 <a id="deleteannotation"></a>
 # **DeleteAnnotation**
-> void DeleteAnnotation (int projectId, int id)
+> AnnotationDeleteResponse DeleteAnnotation (int projectId, int id)
 
 Delete a timeline annotation
 
@@ -65,7 +65,7 @@ Deletes an annotation. Same ownership rule as PATCH. Available on every plan and
 
 ### Return type
 
-void (empty response body)
+[**AnnotationDeleteResponse**](AnnotationDeleteResponse.md)
 
 ### Authorization
 
@@ -88,7 +88,7 @@ void (empty response body)
 
 <a id="listannotations"></a>
 # **ListAnnotations**
-> void ListAnnotations (int projectId, DateOnly from = null, DateOnly to = null, int annotationCategoryId = null, int page = null, int perPage = null)
+> AnnotationsResponse ListAnnotations (int projectId, DateOnly from = null, DateOnly to = null, int annotationCategoryId = null, int page = null, int perPage = null)
 
 List timeline annotations
 
@@ -108,7 +108,7 @@ Lists project timeline annotations, newest first. Rows can come from manual note
 
 ### Return type
 
-void (empty response body)
+[**AnnotationsResponse**](AnnotationsResponse.md)
 
 ### Authorization
 
@@ -130,7 +130,7 @@ void (empty response body)
 
 <a id="updateannotation"></a>
 # **UpdateAnnotation**
-> void UpdateAnnotation (int id, UpdateAnnotationRequest updateAnnotationRequest)
+> AnnotationUpdateResponse UpdateAnnotation (int id, UpdateAnnotationRequest updateAnnotationRequest)
 
 Update a timeline annotation
 
@@ -146,7 +146,7 @@ Updates title, description, annotation_date, color and/or annotation_category_id
 
 ### Return type
 
-void (empty response body)
+[**AnnotationUpdateResponse**](AnnotationUpdateResponse.md)
 
 ### Authorization
 

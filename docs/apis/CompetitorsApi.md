@@ -51,7 +51,7 @@ Adds a competitor with its own citation URL matching rule. Honours the per-plan 
 
 <a id="deletecompetitor"></a>
 # **DeleteCompetitor**
-> void DeleteCompetitor (int projectId, int id)
+> CompetitorDeleteResponse DeleteCompetitor (int projectId, int id)
 
 Delete a competitor
 
@@ -67,7 +67,7 @@ Deletes a competitor (irreversible). It disappears immediately and frees a compe
 
 ### Return type
 
-void (empty response body)
+[**CompetitorDeleteResponse**](CompetitorDeleteResponse.md)
 
 ### Authorization
 
@@ -203,7 +203,7 @@ List competitors
 
 <a id="updatecompetitor"></a>
 # **UpdateCompetitor**
-> void UpdateCompetitor (int id, UpdateCompetitorRequest updateCompetitorRequest)
+> CompetitorUpdateResponse UpdateCompetitor (int id, UpdateCompetitorRequest updateCompetitorRequest)
 
 Update a competitor
 
@@ -219,7 +219,7 @@ Updates brand_name, the competitor website domain or host, matching_names (full 
 
 ### Return type
 
-void (empty response body)
+[**CompetitorUpdateResponse**](CompetitorUpdateResponse.md)
 
 ### Authorization
 

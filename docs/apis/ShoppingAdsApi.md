@@ -10,7 +10,7 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 
 <a id="listads"></a>
 # **ListAds**
-> void ListAds (int projectId, int page = null, int perPage = null, string view = null, bool owned = null, string order = null, string direction = null, string query = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, int range = null, DateTime from = null, DateTime to = null, string output = null)
+> AdsResponse ListAds (int projectId, int page = null, int perPage = null, string view = null, bool owned = null, string order = null, string direction = null, string query = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, int range = null, DateTime from = null, DateTime to = null, string output = null)
 
 List AI ad placements
 
@@ -43,7 +43,7 @@ Paid placements returned inside AI answers. view=advertisers (default) returns o
 
 ### Return type
 
-void (empty response body)
+[**AdsResponse**](AdsResponse.md)
 
 ### Authorization
 
@@ -119,7 +119,7 @@ Local businesses (shops, restaurants, services) listed inside AI answers, one ro
 
 <a id="listshopping"></a>
 # **ListShopping**
-> void ListShopping (int projectId, int page = null, int perPage = null, string view = null, bool owned = null, string order = null, string direction = null, string query = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, int range = null, DateTime from = null, DateTime to = null, string output = null)
+> ShoppingResponse ListShopping (int projectId, int page = null, int perPage = null, string view = null, bool owned = null, string order = null, string direction = null, string query = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, int range = null, DateTime from = null, DateTime to = null, string output = null)
 
 List shopping results
 
@@ -152,7 +152,7 @@ Product cards returned inside AI answers. view=products (default) returns one ro
 
 ### Return type
 
-void (empty response body)
+[**ShoppingResponse**](ShoppingResponse.md)
 
 ### Authorization
 

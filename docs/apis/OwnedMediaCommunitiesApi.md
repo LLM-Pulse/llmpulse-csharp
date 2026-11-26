@@ -205,7 +205,7 @@ The drill-down behind one row of an Owned Media or YouTube Intelligence table. P
 
 <a id="listredditcitations"></a>
 # **ListRedditCitations**
-> void ListRedditCitations (int projectId, int page = null, int perPage = null, string view = null, string subreddit = null, string author = null, string status = null, bool owned = null, string brand = null, string order = null, string direction = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, string brandKind = null, int range = null, DateTime from = null, DateTime to = null, string output = null)
+> RedditResponse ListRedditCitations (int projectId, int page = null, int perPage = null, string view = null, string subreddit = null, string author = null, string status = null, bool owned = null, string brand = null, string order = null, string direction = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, string brandKind = null, int range = null, DateTime from = null, DateTime to = null, string output = null)
 
 List cited Reddit content
 
@@ -239,7 +239,7 @@ Which Reddit content AI answers cite for your tracked prompts. view=subreddits (
 
 ### Return type
 
-void (empty response body)
+[**RedditResponse**](RedditResponse.md)
 
 ### Authorization
 

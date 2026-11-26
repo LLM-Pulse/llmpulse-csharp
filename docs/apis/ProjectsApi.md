@@ -57,7 +57,7 @@ Create a complete project in one call: project fields, prompts (queued for execu
 
 <a id="createprojectdraft"></a>
 # **CreateProjectDraft**
-> void CreateProjectDraft (CreateProjectDraftRequest createProjectDraftRequest)
+> ProjectDraftResponse CreateProjectDraft (CreateProjectDraftRequest createProjectDraftRequest)
 
 Start a project draft (wizard step 1)
 
@@ -72,7 +72,7 @@ Start the multi-step project-creation wizard. Returns a draft_id plus AI suggest
 
 ### Return type
 
-void (empty response body)
+[**ProjectDraftResponse**](ProjectDraftResponse.md)
 
 ### Authorization
 
@@ -211,7 +211,7 @@ Detailed info for one project: matching_names, additional_owned_domains, industr
 
 <a id="getprojectdraft"></a>
 # **GetProjectDraft**
-> void GetProjectDraft (string id, bool includeSuggestions = null)
+> ProjectDraftResponse GetProjectDraft (string id, bool includeSuggestions = null)
 
 Read a project draft
 
@@ -225,7 +225,7 @@ Read a project draft
 
 ### Return type
 
-void (empty response body)
+[**ProjectDraftResponse**](ProjectDraftResponse.md)
 
 ### Authorization
 
@@ -393,7 +393,7 @@ Updates the project name and profile, the same fields as Project Settings: name,
 
 <a id="updateprojectdraft"></a>
 # **UpdateProjectDraft**
-> void UpdateProjectDraft (string id, UpdateProjectDraftRequest updateProjectDraftRequest)
+> ProjectDraftResponse UpdateProjectDraft (string id, UpdateProjectDraftRequest updateProjectDraftRequest)
 
 Submit a wizard step
 
@@ -409,7 +409,7 @@ Submit one step (details, prompts, competitors, owned_media). Strict forward gat
 
 ### Return type
 
-void (empty response body)
+[**ProjectDraftResponse**](ProjectDraftResponse.md)
 
 ### Authorization
 

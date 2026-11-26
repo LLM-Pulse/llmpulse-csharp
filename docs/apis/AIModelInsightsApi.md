@@ -57,7 +57,7 @@ Per-model mentions, citations, brand net sentiment with raw counts, weighted vis
 
 <a id="getaimodelpositiondistribution"></a>
 # **GetAiModelPositionDistribution**
-> void GetAiModelPositionDistribution (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, string collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, string model = null, int brand1 = null, int brand2 = null)
+> AiModelPositionDistributionResponse GetAiModelPositionDistribution (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, string collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, string model = null, int brand1 = null, int brand2 = null)
 
 Position distribution comparison
 
@@ -82,7 +82,7 @@ Position distribution comparison
 
 ### Return type
 
-void (empty response body)
+[**AiModelPositionDistributionResponse**](AiModelPositionDistributionResponse.md)
 
 ### Authorization
 
@@ -91,7 +91,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details
@@ -103,7 +103,7 @@ void (empty response body)
 
 <a id="getaioverviewresults"></a>
 # **GetAiOverviewResults**
-> void GetAiOverviewResults (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, string collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, int page = null, int perPage = null)
+> AiOverviewResultsResponse GetAiOverviewResults (int projectId, int range = null, DateTime from = null, DateTime to = null, string granularity = null, string collectionId = null, string countryCode = null, string languageCode = null, string promptType = null, string brandKind = null, int page = null, int perPage = null)
 
 Google AI Overview result availability
 
@@ -127,7 +127,7 @@ Google AI Overview result availability
 
 ### Return type
 
-void (empty response body)
+[**AiOverviewResultsResponse**](AiOverviewResultsResponse.md)
 
 ### Authorization
 
@@ -136,7 +136,7 @@ void (empty response body)
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: Not defined
+ - **Accept**: application/json
 
 
 ### HTTP response details

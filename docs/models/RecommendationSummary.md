@@ -12,7 +12,7 @@ Name | Type | Description | Notes
 **UpdatedAt** | **DateTime** |  | 
 **TotalRecommendations** | **int** |  | 
 **HighPriorityCount** | **int** |  | 
-**Summary** | [**RecommendationSummarySummary**](RecommendationSummarySummary.md) |  | 
+**Summary** | [**RecommendationDetailResponseSummary**](RecommendationDetailResponseSummary.md) |  | 
 **Context** | **Object** | Generation context and run diagnostics as stored; empty until the generation completes. Its keys are not a stable contract | 
 **ErrorMessage** | **string** | Set only when status is failed | 
 **GeneratedAt** | **DateTime** | Null until the generation completes | 

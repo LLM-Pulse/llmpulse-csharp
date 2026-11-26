@@ -90,7 +90,7 @@ Creates a tag (Collection) in a project. Optional `prompt_ids` attaches existing
 
 <a id="deletecollection"></a>
 # **DeleteCollection**
-> void DeleteCollection (int projectId, int id)
+> CollectionDeleteResponse DeleteCollection (int projectId, int id)
 
 Delete a tag
 
@@ -106,7 +106,7 @@ Deletes a tag/collection. The prompts inside it are NOT deleted; only the groupi
 
 ### Return type
 
-void (empty response body)
+[**CollectionDeleteResponse**](CollectionDeleteResponse.md)
 
 ### Authorization
 
@@ -237,7 +237,7 @@ Idempotent bulk removal of tags (Collections) from existing prompts: up to 500 p
 
 <a id="updatecollection"></a>
 # **UpdateCollection**
-> void UpdateCollection (int id, UpdateCollectionRequest updateCollectionRequest)
+> CollectionUpdateResponse UpdateCollection (int id, UpdateCollectionRequest updateCollectionRequest)
 
 Update a tag
 
@@ -253,7 +253,7 @@ Renames a tag/collection or changes its description. Prompt membership is manage
 
 ### Return type
 
-void (empty response body)
+[**CollectionUpdateResponse**](CollectionUpdateResponse.md)
 
 ### Authorization
 

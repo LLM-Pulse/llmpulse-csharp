@@ -135,7 +135,7 @@ Add prompts to a project in bulk (up to 100 per request). Validates the account 
 
 <a id="deleteprompt"></a>
 # **DeletePrompt**
-> void DeletePrompt (int projectId, int id)
+> PromptDeleteResponse DeletePrompt (int projectId, int id)
 
 Delete a prompt
 
@@ -151,7 +151,7 @@ Deletes a prompt (irreversible). The prompt disappears immediately and frees a p
 
 ### Return type
 
-void (empty response body)
+[**PromptDeleteResponse**](PromptDeleteResponse.md)
 
 ### Authorization
 
@@ -349,7 +349,7 @@ List prompts
 
 <a id="listqueryfanouts"></a>
 # **ListQueryFanOuts**
-> void ListQueryFanOuts (int projectId, int page = null, int perPage = null, string view = null, string order = null, string direction = null, string query = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, int range = null, DateTime from = null, DateTime to = null, string output = null)
+> QueryFanOutsResponse ListQueryFanOuts (int projectId, int page = null, int perPage = null, string view = null, string order = null, string direction = null, string query = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string promptType = null, string brandKind = null, int range = null, DateTime from = null, DateTime to = null, string output = null)
 
 List query fan-out
 
@@ -381,7 +381,7 @@ The sub-queries a model actually issued when answering your tracked prompts. vie
 
 ### Return type
 
-void (empty response body)
+[**QueryFanOutsResponse**](QueryFanOutsResponse.md)
 
 ### Authorization
 

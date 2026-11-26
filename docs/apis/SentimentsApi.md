@@ -121,7 +121,7 @@ One row per topic AI answers associate with the brand (topics are matched case-i
 
 <a id="listsentimentcategories"></a>
 # **ListSentimentCategories**
-> void ListSentimentCategories (int projectId, string output = null)
+> SentimentCategoriesResponse ListSentimentCategories (int projectId, string output = null)
 
 List sentiment categories (Growth plan or above)
 
@@ -137,7 +137,7 @@ Sentiment metric keys + labels + colors. For records, use /sentiments. Requires 
 
 ### Return type
 
-void (empty response body)
+[**SentimentCategoriesResponse**](SentimentCategoriesResponse.md)
 
 ### Authorization
 

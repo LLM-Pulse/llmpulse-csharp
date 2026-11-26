@@ -137,7 +137,7 @@ Deletes a URL list and its entries. Citation data is not affected. Requires a `r
 
 <a id="getcitedurlcontent"></a>
 # **GetCitedUrlContent**
-> void GetCitedUrlContent (int projectId, string urlSha256)
+> CitedUrlContentResponse GetCitedUrlContent (int projectId, string urlSha256)
 
 Cited URL cached content
 
@@ -153,7 +153,7 @@ Unavailable page content keeps the cited URL and citation metrics. Page metadata
 
 ### Return type
 
-void (empty response body)
+[**CitedUrlContentResponse**](CitedUrlContentResponse.md)
 
 ### Authorization
 
@@ -175,7 +175,7 @@ void (empty response body)
 
 <a id="getcitedurldetail"></a>
 # **GetCitedUrlDetail**
-> void GetCitedUrlDetail (int projectId, string urlSha256, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string brandKind = null, DateTime from = null, DateTime to = null, string sourceType = null, string sentiment = null, string contentGap = null, bool includeSeries = null)
+> CitedUrlDetailsResponse GetCitedUrlDetail (int projectId, string urlSha256, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string brandKind = null, DateTime from = null, DateTime to = null, string sourceType = null, string sentiment = null, string contentGap = null, bool includeSeries = null)
 
 Cited URL detail
 
@@ -203,7 +203,7 @@ Unavailable page content keeps the cited URL and citation metrics. Page metadata
 
 ### Return type
 
-void (empty response body)
+[**CitedUrlDetailsResponse**](CitedUrlDetailsResponse.md)
 
 ### Authorization
 
@@ -226,7 +226,7 @@ void (empty response body)
 
 <a id="getmentionsbycitingdomain"></a>
 # **GetMentionsByCitingDomain**
-> void GetMentionsByCitingDomain (int projectId, List<string> domains, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string brandKind = null, DateTime from = null, DateTime to = null)
+> CitingDomainMentionShareResponse GetMentionsByCitingDomain (int projectId, List<string> domains, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string brandKind = null, DateTime from = null, DateTime to = null)
 
 Mention share by citing domain
 
@@ -250,7 +250,7 @@ For the responses where each given source domain is cited, returns the share of 
 
 ### Return type
 
-void (empty response body)
+[**CitingDomainMentionShareResponse**](CitingDomainMentionShareResponse.md)
 
 ### Authorization
 
@@ -326,7 +326,7 @@ The list, its summary (entries_count, cited_entries, citations, answers in the w
 
 <a id="listcitationgroups"></a>
 # **ListCitationGroups**
-> void ListCitationGroups (int projectId, string view = null, int page = null, int perPage = null, string order = null, string direction = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string brandKind = null, DateTime from = null, DateTime to = null, string key = null, bool includeSeries = null, string query = null, string sourceType = null, string sentiment = null, string contentGap = null)
+> CitationGroupsResponse ListCitationGroups (int projectId, string view = null, int page = null, int perPage = null, string order = null, string direction = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, string brandKind = null, DateTime from = null, DateTime to = null, string key = null, bool includeSeries = null, string query = null, string sourceType = null, string sentiment = null, string contentGap = null)
 
 Grouped citation intelligence
 
@@ -360,7 +360,7 @@ Grouped citation intelligence by url / domain / host with per-model breakdown, c
 
 ### Return type
 
-void (empty response body)
+[**CitationGroupsResponse**](CitationGroupsResponse.md)
 
 ### Authorization
 
@@ -383,7 +383,7 @@ void (empty response body)
 
 <a id="listcitedurloccurrences"></a>
 # **ListCitedUrlOccurrences**
-> void ListCitedUrlOccurrences (int projectId, string urlSha256, int page = null, int perPage = null, string sentiment = null)
+> CitedUrlOccurrencesResponse ListCitedUrlOccurrences (int projectId, string urlSha256, int page = null, int perPage = null, string sentiment = null)
 
 Cited URL occurrences
 
@@ -400,7 +400,7 @@ Cited URL occurrences
 
 ### Return type
 
-void (empty response body)
+[**CitedUrlOccurrencesResponse**](CitedUrlOccurrencesResponse.md)
 
 ### Authorization
 
@@ -423,7 +423,7 @@ void (empty response body)
 
 <a id="listsources"></a>
 # **ListSources**
-> void ListSources (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string sourceType = null, string mentionFilter = null, string competitors = null, string output = null, string promptType = null, string brandKind = null, int range = null)
+> SourcesResponse ListSources (int projectId, int page = null, int perPage = null, string model = null, string collectionId = null, string countryCode = null, string languageCode = null, int prompt = null, DateTime from = null, DateTime to = null, string sourceType = null, string mentionFilter = null, string competitors = null, string output = null, string promptType = null, string brandKind = null, int range = null)
 
 List source URLs
 
@@ -452,7 +452,7 @@ List source URLs
 
 ### Return type
 
-void (empty response body)
+[**SourcesResponse**](SourcesResponse.md)
 
 ### Authorization
 

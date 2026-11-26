@@ -12,7 +12,7 @@ All URIs are relative to *https://api.llmpulse.ai/api/v1*
 
 <a id="createtechnicalgeoreports"></a>
 # **CreateTechnicalGeoReports**
-> void CreateTechnicalGeoReports (CreateTechnicalGeoReportsRequest createTechnicalGeoReportsRequest)
+> TechnicalGeoReportsCreateResponse CreateTechnicalGeoReports (CreateTechnicalGeoReportsRequest createTechnicalGeoReportsRequest)
 
 Run technical GEO analysis
 
@@ -27,7 +27,7 @@ Launches the full nine-report technical GEO analysis bundle for a URL + country.
 
 ### Return type
 
-void (empty response body)
+[**TechnicalGeoReportsCreateResponse**](TechnicalGeoReportsCreateResponse.md)
 
 ### Authorization
 
@@ -50,7 +50,7 @@ void (empty response body)
 
 <a id="gettechnicalgeoreport"></a>
 # **GetTechnicalGeoReport**
-> void GetTechnicalGeoReport (int projectId, string reportType, int id)
+> TechnicalGeoReportResponse GetTechnicalGeoReport (int projectId, string reportType, int id)
 
 Get a technical GEO report
 
@@ -67,7 +67,7 @@ Returns the current status and the full result_data once the report is completed
 
 ### Return type
 
-void (empty response body)
+[**TechnicalGeoReportResponse**](TechnicalGeoReportResponse.md)
 
 ### Authorization
 
@@ -90,7 +90,7 @@ void (empty response body)
 
 <a id="listtechnicalgeoreports"></a>
 # **ListTechnicalGeoReports**
-> void ListTechnicalGeoReports (int projectId, string reportType, string status = null, int batchId = null, int page = null, int perPage = null)
+> TechnicalGeoReportsResponse ListTechnicalGeoReports (int projectId, string reportType, string status = null, int batchId = null, int page = null, int perPage = null)
 
 List technical GEO reports
 
@@ -110,7 +110,7 @@ Lists reports of one technical GEO type for a project, newest first. Use agent_r
 
 ### Return type
 
-void (empty response body)
+[**TechnicalGeoReportsResponse**](TechnicalGeoReportsResponse.md)
 
 ### Authorization
 
