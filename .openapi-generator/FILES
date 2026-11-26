@@ -282,6 +282,7 @@ docs/models/OwnedMediaSummaryResponse.md
 docs/models/OwnedMediaSummaryResponsePrevious.md
 docs/models/OwnedMediaWeek.md
 docs/models/PaginatedEnvelope.md
+docs/models/PeecExportImportResponse.md
 docs/models/Ping200Response.md
 docs/models/Project.md
 docs/models/ProjectCreateRequest.md
@@ -332,6 +333,7 @@ docs/models/PromptTagsRemoveResponse.md
 docs/models/PromptsCreateRequest.md
 docs/models/PromptsCreateResponse.md
 docs/models/PromptsCreateResponseDataInner.md
+docs/models/PromptsImportFileResponse.md
 docs/models/PromptsImportRequest.md
 docs/models/PromptsImportRequestRowsInner.md
 docs/models/PromptsImportResponse.md
@@ -790,6 +792,7 @@ src/LLMPulse.SDK/Model/OwnedMediaSummaryResponse.cs
 src/LLMPulse.SDK/Model/OwnedMediaSummaryResponsePrevious.cs
 src/LLMPulse.SDK/Model/OwnedMediaWeek.cs
 src/LLMPulse.SDK/Model/PaginatedEnvelope.cs
+src/LLMPulse.SDK/Model/PeecExportImportResponse.cs
 src/LLMPulse.SDK/Model/Ping200Response.cs
 src/LLMPulse.SDK/Model/Project.cs
 src/LLMPulse.SDK/Model/ProjectCreateRequest.cs
@@ -840,6 +843,7 @@ src/LLMPulse.SDK/Model/PromptTagsRemoveResponse.cs
 src/LLMPulse.SDK/Model/PromptsCreateRequest.cs
 src/LLMPulse.SDK/Model/PromptsCreateResponse.cs
 src/LLMPulse.SDK/Model/PromptsCreateResponseDataInner.cs
+src/LLMPulse.SDK/Model/PromptsImportFileResponse.cs
 src/LLMPulse.SDK/Model/PromptsImportRequest.cs
 src/LLMPulse.SDK/Model/PromptsImportRequestRowsInner.cs
 src/LLMPulse.SDK/Model/PromptsImportResponse.cs
