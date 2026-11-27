@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.107.1
+  version: 1.108.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -3508,92 +3508,6 @@ paths:
       x-llms-description: "Import prompts from a CSV or .xlsx file sent as multipart/form-data,\
         \ with the columns of the app's CSV import (not available yet)."
       x-mcp-tool: import_prompts_file
-      x-write: true
-  /prompts/import_peec_export:
-    post:
-      description: "Not available yet: until file imports are enabled, the call returns\
-        \ ERR_INTEGRATION_UNAVAILABLE (403). Imports the answers export of Peec AI,\
-        \ sent as a multipart/form-data body with project_id and the file as a part\
-        \ named file: a CSV of up to 8 MB and 20,000 answers with Peec AI's column\
-        \ names (user, assistant, model, created, and optionally country and mentions).\
-        \ Every prompt of the file becomes a tracked prompt of the project, and each\
-        \ answer from an AI model the account tracks is filed as that week's answer\
-        \ for its model and analysed for mentions, sources and sentiment like a tracked\
-        \ one; answers from other models are skipped and listed in skipped_models.\
-        \ Competitors are not created: detected_brands lists the names the export\
-        \ mentions, to add with POST /competitors. The file is checked whole before\
-        \ anything is written: a file that cannot be read returns ERR_INVALID_PARAM\
-        \ with error.meta.reason file_missing, file_empty, file_too_large, columns_missing,\
-        \ models_not_tracked, nothing_to_import or too_large (more than 20,000 weekly\
-        \ answers: prompts x AI models x weeks), dates_out_of_range (an answer dated\
-        \ before 2022-11-30 or after today), answer_too_long (an answer over 50,000\
-        \ characters) or prompt_too_long (a prompt over 2,000 bytes), or a message\
-        \ naming the problem. The prompt limits count only the prompts the project\
-        \ does not hold yet, together with those of the account's imports still finishing:\
-        \ when they would exceed the project or the plan, the call returns ERR_LIMIT_REACHED\
-        \ and imports nothing, so a full account can still add answers to the prompts\
-        \ it holds. The analysis is paid on-demand work, so an account that is not\
-        \ active gets ERR_ACCOUNT_INACTIVE. The import is planned in the request and\
-        \ finishes in the background, usually within minutes: 202 means it started,\
-        \ and app_url opens the project's prompts. The MCP tool import_peec_export\
-        \ takes the same file through the MCP files extension. Requires a `read_write`\
-        \ scope API key and, for team members, create access to Prompts."
-      operationId: importPeecExport
-      requestBody:
-        content:
-          multipart/form-data:
-            schema:
-              $ref: "#/components/schemas/importPeecExport_request"
-        required: true
-      responses:
-        "202":
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/PeecExportImportResponse"
-          description: The import started
-        "403":
-          content:
-            application/json:
-              example:
-                error:
-                  code: ERR_INTEGRATION_UNAVAILABLE
-                  message: File imports are not available yet.
-                request_id: abc-123
-              schema:
-                $ref: "#/components/schemas/ApiError"
-          description: "File imports are not available until they are enabled (ERR_INTEGRATION_UNAVAILABLE).\
-            \ Writes with a read-only key answer ERR_INSUFFICIENT_SCOPE, and a team\
-            \ member without the permission ERR_INSUFFICIENT_PERMISSION, with the\
-            \ same status"
-        "404":
-          content:
-            application/json:
-              example:
-                error:
-                  code: ERR_PROJECT_NOT_FOUND
-                  message: project_not_found
-                request_id: abc-123
-              schema:
-                $ref: "#/components/schemas/ApiError"
-          description: Resource not found
-        "422":
-          content:
-            application/json:
-              example:
-                error:
-                  code: ERR_INVALID_PARAM
-                  message: invalid metrics
-                request_id: abc-123
-              schema:
-                $ref: "#/components/schemas/ApiError"
-          description: Invalid parameters
-      summary: Import a Peec AI export
-      tags:
-      - Prompts
-      x-llms-description: "Import the answers export of Peec AI (CSV, multipart/form-data)\
-        \ as tracked prompts and their weekly answers (not available yet)."
-      x-mcp-tool: import_peec_export
       x-write: true
   /prompt_generations:
     post:
@@ -25557,9 +25471,9 @@ components:
           default: false
           type: boolean
         external_identifier:
-          description: "Embed-enabled (Enterprise) accounts only; other accounts receive\
-            \ ERR_PLAN_REQUIRED. Idempotency key and embed-session join key, unique\
-            \ per account"
+          description: "Accounts with Enterprise Embed enabled only; other accounts\
+            \ receive ERR_PLAN_REQUIRED. Idempotency key and embed-session join key,\
+            \ unique per account"
           pattern: "^[a-z0-9_-]{1,64}$"
           type: string
         execute_prompts_immediately:
@@ -35828,83 +35742,6 @@ components:
       - untracked_reason
       - warning
       type: object
-    PeecExportImportResponse:
-      example:
-        project_id: 0
-        import_id: 6
-        status: started
-        prompts: 1
-        new_prompts: 5
-        planned_answers: 5
-        models:
-          key: models
-        skipped_models:
-        - skipped_models
-        - skipped_models
-        detected_brands:
-        - detected_brands
-        - detected_brands
-        app_url: https://openapi-generator.tech
-        request_id: request_id
-      properties:
-        project_id:
-          type: integer
-        import_id:
-          type: integer
-        status:
-          description: The import was accepted and finishes in the background
-          enum:
-          - started
-          type: string
-        prompts:
-          description: "Distinct prompts of the file, per country and language; each\
-            \ becomes a tracked prompt of the project"
-          type: integer
-        new_prompts:
-          description: "The prompts the project does not hold yet, counted against\
-            \ the plan"
-          type: integer
-        planned_answers:
-          description: Weekly answers the import files (prompts x tracked AI models
-            x weeks)
-          type: integer
-        models:
-          additionalProperties:
-            type: string
-          description: "Each AI model name of the file that is imported, with the\
-            \ tracked AI model its answers are filed under"
-          type: object
-        skipped_models:
-          description: "AI model names of the file whose answers are skipped, because\
-            \ the account does not track them"
-          items:
-            type: string
-          type: array
-        detected_brands:
-          description: "Brand names the export's mentions column lists (up to 50),\
-            \ none of them created as competitors"
-          items:
-            type: string
-          type: array
-        app_url:
-          description: Opens the project's prompts in the app
-          format: uri
-          type: string
-        request_id:
-          type: string
-      required:
-      - app_url
-      - detected_brands
-      - import_id
-      - models
-      - new_prompts
-      - planned_answers
-      - project_id
-      - prompts
-      - request_id
-      - skipped_models
-      - status
-      type: object
     PromptsImportFileResponse:
       example:
         project_id: 0
@@ -38520,19 +38357,6 @@ components:
         file:
           description: "A CSV or .xlsx file (its first sheet is read) of up to 5 MB\
             \ and 10,000 rows, with the columns of the app's CSV import"
-          format: binary
-          type: string
-      required:
-      - file
-      - project_id
-      type: object
-    importPeecExport_request:
-      properties:
-        project_id:
-          type: integer
-        file:
-          description: "The answers export of Peec AI, a CSV of up to 8 MB and 20,000\
-            \ answers"
           format: binary
           type: string
       required:
