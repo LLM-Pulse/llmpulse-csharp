@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.106.0
+  version: 1.107.0
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -3287,11 +3287,10 @@ paths:
         \ gives the reset time when the rest run, with a `warning`. On an account\
         \ that caps each project's executions at its prompt limit, the project's own\
         \ share of the allowance counts the same way. A pitch project holds at most\
-        \ 100 prompts in all, deleted ones included (ERR_LIMIT_REACHED past that),\
-        \ and the prompts of a launched pitch project are fixed, so adding one returns\
-        \ ERR_INVALID_PARAM with error.meta.reason pitch_prompts_frozen. A new prompt\
-        \ over 2,000 bytes returns ERR_INVALID_PARAM with error.meta.reason prompt_too_long\
-        \ (see prompts). Requires a `read_write` scope API key."
+        \ 100 prompts in all, deleted ones included (ERR_LIMIT_REACHED past that);\
+        \ one added after its run runs once, right away, on the AI models of that\
+        \ run. A new prompt over 2,000 bytes returns ERR_INVALID_PARAM with error.meta.reason\
+        \ prompt_too_long (see prompts). Requires a `read_write` scope API key."
       operationId: createPrompts
       requestBody:
         content:
@@ -3351,19 +3350,19 @@ paths:
         \ For a team member without update access to Prompts, a row matching a prompt\
         \ that already existed adds no tags to it, and comes back in row_errors when\
         \ it would have added one. Responds 201 when it created prompts, 200 otherwise.\
-        \ The prompts of a launched pitch project are fixed, so importing one returns\
-        \ ERR_INVALID_PARAM with error.meta.reason pitch_prompts_frozen. `tracked`\
-        \ false, with `untracked_reason` and a `warning`, means the project does not\
-        \ run on the schedule, so the imported prompts do not run until that changes.\
-        \ Imported prompts get their first answers within about 24 hours. The first\
-        \ run is queued on creation and a nightly run at 00:00 Europe/Madrid picks\
-        \ up any prompt still without answers, as far as the account's allowance of\
-        \ AI answers for the cycle covers it. When the allowance left cannot give\
-        \ every new prompt one answer per enabled AI model, `first_runs_wait_until`\
-        \ gives the reset time when the rest run, with a `warning`. On an account\
-        \ that caps each project's executions at its prompt limit, the project's own\
-        \ share of the allowance counts the same way. Requires a `read_write` scope\
-        \ API key and, for team members, create access to Prompts."
+        \ A pitch project takes rows until it holds 100 prompts, deleted ones included,\
+        \ and one added after its run runs once, right away. `tracked` false, with\
+        \ `untracked_reason` and a `warning`, means the project does not run on the\
+        \ schedule, so the imported prompts do not run until that changes. Imported\
+        \ prompts get their first answers within about 24 hours. The first run is\
+        \ queued on creation and a nightly run at 00:00 Europe/Madrid picks up any\
+        \ prompt still without answers, as far as the account's allowance of AI answers\
+        \ for the cycle covers it. When the allowance left cannot give every new prompt\
+        \ one answer per enabled AI model, `first_runs_wait_until` gives the reset\
+        \ time when the rest run, with a `warning`. On an account that caps each project's\
+        \ executions at its prompt limit, the project's own share of the allowance\
+        \ counts the same way. Requires a `read_write` scope API key and, for team\
+        \ members, create access to Prompts."
       operationId: importPrompts
       requestBody:
         content:
@@ -3611,12 +3610,11 @@ paths:
         \ land in the Suggested prompts queue; poll GET /prompt_generations/{id},\
         \ then accept the ones you want with POST /suggested_prompts/accept. Nothing\
         \ is tracked until accepted. The request is validated before the run starts,\
-        \ and refused with ERR_LIMIT_REACHED when the plan has no prompt slot left,\
-        \ ERR_INVALID_PARAM with error.meta.reason pitch_prompts_frozen for a launched\
-        \ pitch project, whose prompts are fixed, or ERR_QUOTA_EXCEEDED after 60 runs\
-        \ in an hour (the per-user prompt suggestion allowance, shared with project\
-        \ setup). Requires a `read_write` scope API key and, for team members, create\
-        \ access to Prompts."
+        \ and refused with ERR_LIMIT_REACHED when the plan (or a pitch project's 100-prompt\
+        \ cap) has no prompt slot left, or ERR_QUOTA_EXCEEDED after 60 runs in an\
+        \ hour (the per-user prompt suggestion allowance, shared with project setup).\
+        \ Requires a `read_write` scope API key and, for team members, create access\
+        \ to Prompts."
       operationId: createPromptGeneration
       requestBody:
         content:
@@ -3680,10 +3678,10 @@ paths:
         \ may create tags). Suggestions that are no longer pending come back in skipped,\
         \ as does one that would be a new prompt over the 2,000-byte limit (reason\
         \ prompt_too_long), which stays pending. When the new prompts would exceed\
-        \ the plan the call returns ERR_LIMIT_REACHED and accepts nothing. The prompts\
-        \ of a launched pitch project are fixed, so accepting a suggestion returns\
-        \ ERR_INVALID_PARAM with error.meta.reason pitch_prompts_frozen. Requires\
-        \ a `read_write` scope API key and, for team members, create access to Prompts."
+        \ the plan the call returns ERR_LIMIT_REACHED and accepts nothing. On a pitch\
+        \ project, a prompt accepted after its run runs once, right away, up to 100\
+        \ prompts in all. Requires a `read_write` scope API key and, for team members,\
+        \ create access to Prompts."
       operationId: acceptSuggestedPrompts
       requestBody:
         content:
@@ -3803,7 +3801,7 @@ paths:
         \ and frees a prompt slot; its historical data (executions, mentions, citations,\
         \ sentiment) is purged by a background job. Until that job finishes, its answers,\
         \ mentions and metrics still count the prompt, so totals can include it for\
-        \ a short while. The prompts of a launched pitch project are fixed, so deleting\
+        \ a short while. A pitch project keeps its prompts once it has run, so deleting\
         \ one returns ERR_INVALID_PARAM with error.meta.reason pitch_prompts_frozen.\
         \ Requires a `read_write` scope API key."
       operationId: deletePrompt
@@ -19172,11 +19170,10 @@ paths:
         \ over the 2,000-byte limit (reason prompt_too_long), which stays pending.\
         \ All accepted suggestions must share one country and language. When the new\
         \ prompts would exceed the plan, the call returns ERR_LIMIT_REACHED and accepts\
-        \ nothing. The prompts of a launched pitch project are fixed, so accepting\
-        \ a suggestion returns ERR_INVALID_PARAM with error.meta.reason pitch_prompts_frozen.\
-        \ Requires a `read_write` scope API key and, for team members, create access\
-        \ to Prompts. Not available to accounts with a white-label portal or an embed\
-        \ (ERR_INTEGRATION_UNAVAILABLE)."
+        \ nothing. On a pitch project, a prompt accepted after its run runs once,\
+        \ right away, up to 100 prompts in all. Requires a `read_write` scope API\
+        \ key and, for team members, create access to Prompts. Not available to accounts\
+        \ with a white-label portal or an embed (ERR_INTEGRATION_UNAVAILABLE)."
       operationId: acceptCatalogPromptSuggestions
       requestBody:
         content:
@@ -42486,9 +42483,8 @@ components:
           description: "Extra detail for some codes. A not-connected or access-revoked\
             \ error from the Search Console, Bing Webmaster Tools, AI traffic, web\
             \ analytics or agent traffic endpoints carries connect_url, the in-app\
-            \ page where the user connects or reconnects the source. A prompt write\
-            \ refused because a launched pitch project's prompts are fixed carries\
-            \ reason pitch_prompts_frozen."
+            \ page where the user connects or reconnects the source. Deleting a prompt\
+            \ of a pitch project that has run is refused with reason pitch_prompts_frozen."
           type: object
       type: object
   securitySchemes:
