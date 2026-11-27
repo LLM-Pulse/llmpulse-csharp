@@ -9,7 +9,7 @@ info:
     name: MIT
     url: https://opensource.org/license/mit
   title: LLM Pulse API
-  version: 1.107.0
+  version: 1.107.1
 servers:
 - description: Production API
   url: https://api.llmpulse.ai/api/v1
@@ -18532,15 +18532,15 @@ paths:
   /api_keys:
     get:
       description: "Lists the API keys of the user the calling key belongs to, newest\
-        \ first, revoked ones included: name, the visible prefix of the token, scope\
-        \ (read or read_write), the projects a key is limited to (project_scoped,\
+        \ first, revoked and expired ones included: name, the visible prefix of the\
+        \ token, scope (read or read_write), the projects a key is limited to (project_scoped,\
         \ project_ids; an empty list on an account-wide key), when it was created\
-        \ and last used, and when it was revoked. The secret token is only ever returned\
-        \ once, by POST /api_keys. Requires an account-wide `read_write` scope API\
-        \ key: a key limited to some projects answers ERR_KEY_PROJECT_SCOPED. Still\
-        \ answers after the account moves below the Scale plan, so old keys can be\
-        \ found and revoked. A team member needs the API Keys permission and sees\
-        \ only their own keys."
+        \ and last used, and when it was revoked (null for a key that expired without\
+        \ being revoked). The secret token is only ever returned once, by POST /api_keys.\
+        \ Requires an account-wide `read_write` scope API key: a key limited to some\
+        \ projects answers ERR_KEY_PROJECT_SCOPED. Still answers after the account\
+        \ moves below the Scale plan, so old keys can be found and revoked. A team\
+        \ member needs the API Keys permission and sees only their own keys."
       operationId: listApiKeys
       parameters:
       - explode: true
@@ -18609,11 +18609,13 @@ paths:
         \ is read (default) or read_write. Every project must be one the caller can\
         \ access: a project of another account, a deleted one or an unknown id answers\
         \ ERR_PROJECT_NOT_FOUND and nothing is created. A user can hold up to 500\
-        \ active keys; past that the request answers ERR_LIMIT_REACHED until a key\
-        \ is revoked. Requires an account-wide `read_write` scope API key on the Scale\
-        \ plan or above: a key limited to some projects answers ERR_KEY_PROJECT_SCOPED.\
-        \ A team member needs permission to create API keys and can only choose projects\
-        \ they can access."
+        \ active keys (revoked and expired keys do not count); past that the request\
+        \ answers ERR_LIMIT_REACHED until a key is revoked or expires. The new key\
+        \ expires when the calling key does, and never if the calling key has no expiration\
+        \ (set on the API Keys page when a key is created). Requires an account-wide\
+        \ `read_write` scope API key on the Scale plan or above: a key limited to\
+        \ some projects answers ERR_KEY_PROJECT_SCOPED. A team member needs permission\
+        \ to create API keys and can only choose projects they can access."
       operationId: createApiKey
       requestBody:
         content:
@@ -19390,12 +19392,13 @@ paths:
         \ created the subscription still covers its project: an API key limited to\
         \ some projects that loses the project stops the subscription for good. Idempotent\
         \ for the same project + event + URL: re-posting returns the existing subscription,\
-        \ unless the API key or OAuth connection that created it was revoked, or that\
-        \ API key no longer covers the project; then it is replaced by a new subscription\
-        \ with a new secret. The response carries `secret` when it creates the subscription,\
-        \ and on a re-post only for the API key or OAuth connection that created it:\
-        \ any other credential gets the subscription without `secret`. Requires a\
-        \ `read_write` scope API key and the Scale plan or above."
+        \ unless the API key that created it was revoked or expired, the OAuth connection\
+        \ that created it was revoked, or that API key no longer covers the project;\
+        \ then it is replaced by a new subscription with a new secret. The response\
+        \ carries `secret` when it creates the subscription, and on a re-post only\
+        \ for the API key or OAuth connection that created it: any other credential\
+        \ gets the subscription without `secret`. Requires a `read_write` scope API\
+        \ key and the Scale plan or above."
       operationId: createWebhook
       requestBody:
         content:
@@ -39217,10 +39220,11 @@ components:
           type: string
         disabled:
           description: "True when the subscription receives no more events, including\
-            \ when the API key or OAuth connection that created it was revoked, or\
-            \ when that API key is limited to some projects and no longer covers the\
-            \ subscription's project. Creating it again with the same project, event\
-            \ and URL replaces it with a new subscription and secret."
+            \ when the API key that created it was revoked or expired, the OAuth connection\
+            \ that created it was revoked, or that API key is limited to some projects\
+            \ and no longer covers the subscription's project. Creating it again with\
+            \ the same project, event and URL replaces it with a new subscription\
+            \ and secret."
           type: boolean
         failure_count:
           type: integer
@@ -39330,10 +39334,11 @@ components:
           type: string
         disabled:
           description: "True when the subscription receives no more events, including\
-            \ when the API key or OAuth connection that created it was revoked, or\
-            \ when that API key is limited to some projects and no longer covers the\
-            \ subscription's project. Creating it again with the same project, event\
-            \ and URL replaces it with a new subscription and secret."
+            \ when the API key that created it was revoked or expired, the OAuth connection\
+            \ that created it was revoked, or that API key is limited to some projects\
+            \ and no longer covers the subscription's project. Creating it again with\
+            \ the same project, event and URL replaces it with a new subscription\
+            \ and secret."
           type: boolean
         failure_count:
           type: integer
